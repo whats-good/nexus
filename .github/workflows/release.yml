@@ -33,6 +33,7 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: pnpm ci:publish
+          version: pnpm ci:version
           commit: "chore: release"
           title: "Release"
           createGithubReleases: true

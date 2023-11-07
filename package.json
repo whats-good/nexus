@@ -12,6 +12,7 @@
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ci:publish": "./scripts/publish.sh",
+    "ci:version": "./scripts/version.sh",
     "test:unit": "turbo test:unit",
     "generate:docs": "./scripts/docs.sh"
   },
