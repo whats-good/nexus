@@ -7,6 +7,6 @@ set -eo pipefail
 set -x
 
 pnpm publish -r 
-pnpm changeset tag 
+# pnpm changeset tag 
 
 echo "Done!"
