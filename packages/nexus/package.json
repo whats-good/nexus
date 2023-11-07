@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "echo 'Add dev script here'",
     "build": "tsup",
+    "prepublish": "pnpm run build",
     "typecheck": "tsc",
     "lint": "eslint src/",
     "lint:fix": "pnpm run lint --fix",

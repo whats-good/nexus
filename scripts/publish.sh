@@ -4,7 +4,7 @@ set -eo pipefail
 set -x
 
 ./scripts/docs.sh --autocommit
-pnpm publish -r --no-git-checks
+pnpm publish -r 
 pnpm changeset tag 
 
 # We need to write to /dev/null because this script
