@@ -76,16 +76,34 @@ describe("provider factory", () => {
         const secondResult = pool.current;
 
         pool.advance();
+        const thirdResult = pool.current;
 
         expect(pool).toMatchObject({
           chain: chains.baseGoerli,
-          eligibleServiceProviders: [providers.base],
-          configuredServiceProviders: [providers.base],
+          eligibleServiceProviders: expect.arrayContaining([
+            providers.base,
+            providers.alchemy,
+            providers.ankr,
+          ]) as [],
+          configuredServiceProviders: expect.arrayContaining([
+            providers.base,
+            providers.alchemy,
+          ]) as [],
         });
 
-        expect(firstResult?.provider).toEqual(providers.base);
-
-        expect(secondResult?.provider).toBeUndefined();
+        expect({
+          results: [
+            firstResult?.provider,
+            secondResult?.provider,
+            thirdResult?.provider,
+          ],
+        }).toMatchObject({
+          results: expect.arrayContaining([
+            providers.base,
+            providers.alchemy,
+            undefined,
+          ]) as [],
+        });
       });
     });
 

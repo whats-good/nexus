@@ -118,7 +118,7 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
       },
       84531: {
         type: "url-append-key",
-        baseURL: "https://base-goerli.g.alchemy.com/v2/",
+        baseURL: "https://base-goerli.g.alchemy.com/v2",
       },
     },
   },
