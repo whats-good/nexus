@@ -5,7 +5,7 @@
 
   ![npm version](https://img.shields.io/npm/v/@whatsgood/nexus)
   ![npm downloads](https://img.shields.io/npm/dm/@whatsgood/nexus)
-  <a href="http://nexus.whatsgood.dog/" target="_blank"><img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" /></a>
+  <a href="https://nexus.whatsgood.dog/" target="_blank"><img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" /></a>
   <a href="https://github.com/whats-good/nexus/graphs/commit-activity" target="_blank"><img alt="Maintenance" src="https://img.shields.io/badge/maintained%3F-yes-green.svg" /></a>
   <a href="#" target="_blank"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-yellow.svg" /></a>
 </div>
