@@ -21,11 +21,15 @@ fi
 
 NEXUS_PATH=./packages/nexus
 README_PATH=./README.md
+HERO_IMAGE_PATH=./docs/images/nexus-hero-banner.svg
 
 # Copy the README into packages/nexus
 echo "Copying README into packages/nexus"
 cp $README_PATH $NEXUS_PATH
 
+# Copy the hero image into packages/nexus
+echo "Copying hero image into packages/nexus"
+cp $HERO_IMAGE_PATH "${NEXUS_PATH}/docs/images/"
 
 # Run the changelog generation script
 echo "Running changelog generation script"

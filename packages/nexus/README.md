@@ -1,6 +1,6 @@
 <div align="center">
 
-![alt text](./docs/images/nexus-hero-banner.svg)
+![hero banner with nexus dog](./docs/images/nexus-hero-banner.svg)
 <div>
 
   ![npm version](https://img.shields.io/npm/v/@whatsgood/nexus)
