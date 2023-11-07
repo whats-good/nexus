@@ -1,0 +1,14 @@
+{
+  "extends": "tsconfig/base.json",
+  "exclude": ["dist", "build", "node_modules"],
+  "include": [
+    "./src/**/*.ts",
+    "./vitest.config.ts",
+    "./tests/**/*.ts",
+    "tsup.config.ts"
+  ],
+  "compilerOptions": {
+    "module": "CommonJS",
+    "lib": ["es2017", "dom"]
+  }
+}

@@ -1,0 +1,103 @@
+---
+title: Introduction
+description: "Welcome to Nexus - a simple TypeScript proxy server for any JSON RPC compliant blockchain."
+---
+
+<img
+  className="block w-full"
+  src="/images/nexus-hero-banner.svg"
+  alt="Nexus Dog - pixel art hero banner"
+/>
+
+## Nexus overview
+
+<Warning>
+
+`@whatsgood/nexus` is currently in pre-alpha. Some features may not work as expected. Please report any issues you encounter at our community [Discord](https://discord.gg/P6TxFsWXCk) or file a [GitHub](https://github.com/whats-good/nexus/issues) issue.
+
+</Warning>
+
+`Nexus` is a simple, RPC reverse proxy server for any [Ethereum JSON RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/) compliant blockchain. Instead of connecting your dApps to a blockchain node, you can connect them to `Nexus` and `Nexus` serves the requests for you. `Nexus` is open source and free to use.
+
+## Features
+
+`Nexus` is packed with powerful features that will help you build robust, scalable and secure dApps. Check out some of `Nexus`'s most powerful features below.
+
+<CardGroup cols={2}>
+  <Card
+    title="Authorization"
+    icon="key-skeleton-left-right"
+    iconType="solid"
+    href="/features/authorization"
+  >
+    Implement fine-grained access control to your RPC endpoints
+  </Card>
+  <Card
+    title="Request Cycling"
+    icon="arrows-spin"
+    iconType="solid"
+    href="/features/request-cycling"
+  >
+    Recover from errors by cycling requests to multiple providers
+  </Card>
+  <Card
+    title="Rate Limiting"
+    icon="gauge"
+    iconType="regular"
+    href="/features/rate-limiting"
+  >
+    Setup rate limiting to protect your RPC access from abuse
+  </Card>
+  <Card
+    title="Lifecycle Hooks"
+    icon="conveyor-belt-arm"
+    iconType="regular"
+    href="/features/lifecycle-hooks"
+  >
+    Execute custom logic at specific points over the lifespan of your RPC
+    requests
+  </Card>
+  <Card title="Caching" icon="box" iconType="regular" href="/features/caching">
+    Cache RPC calls to maximize cost-savings and performance
+  </Card>
+  <Card title="Quorum" icon="ballot" iconType="regular" href="/features/quorum">
+    Configure quorum strategies to maximize decentralization and security
+  </Card>
+  <Card
+    title="Adaptive Performance"
+    icon="chart-line-up"
+    iconType="regular"
+    href="/features/adaptive-performance"
+  >
+    Continuously adapt to provider availability to maximize uptime
+  </Card>
+  <Card
+    title="Observability"
+    icon="telescope"
+    iconType="regular"
+    href="/features/observability"
+  >
+    Observe and monitor Nexus's performance
+  </Card>
+</CardGroup>
+
+## Recipes
+
+Follow these recipes to get started with common scenarios.
+
+<CardGroup cols={2}>
+  <Card
+    title="Cloudflare Worker"
+    icon="cloudflare"
+    href="/recipes/cloudflare-worker"
+  >
+    Develop and deploy your RPC Reverse Proxy as a Cloudflare Worker
+  </Card>
+  <Card
+    title="Express.js Middleware"
+    icon="node-js"
+    href="/recipes/express-js-middleware"
+  >
+    Run Nexus as an express-js middleware in your existing node.js application
+  </Card>
+</CardGroup>

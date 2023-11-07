@@ -1,0 +1,148 @@
+---
+title: Use Cases
+description: Learn about the benefits and uses cases of Nexus
+---
+
+## Introduction
+
+There are many benefits to using reverse proxies for traditional applications. The benefits become even more significant in the context of blockchain applications. Below are some of the most important ones.
+
+## Cost Savings
+
+Most node providers bill their clients based on the number of requests they serve. This implies that significant cost-savings can be achieved by reducing the number of requests sent to the node.
+
+Since blocks are mined at fixed intervals, this is the perfect use-case for caching read requests. In fact, this is how most node providers operate: they wrap their nodes with a reverse proxy of their own, and serve their clients their own cached results. You can employ this very same strategy and significantly cut down on your node provider costs. Check out [Caching](/features/caching) for more information.
+
+<Warning>
+  Caching is currently under development and will be available in the next
+  release.
+</Warning>
+
+## Privacy
+
+While there are many successful and trustworthy node providers out there, it is still a good idea to avoid exposing the IP addresses of your users. When you use `Nexus` as a reverse proxy, the node provider will only see the IP address of your `Nexus` server, thus respecting the privacy of your end users.
+
+## Vendor lock-in
+
+When you use `Nexus`, you are able to switch node providers from a single location, without downtime and without having to change your dApp code or configuration. This is especially useful if you are publishing multiple dApps, connecting to multiple blockchains, or operating multiple clients and services that require blockchain access.
+
+## Future-proofing
+
+You will occasionally find that your dApp requires to connect to a new chain. If the chain is especially new, such as the latest testnet, your current provider may not have begun supporting it, but perhaps another provider has.
+
+When this happens, you will suddenly find yourself juggling multiple providers, which increases operational complexity. When you use `Nexus`, you can simply add a new node provider to your configuration and you're good to go. No need to introduce additional providers to your dApp.
+
+## Availability
+
+If one of the RPC providers you’re using experiences failure or downtime, `Nexus` will cycle the request to another one, effectively multiplying your availability and uptime. Check out [Request Cycling](/features/request-cycling) for more information.
+
+{" "}
+
+<Note>
+  In the upcoming release, `Nexus` will continuously track response times and
+  availability of your providers and will automatically forward requests to the
+  fastest one.
+</Note>
+Furthermore, if you deploy `Nexus` as a [Cloudflare Worker](/recipes/cloudflare-worker),
+you will benefit from Cloudflare’s global network of edge servers, which will further
+increase your availability and reduce latency.
+
+## Key protection
+
+The de-facto way we as dApp authors share blockchain node access with our
+users is by exposing our access keys in our client code. These keys are
+usually statically compiled into the build (such as
+[Next.js](https://nextjs.org) or [Render](https://render.com) environment
+variables). This is a security risk, as anyone with access to the client code
+can extract the keys and use them to access the blockchain on your dime. Worse,
+this can cause your keys to be rate limited or even disabled by your provider,
+causing outages for your users.
+
+Industry leaders have done good progress in implementing [access protection](https://files.readme.io/47eecd8-0775d06-Alchemy-docs-favicon.svg) through CORS, contract addresses, wallet addresses and even
+IP addresses. These are all great solutions, but they are not universal or standard. If you commit
+to a provider that implements these measures, you will risk vendor lock-in. If you switch providers,
+you will risk key exposure.
+
+<Warning>
+  `Nexus` is currently under development. Token based access protection
+  (described below) will be available in the next release.
+</Warning>
+
+`Nexus` brings the best of both worlds: you can use any provider you want, and
+you can protect your keys from being exposed. `Nexus` will protect your keys and
+will only expose its own access keys to your users. If run in `token` mode, unlike standard
+providers keys which are baked into your client code, `Nexus` will manage access through
+[jwt](https://jwt.io) tokens at runtime.
+
+## Custom authorization
+
+The industry standard for access protection is to isolate modes of access into "applications" or "keys", and then bake these keys into your various dApps. We usually make do with these, but we end up with a very coarse-grained access control that tends to apply to the entire dApp. If you want to restrict access to certain parts of your dApp, or specific users, you are out of luck. Consider the following scenario, which is unattainable without `Nexus`:
+
+- Anonymous users can only read `totalSupply()` and `balanceOf()` for your token contracts `A` and `B`.
+- Logged-in users can read `totalSupply()` and `balanceOf()` for your token contracts `A`, `B` and `C`, and also call `transferTo()` on `A` and `B`.
+- Admin users can read all contract data, or call any contract method.
+
+  <Warning>
+    `Nexus` is currently under development. Fine-grained access protection
+    (described below) will be available in an upcoming release.
+  </Warning>
+
+`Nexus` allows you to create fine-grained scopes via [jwt](https://jwt.io) tokens and distribute them to your users at runtime. If you're already using a token-based authentication system, you can configure your services to sign `Nexus` tokens as you authenticate your users. Check out [Authorization](/features/authorization) docs for more information.
+
+## Decentralization
+
+If you’re using a single rpc provider, it becomes your single point of failure. `Nexus` round-robins the relayed requests when it detects multiple configured providers for a given chain. For example, if you configure your access keys for infura, alchemy and ankr, since they all support eth mainnet, clients using this `Nexus` will have their requests randomly relayed to one of these providers at any given time, effectively decentralizing your blockchain access.
+
+<Note>
+  In the upcoming release, `Nexus` will optionally allow you to configure quorum
+  based strategies, such as 2-of-3, 3-of-5, etc. This will provide additional
+  security and decentralization, beyond the randomized-round-robin strategy.
+  Check out [Quorum](/features/quorum) for more information.
+</Note>
+
+<Tip>
+  Many client libraries such as
+  [web3.js](https://web3js.readthedocs.io/en/v1.3.4/web3-eth.html#setprovider)
+  and [ethers.js](https://docs.ethers.io/v5/api/providers/#providers-urls)
+  actually allow you to configure multiple providers on the client-side. They
+  empower you to implement RPC quorum strategies such as 2-of-3, 3-of-5, etc. If
+  decentralization is your highest priority, you are highly encouraged to use
+  these strategies in conjunction with `Nexus`.
+</Tip>
+
+## Coordination
+
+If you're building anything beyond a simple, single-purpose dApp such as a token swap, you will likely be coordinating distinct services and web2 state with your web3 activity. The current de-facto solution is setting up background jobs that listen to web3 events and update your web2 state accordingly. The issue here is that you want your user experience to be as close to realtime as possible, and the inherent asychronicity of this solution makes it very difficult to achieve this. This will also require you to implement web2 subscriptions on your client side to adapt your UI to the changing state, which further complicates your codebase.
+
+Alternatives include orchestrating a series of api calls directly on the client-side, where you may first dispatch a web2 call to your backend, then dispatch a web3 transaction, await its confirmation and finally dispatch another web2 call to your backend for post-processing. This is a very brittle solution, as it requires implementing a lot of error handling and retry logic. It further raises concerns over atomicity too, as you may end up with a partially completed state transition if any of the steps fail.
+
+`Nexus` allows you to execute custom code before, during and after your web3 transactions, allowing you to handle state transitions atomically and in a single request. Since this happens on the server-side, you are no longer required to implement web2 subscriptions on the client-side. You are further protected from client-specific failure modes, such as network connectivity issues or request interruptions (e.g. user closes the browser tab in the middle of a state transition).
+
+`Nexus` does this through [Lifecycle Hooks](/features/lifecycle-hooks), which allow you to coordinate web2 and web3 state updates in a single request. This is a much more robust solution, as it allows you to handle errors and retries in a single place, and it also allows you to implement atomicity, as you can rollback your web2 state if your web3 transaction fails. `Nexus` allows you to inject custom code in the following lifecycle stages:
+
+- `pre-request`: before the request is processed by `Nexus`
+- `pre-relay`: before the request is relayed to the blockchain
+- `post-relay`: after the request is relayed to the blockchain
+- `post-receipt`: after the transaction receipt is received
+- `pre-response`: before the response is sent to the client
+- `post-response`: after the response is sent to the client
+
+<Warning>
+  `Nexus` is currently under development. Lifecycle hooks will be available in
+  an upcoming release.
+</Warning>
+
+## Rate limiting
+
+`Nexus` allows you to configure rate limiting on multiple levels. You can limit based on IP addresses, request types (e.g. `eth_call`, `eth_sendTransaction`, etc.), request parameters (e.g. `method`, `params`, etc.), aggregate number of requests per second, user roles, and many more. You can even configure different rate limits for different providers. This allows you to protect your providers from being rate limited or disabled by your provider, causing outages for your users.
+
+If the out-of-the-box rate limiting capabilities of `Nexus` are not enough for your use case, you can easily extend them by implementing your own rate limiting logic of your choice. Check out [Rate Limiting](/features/rate-limiting) for more information.
+
+<Warning>
+  `Nexus` is currently under development. Rate limiting will be available in an
+  upcoming release.
+</Warning>
+
+## Observability
+
+RPC access is a critical but often neglected component of your dApp. `Nexus` allows you to monitor and observe its performance through a variety of metrics and logs. You can monitor the number of requests, the number of errors, the response times, the availability of your providers, and much more. Check out [Observability](/features/observability) for more information.

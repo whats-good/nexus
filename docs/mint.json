@@ -1,0 +1,79 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Nexus",
+  "logo": {
+    "dark": "/images/nexus-proxy-banner-wordmark-dark.svg",
+    "light": "/images/nexus-proxy-banner-wordmark-light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:yo@whatsgood.dog?subject=Support%20Request%20%28Nexus%29"
+    }
+  ],
+  "topbarCtaButton": {
+    "type": "github",
+    "url": "https://github.com/whats-good/nexus"
+  },
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/P6TxFsWXCk"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "use-cases",
+        "quickstart",
+        "development",
+        "changelog"
+      ]
+    },
+    {
+      "group": "Features",
+      "pages": [
+        "features/provider-configuration",
+        "features/request-cycling",
+        "features/adaptive-performance",
+        "features/authorization",
+        "features/caching",
+        "features/quorum",
+        "features/lifecycle-hooks",
+        "features/rate-limiting",
+        "features/observability"
+      ]
+    },
+    {
+      "group": "Recipes",
+      "pages": ["recipes/cloudflare-worker", "recipes/express-js-middleware"]
+    }
+  ],
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true
+  },
+  "footerSocials": {
+    "twitter": "https://twitter.com/MechanicalKazan",
+    "github": "https://github.com/whats-good/nexus",
+    "linkedin": "https://www.linkedin.com/in/keremkazan/"
+  },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-7P86P21ZJD"
+    }
+  }
+}

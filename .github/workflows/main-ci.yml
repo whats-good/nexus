@@ -1,0 +1,12 @@
+name: Main CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    uses: "./.github/workflows/ci.yml"
+    secrets:
+      SLACK_CI_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
