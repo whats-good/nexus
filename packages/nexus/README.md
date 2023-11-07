@@ -24,6 +24,11 @@
 
 Welcome to `Nexus` - a simple TypeScript proxy server for any [Ethereum JSON RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/) compliant blockchain. Instead of connecting your dApps to a blockchain node, you can connect them to `Nexus` and `Nexus` serves the requests for you. `Nexus` is open source and free to use.
 
+
+## Documentation
+
+Check out our [documentation](https://nexus.whatsgood.dog) for detailed instructions.
+
 ## Installation
 
 ```sh
@@ -61,7 +66,3 @@ export default {
 };
 
 ```
-
-## Documentation
-
-Check out our [documentation](https://nexus.whatsgood.dog) for detailed instructions.
