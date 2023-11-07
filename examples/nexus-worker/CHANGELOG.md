@@ -1,5 +1,13 @@
 # @whatsgood/nexus-worker
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [e3e4864]
+- Updated dependencies [5bc7ae6]
+  - @whatsgood/nexus@0.0.4
+
 ## 0.1.12
 
 ### Patch Changes

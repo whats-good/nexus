@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.0.4
+
+### Patch Changes
+
+- e3e4864: added base sepolia and additional base-goerli configurations
+- 5bc7ae6: separating between error logs and warning logs
+
 ## 0.0.3
 
 ### Patch Changes
