@@ -41,7 +41,7 @@ export class ServiceProvider {
       const key = config.providers[this.name]?.key;
 
       if (!key) {
-        console.error(`Key for service provider: ${this.name} not found`);
+        console.warn(`Key for service provider: ${this.name} not found`);
 
         return undefined;
       }

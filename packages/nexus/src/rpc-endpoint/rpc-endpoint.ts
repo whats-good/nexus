@@ -50,7 +50,7 @@ export class RpcEndpoint {
 
       return response.ok;
     } catch (e) {
-      console.error(e);
+      console.warn("provider.isUp returned error", e);
 
       return false;
     }
@@ -92,7 +92,7 @@ export class RpcEndpoint {
     try {
       json = await relayResponse.json();
     } catch (error) {
-      console.error(error);
+      console.error("provider failure", error);
 
       // TODO: i should have different error logging for errors that are caught,
       // or not caught.
