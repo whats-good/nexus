@@ -1,6 +1,6 @@
 <div align="center">
 
-![alt text](https://mintlify.s3-us-west-1.amazonaws.com/whatsgooddog/images/nexus-hero-banner.svg)
+![alt text](./docs/images/nexus-hero-banner.svg)
 <div>
 
   ![npm version](https://img.shields.io/npm/v/@whatsgood/nexus)
