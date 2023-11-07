@@ -51,6 +51,9 @@ export const networkDescriptors: NetworkDescriptors = {
       goerli: {
         chainId: 84531,
       },
+      sepolia: {
+        chainId: 84532,
+      },
     },
   },
   polygon: {
@@ -89,6 +92,10 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
         type: "url-append-key",
         baseURL: "https://rpc.ankr.com/polygon_mumbai",
       },
+      84531: {
+        type: "url-append-key",
+        baseURL: "https://rpc.ankr.com/base_goerli",
+      },
     },
   },
   alchemy: {
@@ -109,6 +116,10 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
         type: "url-append-key",
         baseURL: "https://polygon-mumbai.alchemyapi.io/v2",
       },
+      84531: {
+        type: "url-append-key",
+        baseURL: "https://base-goerli.g.alchemy.com/v2/",
+      },
     },
   },
   base: {
@@ -122,6 +133,10 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
         type: "url",
         url: "https://goerli.base.org",
         isProduction: false,
+      },
+      84532: {
+        type: "url",
+        url: "https://sepolia.base.org",
       },
     },
   },
