@@ -1,11 +1,23 @@
 {
   "name": "@whatsgood/nexus",
   "version": "0.0.2",
+  "description": "A simple TypeScript proxy server for any Ethereum JSON RPC compliant blockchain",
   "private": false,
   "access": "public",
+  "categories": [
+    "blockchain",
+    "ethereum",
+    "json-rpc",
+    "proxy",
+    "typescript"
+  ],
   "author": {
     "name": "Kerem Kazan",
     "email": "kerem@whatsgood.dog"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whats-good/nexus"
   },
   "license": "MIT",
   "types": "./dist/index.d.ts",
