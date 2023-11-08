@@ -5,9 +5,9 @@ description: "Deploy Nexus as a Cloudflare Worker in under 5 minutes"
 
 ## Prerequisites
 
-1. Sign up for a [Cloudflare](https://wo2.ww.cloudflare.com/) account.
-2. Install [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update) - the official Cloudflare Workers CLI.
-3. Sign up for an [Alchemy](https://www.alchemy.com/), [Ankr](https://www.ankr.com/) or [Infura](https://infura.io/) account. You will need this to connect to the Ethereum network.
+- Sign up for a [Cloudflare](https://wo2.ww.cloudflare.com/) account.
+- Install [Wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update) - the official Cloudflare Workers CLI.
+- <Snippet file="prerequisite-providers.mdx" />
 
 ## Initialize project
 
@@ -366,12 +366,7 @@ yarn deploy
 
 ## Provider configuration
 
-<Note>
-  `@whatsgood/nexus` is currently in pre-alpha and only supports `Alchemy`,
-  `Ankr` and `Infura` as node providers. If you would like to see support for
-  another provider, please [open an
-  issue](https://github.com/whats-good/nexus/issues).
-</Note>
+<Snippet file="note-limited-providers.mdx" />
 
 `Nexus` is not an [Ethereum Node](https://ethereum.org/en/developers/docs/nodes-and-clients/), it's a reverse proxy against [Ethereum JSON-RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/) compliant nodes. As such, you need to import your `Ethereum` node's `JSON-RPC` endpoint(s). `Nexus` supports setting up access keys directly for popular node providers. You can configure these keys via `wrangler secret put`.
 

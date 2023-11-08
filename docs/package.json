@@ -1,0 +1,13 @@
+{
+  "name": "nexus-docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "docs:dev": "mintlify dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

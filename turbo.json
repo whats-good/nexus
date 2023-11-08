@@ -11,6 +11,7 @@
       "cache": false
       // TODO: see if we can actually cache the deploys
     },
+    "docs:dev": {},
     "test:unit": {},
     "test:unit:coverage": {
       "outputs": ["coverage/**"]

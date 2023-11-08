@@ -3,6 +3,8 @@ title: Use Cases
 description: Learn about the benefits and uses cases of Nexus
 ---
 
+<Snippet file="warning-pre-alpha.mdx" />
+
 ## Introduction
 
 There are many benefits to using reverse proxies for traditional applications. The benefits become even more significant in the context of blockchain applications. Below are some of the most important ones.
@@ -82,10 +84,10 @@ The industry standard for access protection is to isolate modes of access into "
 - Logged-in users can read `totalSupply()` and `balanceOf()` for your token contracts `A`, `B` and `C`, and also call `transferTo()` on `A` and `B`.
 - Admin users can read all contract data, or call any contract method.
 
-  <Warning>
-    `Nexus` is currently under development. Fine-grained access protection
-    (described below) will be available in an upcoming release.
-  </Warning>
+<Warning>
+  `Nexus` is currently under development. Fine-grained access protection
+  (described below) will be available in an upcoming release.
+</Warning>
 
 `Nexus` allows you to create fine-grained scopes via [jwt](https://jwt.io) tokens and distribute them to your users at runtime. If you're already using a token-based authentication system, you can configure your services to sign `Nexus` tokens as you authenticate your users. Check out [Authorization](/features/authorization) docs for more information.
 
