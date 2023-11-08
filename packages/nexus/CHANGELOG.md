@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.0.5
+
+### Patch Changes
+
+- 4b421a7: Fixed tests to account for the newly added base-goerli providers
+
 ## 0.0.4
 
 ### Patch Changes
