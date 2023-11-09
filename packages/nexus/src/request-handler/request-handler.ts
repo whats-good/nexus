@@ -5,7 +5,7 @@ import type { ChainRegistry } from "../chain/chain-registry";
 import { defaultChainRegistry } from "../setup/data";
 import { RpcProxyResponseContext } from "./rpc-proxy-context";
 
-export class RpcProxyResponseHandler {
+export class RequestHandler {
   private readonly endpointFactory: RpcEndpointPoolFactory;
   private readonly chainRegistry: ChainRegistry;
   private readonly config: Config;

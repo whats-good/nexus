@@ -3,7 +3,7 @@ import { setupServer } from "msw/node";
 import { Config } from "../config";
 import { handlers } from "../../tests/mock-server-handlers";
 import { retry } from "../../tests/utils";
-import { RpcProxyResponseHandler } from "./rpc-proxy-response-handler";
+import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
   globalAccessKey: "some-key",
@@ -31,7 +31,7 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
-  const requestHandler = new RpcProxyResponseHandler({ config });
+  const requestHandler = new RequestHandler({ config });
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
@@ -48,7 +48,7 @@ const blockNumberRequestHelper = (config: Config) => {
   return requestHandler.handle(request);
 };
 
-describe("rpc proxy response handler - relay", () => {
+describe("request handler - relay", () => {
   describe("all providers up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

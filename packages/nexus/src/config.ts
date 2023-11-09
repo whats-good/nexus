@@ -14,7 +14,7 @@ interface ProviderConfig {
 
 type Env = Partial<Record<string, string>>;
 
-interface ConfigConstructorParams extends Partial<Config> {
+export interface ConfigConstructorParams extends Partial<Config> {
   // some runtimes don't support process.env (e.g. Cloudflare Workers)
   // so we allow them to pass in an object with the same keys as process.env
   env?: Env;
