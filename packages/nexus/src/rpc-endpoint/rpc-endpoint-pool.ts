@@ -1,7 +1,8 @@
 import type { Config } from "../config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
-import { JsonRPCRequestSchema, type RpcEndpoint } from "./rpc-endpoint";
+import { JsonRPCRequestSchema } from "./json-rpc-types";
+import type { RpcEndpoint } from "./rpc-endpoint";
 
 export class RpcEndpointPool {
   public readonly chain: Chain;
