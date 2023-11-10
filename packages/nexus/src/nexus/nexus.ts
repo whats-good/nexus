@@ -7,7 +7,7 @@ export class Nexus {
 
   public readonly requestHandler: RequestHandler;
 
-  constructor(params: ConfigConstructorParams) {
+  constructor(params: ConfigConstructorParams = {}) {
     this.config = new Config(params);
     this.requestHandler = new RequestHandler({
       config: this.config,
