@@ -43,7 +43,7 @@ export class RpcEndpoint {
     }
   }
 
-  public async req(request: z.TypeOf<typeof JsonRPCRequestSchema>) {
+  public async relay(request: z.TypeOf<typeof JsonRPCRequestSchema>) {
     // TODO: add caching for non-mutating requests
     // TODO: test that the payload from the client actually hits the relayed server
 

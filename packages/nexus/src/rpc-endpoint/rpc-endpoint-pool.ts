@@ -118,7 +118,7 @@ export class RpcEndpointPool {
     // TODO: what should we return if no endpoint is available?
     if (this.config.recoveryMode === "none") {
       return (
-        this.current?.req(parsedPayload.data) ??
+        this.current?.relay(parsedPayload.data) ??
         new Response(null, { status: 500 })
       );
       // TODO: standardize these Response objects
@@ -133,7 +133,7 @@ export class RpcEndpointPool {
         break;
       }
 
-      const response = await endpoint.req(parsedPayload.data);
+      const response = await endpoint.relay(parsedPayload.data);
 
       if (response.type === "success") {
         return response;
