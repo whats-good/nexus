@@ -1,21 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
-
-// TODO: migrate to the older whatsgood rpc-proxy schema validation,
-// based on the input params.
-const JsonRPCResponseSchema = z.object({
-  jsonrpc: z.literal("2.0"),
-  id: z.number(),
-  result: z.any(),
-});
-
-export const JsonRPCRequestSchema = z.object({
-  jsonrpc: z.literal("2.0"),
-  id: z.number(),
-  method: z.string(),
-  params: z.array(z.any()),
-});
+import type { JsonRPCRequestSchema } from "./json-rpc-types";
+import { JsonRPCResponseSchema } from "./json-rpc-types";
 
 export class RpcEndpoint {
   public readonly url: string;
