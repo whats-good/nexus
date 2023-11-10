@@ -3,6 +3,7 @@ import { matchPath } from "../routes/routes";
 import { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
 import type { ChainRegistry } from "../chain/chain-registry";
 import { defaultChainRegistry } from "../setup/data";
+import { JsonRPCRequestSchema } from "../rpc-endpoint/json-rpc-types";
 import { RpcProxyContext } from "./rpc-proxy-context";
 
 export class RequestHandler {
@@ -18,8 +19,54 @@ export class RequestHandler {
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
   }
 
-  private buildContext(request: Request): RpcProxyContext {
+  private async parseJSONRpcRequest(request: Request) {
+    // we clean the request to remove any non-required pieces
+    let payload: unknown;
+
+    try {
+      payload = await request.json();
+    } catch (error) {
+      console.error(
+        JSON.stringify(
+          {
+            request,
+            error,
+          },
+          null,
+          2
+        )
+      );
+
+      return {
+        type: "invalid-json-request",
+        request,
+        error,
+      } as const;
+    }
+
+    const parsedPayload = JsonRPCRequestSchema.safeParse(payload);
+
+    if (!parsedPayload.success) {
+      console.error(parsedPayload.error);
+
+      return {
+        type: "invalid-json-rpc-request",
+        request,
+        payload,
+        error: parsedPayload.error,
+      } as const;
+    }
+
+    return {
+      type: "success",
+      request,
+      data: parsedPayload.data,
+    } as const;
+  }
+
+  private async buildContext(request: Request): Promise<RpcProxyContext> {
     const requestUrl = new URL(request.url);
+    const requestPath = requestUrl.pathname;
 
     const route = matchPath(requestUrl.pathname);
     const chain = route
@@ -27,11 +74,20 @@ export class RequestHandler {
       : undefined;
     const pool = chain ? this.endpointFactory.fromChain(chain) : undefined;
 
+    const jsonRPCRequestParseResult = await this.parseJSONRpcRequest(request);
+
+    const clientAccessKey = requestUrl.searchParams.get("key") || undefined;
+
     return new RpcProxyContext({
       pool,
       config: this.config,
       chain,
-      request,
+      path: requestPath,
+      clientAccessKey,
+      jsonRPCRequest:
+        jsonRPCRequestParseResult.type === "success"
+          ? jsonRPCRequestParseResult.data
+          : undefined,
     });
   }
 
@@ -44,11 +100,18 @@ export class RequestHandler {
   }
 
   private async handleRpcRelay(context: RpcProxyContext): Promise<Response> {
+    if (!context.jsonRPCRequest) {
+      // TODO: test
+      // TODO: pass the actual parse result into the context, not the
+      // jsonRPCRequest
+      return new Response("Invalid Json RPC Request ", { status: 400 });
+    }
+
     if (!context.pool) {
       return new Response("Unexpected Error: Not Found", { status: 500 });
     }
 
-    const result = await context.pool.relay(context.request);
+    const result = await context.pool.relay(context.jsonRPCRequest);
 
     if (result.type === "success") {
       return Response.json(result.data);
@@ -65,7 +128,7 @@ export class RequestHandler {
   }
 
   public async handle(request: Request): Promise<Response> {
-    const context = this.buildContext(request);
+    const context = await this.buildContext(request);
 
     if (request.method === "GET") {
       return this.handleStatus(context);

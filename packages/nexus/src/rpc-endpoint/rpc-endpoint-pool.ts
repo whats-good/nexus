@@ -1,7 +1,7 @@
 import type { Config } from "../config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
-import { JsonRPCRequestSchema } from "./json-rpc-types";
+import type { JsonRPCRequest } from "./json-rpc-types";
 import type { RpcEndpoint } from "./rpc-endpoint";
 
 export class RpcEndpointPool {
@@ -77,49 +77,11 @@ export class RpcEndpointPool {
     return false;
   }
 
-  public async relay(request: Request) {
-    // we clean the request to remove any non-required pieces
-    let payload: unknown;
-
-    try {
-      payload = await request.json();
-    } catch (error) {
-      console.error(
-        JSON.stringify(
-          {
-            request,
-            error,
-          },
-          null,
-          2
-        )
-      );
-
-      return {
-        type: "invalid-json-request",
-        request,
-        error,
-      } as const;
-    }
-
-    const parsedPayload = JsonRPCRequestSchema.safeParse(payload);
-
-    if (!parsedPayload.success) {
-      console.error(parsedPayload.error);
-
-      return {
-        type: "invalid-json-rpc-request",
-        request,
-        payload,
-        error: parsedPayload.error,
-      } as const;
-    }
-
+  public async relay(request: JsonRPCRequest) {
     // TODO: what should we return if no endpoint is available?
     if (this.config.recoveryMode === "none") {
       return (
-        this.current?.relay(parsedPayload.data) ??
-        new Response(null, { status: 500 })
+        this.current?.relay(request) ?? new Response(null, { status: 500 })
       );
       // TODO: standardize these Response objects
     }
@@ -133,7 +95,7 @@ export class RpcEndpointPool {
         break;
       }
 
-      const response = await endpoint.relay(parsedPayload.data);
+      const response = await endpoint.relay(request);
 
       if (response.type === "success") {
         return response;
