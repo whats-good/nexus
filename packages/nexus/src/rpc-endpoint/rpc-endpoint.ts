@@ -1,7 +1,6 @@
-import type { z } from "zod";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
-import type { JsonRPCRequestSchema } from "./json-rpc-types";
+import type { JsonRPCRequest } from "./json-rpc-types";
 import { JsonRPCResponseSchema } from "./json-rpc-types";
 
 export class RpcEndpoint {
@@ -43,7 +42,7 @@ export class RpcEndpoint {
     }
   }
 
-  public async relay(request: z.TypeOf<typeof JsonRPCRequestSchema>) {
+  public async relay(request: JsonRPCRequest) {
     // TODO: add caching for non-mutating requests
     // TODO: test that the payload from the client actually hits the relayed server
 

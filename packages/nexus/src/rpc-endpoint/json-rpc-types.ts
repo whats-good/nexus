@@ -14,3 +14,6 @@ export const JsonRPCRequestSchema = z.object({
   method: z.string(),
   params: z.array(z.any()),
 });
+
+export type JsonRPCRequest = z.infer<typeof JsonRPCRequestSchema>;
+export type JsonRPCResponse = z.infer<typeof JsonRPCResponseSchema>;
