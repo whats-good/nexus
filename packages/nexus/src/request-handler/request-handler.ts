@@ -3,7 +3,7 @@ import { matchPath } from "../routes/routes";
 import { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
 import type { ChainRegistry } from "../chain/chain-registry";
 import { defaultChainRegistry } from "../setup/data";
-import { RpcProxyResponseContext } from "./rpc-proxy-context";
+import { RpcProxyContext } from "./rpc-proxy-context";
 
 export class RequestHandler {
   private readonly endpointFactory: RpcEndpointPoolFactory;
@@ -18,7 +18,7 @@ export class RequestHandler {
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
   }
 
-  private buildContext(request: Request): RpcProxyResponseContext {
+  private buildContext(request: Request): RpcProxyContext {
     const requestUrl = new URL(request.url);
 
     const route = matchPath(requestUrl.pathname);
@@ -27,7 +27,7 @@ export class RequestHandler {
       : undefined;
     const pool = chain ? this.endpointFactory.fromChain(chain) : undefined;
 
-    return new RpcProxyResponseContext({
+    return new RpcProxyContext({
       pool,
       config: this.config,
       chain,
@@ -35,9 +35,7 @@ export class RequestHandler {
     });
   }
 
-  private async handleStatus(
-    context: RpcProxyResponseContext
-  ): Promise<Response> {
+  private async handleStatus(context: RpcProxyContext): Promise<Response> {
     const status = await context.getStatus();
 
     return Response.json(status, {
@@ -45,9 +43,7 @@ export class RequestHandler {
     });
   }
 
-  private async handleRpcRelay(
-    context: RpcProxyResponseContext
-  ): Promise<Response> {
+  private async handleRpcRelay(context: RpcProxyContext): Promise<Response> {
     if (!context.pool) {
       return new Response("Unexpected Error: Not Found", { status: 500 });
     }

@@ -25,7 +25,7 @@ interface ErrorStatus extends BaseStatus {
 
 type Status = SuccessStatus | ErrorStatus;
 
-export class RpcProxyResponseContext {
+export class RpcProxyContext {
   public readonly chain?: Chain;
   public readonly pool?: RpcEndpointPool;
 
