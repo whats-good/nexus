@@ -12,6 +12,6 @@ export default {
     const nexus = new Nexus({
       env,
     });
-    return nexus.requestHandler.handle(request);
+    return nexus.requestHandler.handleFetch(request);
   },
 };

@@ -45,7 +45,7 @@ const blockNumberRequestHelper = (config: Config) => {
     }
   );
 
-  return requestHandler.handle(request);
+  return requestHandler.handleFetch(request);
 };
 
 describe("request handler - relay", () => {

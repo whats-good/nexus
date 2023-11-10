@@ -1,3 +1,6 @@
+import type * as http from "node:http";
+import NodeURL from "node:url";
+import querystring from "node:querystring";
 import type { Config } from "../config";
 import { matchPath } from "../routes/routes";
 import { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
@@ -19,7 +22,116 @@ export class RequestHandler {
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
   }
 
-  private async parseJSONRpcRequest(request: Request) {
+  private parseJSONFromNodeHttpRequest(req: http.IncomingMessage) {
+    // TODO: is any the right choice?
+    // TODO: test
+    const body: any[] = [];
+    let receivedSize = 0;
+    const maxSize = 1e6; // 1 MB, for example
+
+    return new Promise((resolve, reject) => {
+      req.on("data", (chunk) => {
+        receivedSize += chunk.length;
+
+        if (receivedSize > maxSize) {
+          reject(new Error("Payload too large"));
+          req.destroy();
+        } else {
+          body.push(chunk);
+        }
+      });
+
+      req.on("end", () => {
+        try {
+          const parsedBody: unknown = JSON.parse(
+            Buffer.concat(body).toString()
+          );
+
+          resolve(parsedBody);
+        } catch (error) {
+          reject(new Error("Invalid JSON"));
+        }
+      });
+
+      req.on("error", (error) => {
+        reject(error);
+      });
+    });
+  }
+
+  private async parseJSONRpcRequestFromNodeHttpRequest(
+    req: http.IncomingMessage
+  ) {
+    let payload: unknown;
+
+    try {
+      // TODO: cover the cases where the request is not a json rpc request
+      // TODO: cover the cases where the request is already parsed as a json object
+      // from a higher middleware
+      payload = await this.parseJSONFromNodeHttpRequest(req);
+    } catch (error) {
+      console.error(
+        JSON.stringify(
+          {
+            req,
+            error,
+          },
+          null,
+          2
+        )
+      );
+
+      return {
+        type: "invalid-json-request",
+        req,
+        error,
+      } as const;
+    }
+
+    try {
+      console.log("PAYLOAD:", payload);
+
+      const parsedPayload = JsonRPCRequestSchema.safeParse(payload);
+
+      if (!parsedPayload.success) {
+        console.log("HELLO!");
+        console.log("error parsing json rpc request", payload);
+        console.error(parsedPayload.error);
+
+        return {
+          type: "invalid-json-rpc-request",
+          req,
+          payload,
+          error: parsedPayload.error,
+        } as const;
+      }
+
+      return {
+        type: "success",
+        req,
+        data: parsedPayload.data,
+      } as const;
+    } catch (error) {
+      console.error(
+        JSON.stringify(
+          {
+            req,
+            error,
+          },
+          null,
+          2
+        )
+      );
+
+      return {
+        type: "invalid-json-request",
+        req,
+        error,
+      } as const;
+    }
+  }
+
+  private async parseJSONRpcRequestFromFetchRequest(request: Request) {
     // we clean the request to remove any non-required pieces
     let payload: unknown;
 
@@ -64,7 +176,9 @@ export class RequestHandler {
     } as const;
   }
 
-  private async buildContext(request: Request): Promise<RpcProxyContext> {
+  private async buildContextFromFetchRequest(
+    request: Request
+  ): Promise<RpcProxyContext> {
     const requestUrl = new URL(request.url);
     const requestPath = requestUrl.pathname;
 
@@ -74,7 +188,8 @@ export class RequestHandler {
       : undefined;
     const pool = chain ? this.endpointFactory.fromChain(chain) : undefined;
 
-    const jsonRPCRequestParseResult = await this.parseJSONRpcRequest(request);
+    const jsonRPCRequestParseResult =
+      await this.parseJSONRpcRequestFromFetchRequest(request);
 
     const clientAccessKey = requestUrl.searchParams.get("key") || undefined;
 
@@ -91,51 +206,66 @@ export class RequestHandler {
     });
   }
 
-  private async handleStatus(context: RpcProxyContext): Promise<Response> {
-    const status = await context.getStatus();
+  private async buildContextFromNodeHttpRequest(
+    req: http.IncomingMessage
+  ): Promise<RpcProxyContext> {
+    // TODO: test node http requests
+    console.log("URL:", req.url);
+    const requestUrl = NodeURL.parse(req.url || "");
+    const requestPath = requestUrl.pathname;
+    const { query } = requestUrl;
 
-    return Response.json(status, {
-      status: status.code,
+    const route = requestPath ? matchPath(requestPath) : undefined;
+    const chain = route
+      ? this.chainRegistry.getByOptionalParams(route.params)
+      : undefined;
+    const pool = chain ? this.endpointFactory.fromChain(chain) : undefined;
+
+    console.log({
+      chain,
+      route,
+      pool,
+    });
+
+    const clientAccessKey = query ? querystring.parse(query).key : undefined;
+
+    const jsonRPCRequestParseResult =
+      await this.parseJSONRpcRequestFromNodeHttpRequest(req);
+
+    return new RpcProxyContext({
+      pool,
+      config: this.config,
+      chain,
+      path: requestPath || "", // TODO: remove this hack, make this more robust
+      clientAccessKey:
+        typeof clientAccessKey === "string" ? clientAccessKey : undefined,
+      jsonRPCRequest:
+        jsonRPCRequestParseResult.type === "success"
+          ? jsonRPCRequestParseResult.data
+          : undefined,
     });
   }
 
-  private async handleRpcRelay(context: RpcProxyContext): Promise<Response> {
-    if (!context.jsonRPCRequest) {
-      // TODO: test
-      // TODO: pass the actual parse result into the context, not the
-      // jsonRPCRequest
-      return new Response("Invalid Json RPC Request ", { status: 400 });
-    }
-
-    if (!context.pool) {
-      return new Response("Unexpected Error: Pool unitialized", {
-        status: 500,
-      });
-    }
-
-    const result = await context.pool.relay(context.jsonRPCRequest);
-
-    if (result.type === "success") {
-      return Response.json(result.data);
-    }
-
-    // TODO: should respod with a jsonrpc-compliant error
-
+  private async handleStatus(context: RpcProxyContext) {
     const status = await context.getStatus();
 
-    // TODO: status should always fail here, given the response is not ok.
-    return Response.json(status, {
+    return {
       status: status.code,
-    });
+      body: status,
+    };
   }
 
-  public async handle(request: Request): Promise<Response> {
-    const context = await this.buildContext(request);
+  public async handleFetch(request: Request): Promise<Response> {
+    const context = await this.buildContextFromFetchRequest(request);
 
     if (request.method === "GET") {
-      return this.handleStatus(context);
+      const responseRaw = await this.handleStatus(context);
+
+      return Response.json(responseRaw.body, { status: responseRaw.status });
     } else if (request.method === "POST") {
-      return this.handleRpcRelay(context);
+      const result = await context.relay();
+
+      return Response.json(result.body, { status: result.status });
     }
 
     return Response.json(
@@ -144,5 +274,40 @@ export class RequestHandler {
       },
       { status: 404 }
     );
+  }
+
+  public async handleNodeHttp(
+    req: http.IncomingMessage,
+    res: http.ServerResponse
+  ) {
+    const context = await this.buildContextFromNodeHttpRequest(req);
+
+    if (req.method === "GET") {
+      const status = await context.getStatus();
+
+      res.writeHead(status.code, {
+        "Content-Type": "application/json",
+      });
+
+      res.end(JSON.stringify(status));
+    } else if (req.method === "POST") {
+      const result = await context.relay();
+
+      res.writeHead(result.status, {
+        "Content-Type": "application/json",
+      });
+
+      res.end(JSON.stringify(result.body));
+    } else {
+      res.writeHead(404, {
+        "Content-Type": "application/json",
+      });
+
+      res.end(
+        JSON.stringify({
+          message: "Not Found",
+        })
+      );
+    }
   }
 }

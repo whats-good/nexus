@@ -9,7 +9,7 @@ export const requestHelper = async (endpoint: string, config: Config) => {
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const response = await requestHandler.handle(request);
+  const response = await requestHandler.handleFetch(request);
   const data: unknown = await response.json();
 
   return data;

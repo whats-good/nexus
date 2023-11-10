@@ -303,22 +303,20 @@ For the purposes of this tutorial, update the `"dev"` script in `package.json` f
 <CodeGroup>
 
 ```ts src/index.ts
-import { Config, RpcProxyResponseHandler } from "@whatsgood/nexus";
+import { Nexus } from "@whatsgood/nexus";
 
 export default {
   async fetch(
     request: Request,
     env: Record<string, string>
   ): Promise<Response> {
-    const config = new Config({
+    const nexus = new Nexus({
       env,
     });
-    const responseHandler = new RpcProxyResponseHandler({
-      config,
-    });
-    return responseHandler.handle(request);
+    return nexus.requestHandler.handleFetch(request);
   },
 };
+
 ```
 
 ```json package.json
