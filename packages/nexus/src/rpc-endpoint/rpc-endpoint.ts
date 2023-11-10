@@ -49,6 +49,9 @@ export class RpcEndpoint {
     const cleanedRequest = new Request(this.url, {
       body: JSON.stringify(request),
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     let relayResponse: Response;
