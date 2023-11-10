@@ -108,7 +108,9 @@ export class RequestHandler {
     }
 
     if (!context.pool) {
-      return new Response("Unexpected Error: Not Found", { status: 500 });
+      return new Response("Unexpected Error: Pool unitialized", {
+        status: 500,
+      });
     }
 
     const result = await context.pool.relay(context.jsonRPCRequest);
