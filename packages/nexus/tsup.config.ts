@@ -3,7 +3,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig((options: Options) => ({
   treeshake: true,
-  entry: ["./src/entrypoints/fetch.ts", "./src/entrypoints/node.ts"],
+  entry: ["./src/fetch.ts", "./src/node.ts"],
   format: ["cjs"],
   dts: true,
   minify: true,

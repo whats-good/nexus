@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "../config";
-import { handlers } from "../../tests/mock-server-handlers";
-import { RequestHandler } from "./request-handler";
+import { handlers } from "../../../tests/mock-server-handlers";
+import { AbstractRequestHandler } from "./abstract-request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
-  const requestHandler = new RequestHandler({ config });
+  const requestHandler = new AbstractRequestHandler({ config });
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });

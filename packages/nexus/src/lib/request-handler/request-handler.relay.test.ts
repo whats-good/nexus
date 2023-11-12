@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "../config";
-import { handlers } from "../../tests/mock-server-handlers";
-import { retry } from "../../tests/utils";
-import { RequestHandler } from "./request-handler";
+import { handlers } from "../../../tests/mock-server-handlers";
+import { retry } from "../../../tests/utils";
+import { AbstractRequestHandler } from "./abstract-request-handler";
 
 const sharedConfig = {
   globalAccessKey: "some-key",
@@ -31,7 +31,7 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
-  const requestHandler = new RequestHandler({ config });
+  const requestHandler = new AbstractRequestHandler({ config });
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
