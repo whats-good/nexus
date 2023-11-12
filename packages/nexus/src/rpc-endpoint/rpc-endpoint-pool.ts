@@ -101,6 +101,11 @@ export class RpcEndpointPool {
         return response;
       }
 
+      console.warn(
+        `Provider: ${endpoint.provider.name} failed to relay request:`,
+        response
+      );
+
       errors.push(response);
       this.currentServiceProviderIndex++;
     }
