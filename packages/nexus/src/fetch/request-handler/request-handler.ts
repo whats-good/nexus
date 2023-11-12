@@ -1,33 +1,16 @@
-import type { ChainRegistry } from "../../lib/chain/chain-registry";
-import type { Config } from "../../lib/config";
 import { matchPath } from "../../lib/routes";
 import { JsonRPCRequestSchema } from "../../lib/rpc-endpoint/json-rpc-types";
-import type { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
 import type { Nexus } from "../../lib/nexus";
 import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
 import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
 import { AbstractRequestHandler } from "../../lib/request-handler/abstract-request-handler";
 
 export class RequestHandler extends AbstractRequestHandler<Response> {
-  private readonly request: Request;
-
-  constructor(params: {
-    config: Config;
-    chainRegistry: ChainRegistry;
-    rpcEndpointPoolFactory: RpcEndpointPoolFactory;
-    request: Request;
-  }) {
-    super(params);
-    this.request = params.request;
-  }
-
-  public static init(nexus: Nexus, request: Request) {
-    return new RequestHandler({
-      config: nexus.config,
-      chainRegistry: nexus.chainRegistry,
-      rpcEndpointPoolFactory: nexus.rpcEndpointPoolFactory,
-      request,
-    });
+  constructor(
+    protected readonly nexus: Nexus,
+    private readonly request: Request
+  ) {
+    super(nexus);
   }
 
   private async parseJSONRpcRequest() {
@@ -81,10 +64,10 @@ export class RequestHandler extends AbstractRequestHandler<Response> {
 
     const route = matchPath(requestUrl.pathname);
     const chain = route
-      ? this.chainRegistry.getByOptionalParams(route.params)
+      ? this.nexus.chainRegistry.getByOptionalParams(route.params)
       : undefined;
     const pool = chain
-      ? this.rpcEndpointPoolFactory.fromChain(chain)
+      ? this.nexus.rpcEndpointPoolFactory.fromChain(chain)
       : undefined;
 
     const jsonRPCRequestParseResult = await this.parseJSONRpcRequest();
@@ -93,7 +76,7 @@ export class RequestHandler extends AbstractRequestHandler<Response> {
 
     return new RpcProxyContext({
       pool,
-      config: this.config,
+      config: this.nexus.config,
       chain,
       path: requestPath,
       clientAccessKey,

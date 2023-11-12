@@ -2,27 +2,15 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "../../lib/config";
 import { handlers } from "../../../tests/mock-server-handlers";
-import {
-  defaultChainRegistry,
-  defaultServiceProviderRegistry,
-} from "../../lib/setup/data";
-import { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import { Nexus } from "../../lib";
 import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
+  const nexus = new Nexus(config);
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const requestHandler = new RequestHandler({
-    config,
-    request,
-    chainRegistry: defaultChainRegistry,
-    rpcEndpointPoolFactory: new RpcEndpointPoolFactory({
-      config,
-      chainRegistry: defaultChainRegistry,
-      serviceProviderRegistry: defaultServiceProviderRegistry,
-    }),
-  });
+  const requestHandler = new RequestHandler(nexus, request);
   const response = await requestHandler.handle();
   const data: unknown = await response.json();
 

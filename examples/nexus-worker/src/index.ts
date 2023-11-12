@@ -13,6 +13,7 @@ export default {
     const nexus = new Nexus({
       env,
     });
-    return RequestHandler.init(nexus, request).handle();
+    const requestHandler = new RequestHandler(nexus, request);
+    return requestHandler.handle();
   },
 };

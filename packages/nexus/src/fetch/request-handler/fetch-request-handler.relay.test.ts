@@ -3,11 +3,7 @@ import { setupServer } from "msw/node";
 import { Config } from "../../lib/config";
 import { handlers } from "../../../tests/mock-server-handlers";
 import { retry } from "../../../tests/utils";
-import {
-  defaultChainRegistry,
-  defaultServiceProviderRegistry,
-} from "../../lib/setup/data";
-import { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import { Nexus } from "../../lib";
 import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
@@ -36,6 +32,7 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
+  const nexus = new Nexus(config);
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
@@ -48,16 +45,7 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler({
-    config,
-    request,
-    chainRegistry: defaultChainRegistry,
-    rpcEndpointPoolFactory: new RpcEndpointPoolFactory({
-      chainRegistry: defaultChainRegistry,
-      config,
-      serviceProviderRegistry: defaultServiceProviderRegistry,
-    }),
-  });
+  const requestHandler = new RequestHandler(nexus, request);
 
   return requestHandler.handle();
 };

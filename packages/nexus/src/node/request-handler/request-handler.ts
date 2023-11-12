@@ -1,11 +1,8 @@
 import type http from "node:http";
 import NodeURL from "node:url";
 import querystring from "node:querystring";
-import type { Config } from "../../lib/config";
-import type { ChainRegistry } from "../../lib/chain/chain-registry";
 import { matchPath } from "../../lib/routes";
 import { JsonRPCRequestSchema } from "../../lib/rpc-endpoint/json-rpc-types";
-import type { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
 import type { Nexus } from "../../lib/nexus";
 import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
 import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
@@ -14,33 +11,12 @@ import { AbstractRequestHandler } from "../../lib/request-handler/abstract-reque
 // TODO: write handler tests for the node handler
 
 export class RequestHandler extends AbstractRequestHandler<void> {
-  private readonly req: http.IncomingMessage;
-  private readonly res: http.ServerResponse;
-
-  constructor(params: {
-    config: Config;
-    chainRegistry: ChainRegistry;
-    rpcEndpointPoolFactory: RpcEndpointPoolFactory;
-    req: http.IncomingMessage;
-    res: http.ServerResponse;
-  }) {
-    super(params);
-    this.req = params.req;
-    this.res = params.res;
-  }
-
-  public static init(
-    nexus: Nexus,
-    req: http.IncomingMessage,
-    res: http.ServerResponse
+  constructor(
+    protected readonly nexus: Nexus,
+    private readonly req: http.IncomingMessage,
+    private readonly res: http.ServerResponse
   ) {
-    return new RequestHandler({
-      config: nexus.config,
-      chainRegistry: nexus.chainRegistry,
-      rpcEndpointPoolFactory: nexus.rpcEndpointPoolFactory,
-      req,
-      res,
-    });
+    super(nexus);
   }
 
   protected handlePreResponse(preResponse: NexusPreResponse) {
@@ -180,10 +156,10 @@ export class RequestHandler extends AbstractRequestHandler<void> {
 
     const route = requestPath ? matchPath(requestPath) : undefined;
     const chain = route
-      ? this.chainRegistry.getByOptionalParams(route.params)
+      ? this.nexus.chainRegistry.getByOptionalParams(route.params)
       : undefined;
     const pool = chain
-      ? this.rpcEndpointPoolFactory.fromChain(chain)
+      ? this.nexus.rpcEndpointPoolFactory.fromChain(chain)
       : undefined;
 
     const clientAccessKey = query ? querystring.parse(query).key : undefined;
@@ -192,7 +168,7 @@ export class RequestHandler extends AbstractRequestHandler<void> {
 
     return new RpcProxyContext({
       pool,
-      config: this.config,
+      config: this.nexus.config,
       httpMethod: this.req.method,
       chain,
       path: requestPath || "", // TODO: remove this hack, make this more robust

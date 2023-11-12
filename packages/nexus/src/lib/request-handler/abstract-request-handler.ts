@@ -1,6 +1,4 @@
-import type { ChainRegistry } from "../chain/chain-registry";
-import type { Config } from "../config";
-import type { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
+import type { Nexus } from "../nexus";
 import type { RpcProxyContext } from "./rpc-proxy-context";
 
 export interface NexusPreResponse {
@@ -10,19 +8,7 @@ export interface NexusPreResponse {
 }
 
 export abstract class AbstractRequestHandler<ResponseReturnType> {
-  protected config: Config;
-  protected chainRegistry: ChainRegistry;
-  protected rpcEndpointPoolFactory: RpcEndpointPoolFactory;
-
-  constructor(params: {
-    config: Config;
-    chainRegistry: ChainRegistry;
-    rpcEndpointPoolFactory: RpcEndpointPoolFactory;
-  }) {
-    this.config = params.config;
-    this.chainRegistry = params.chainRegistry;
-    this.rpcEndpointPoolFactory = params.rpcEndpointPoolFactory;
-  }
+  constructor(protected readonly nexus: Nexus) {}
 
   public async handle(): Promise<ResponseReturnType> {
     const context = await this.getContext();
