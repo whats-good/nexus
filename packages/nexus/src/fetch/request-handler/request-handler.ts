@@ -1,9 +1,9 @@
-import { matchPath } from "../../lib/routes";
-import { JsonRPCRequestSchema } from "../../lib/rpc-endpoint/json-rpc-types";
-import type { Nexus } from "../../lib/nexus";
-import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
-import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
-import { AbstractRequestHandler } from "../../lib/request-handler/abstract-request-handler";
+import { JsonRPCRequestSchema } from "@lib/rpc-endpoint/json-rpc-types";
+import type { Nexus } from "@lib/nexus";
+import { RpcProxyContext } from "@lib/request-handler/rpc-proxy-context";
+import type { NexusPreResponse } from "@lib/request-handler/abstract-request-handler";
+import { AbstractRequestHandler } from "@lib/request-handler/abstract-request-handler";
+import { matchPath } from "@lib/routes";
 
 export class RequestHandler extends AbstractRequestHandler<Response> {
   constructor(

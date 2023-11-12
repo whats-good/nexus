@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
-import { Config } from "../../lib/config";
-import { handlers } from "../../../tests/mock-server-handlers";
-import { retry } from "../../../tests/utils";
-import { Nexus } from "../../lib";
+import { handlers } from "@test/mock-server-handlers";
+import { retry } from "@test/utils";
+import { Config } from "@lib/config";
+import { Nexus } from "@lib/nexus";
 import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {

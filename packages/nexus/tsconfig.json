@@ -4,11 +4,17 @@
   "include": [
     "./src/**/*.ts",
     "./vitest.config.ts",
-    "./tests/**/*.ts",
+    "test/**/*.ts",
     "tsup.config.ts"
   ],
   "compilerOptions": {
     "module": "CommonJS",
-    "lib": ["es2017", "dom"]
+    "lib": ["es2017", "dom"],
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@lib/*": ["./src/lib/*"],
+      "@test/*": ["./test/*"]
+    }
   }
 }
