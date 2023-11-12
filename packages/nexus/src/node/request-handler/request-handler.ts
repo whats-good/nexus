@@ -11,6 +11,8 @@ import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
 import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
 import { AbstractRequestHandler } from "../../lib/request-handler/abstract-request-handler";
 
+// TODO: write handler tests for the node handler
+
 export class RequestHandler extends AbstractRequestHandler<void> {
   private readonly req: http.IncomingMessage;
   private readonly res: http.ServerResponse;

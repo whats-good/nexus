@@ -1,4 +1,5 @@
-import { Nexus, RequestHandler } from "@whatsgood/nexus/fetch";
+import { Nexus } from "@whatsgood/nexus";
+import { RequestHandler } from "@whatsgood/nexus/fetch";
 
 // TODO: add config alerts to indicate that the key access is incomplete
 // TODO: add onboarding & UX. (setup admin access, login, etc)
