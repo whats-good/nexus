@@ -4,7 +4,7 @@
   "description": "A simple TypeScript proxy server for any Ethereum JSON RPC compliant blockchain",
   "private": false,
   "access": "public",
-  "categories": [
+  "keywords": [
     "blockchain",
     "ethereum",
     "json-rpc",
