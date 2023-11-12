@@ -1,21 +1,35 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
-import { Config } from "../config";
+import { Config } from "../../lib/config";
 import { handlers } from "../../../tests/mock-server-handlers";
-import { AbstractRequestHandler } from "./abstract-request-handler";
+import {
+  defaultChainRegistry,
+  defaultServiceProviderRegistry,
+} from "../../lib/setup/data";
+import { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
-  const requestHandler = new AbstractRequestHandler({ config });
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const response = await requestHandler.handleFetch(request);
+  const requestHandler = new RequestHandler({
+    config,
+    request,
+    chainRegistry: defaultChainRegistry,
+    rpcEndpointPoolFactory: new RpcEndpointPoolFactory({
+      config,
+      chainRegistry: defaultChainRegistry,
+      serviceProviderRegistry: defaultServiceProviderRegistry,
+    }),
+  });
+  const response = await requestHandler.handle();
   const data: unknown = await response.json();
 
   return data;
 };
 
-describe("request handler - status", () => {
+describe("fetch request handler - status", () => {
   describe("providers are up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

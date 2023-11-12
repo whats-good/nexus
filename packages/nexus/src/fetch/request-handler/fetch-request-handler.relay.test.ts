@@ -1,9 +1,14 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
-import { Config } from "../config";
+import { Config } from "../../lib/config";
 import { handlers } from "../../../tests/mock-server-handlers";
 import { retry } from "../../../tests/utils";
-import { AbstractRequestHandler } from "./abstract-request-handler";
+import {
+  defaultChainRegistry,
+  defaultServiceProviderRegistry,
+} from "../../lib/setup/data";
+import { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
   globalAccessKey: "some-key",
@@ -31,7 +36,6 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
-  const requestHandler = new AbstractRequestHandler({ config });
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
@@ -44,11 +48,21 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
+  const requestHandler = new RequestHandler({
+    config,
+    request,
+    chainRegistry: defaultChainRegistry,
+    rpcEndpointPoolFactory: new RpcEndpointPoolFactory({
+      chainRegistry: defaultChainRegistry,
+      config,
+      serviceProviderRegistry: defaultServiceProviderRegistry,
+    }),
+  });
 
-  return requestHandler.handleFetch(request);
+  return requestHandler.handle();
 };
 
-describe("request handler - relay", () => {
+describe("fetch request handler - relay", () => {
   describe("all providers up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

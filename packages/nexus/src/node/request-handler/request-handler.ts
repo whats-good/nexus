@@ -1,17 +1,17 @@
 import type http from "node:http";
 import NodeURL from "node:url";
 import querystring from "node:querystring";
-import type { Config } from "../config";
-import type { ChainRegistry } from "../chain/chain-registry";
-import { matchPath } from "../routes/routes";
-import { JsonRPCRequestSchema } from "../rpc-endpoint/json-rpc-types";
-import type { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
-import type { Nexus } from "../nexus";
-import { RpcProxyContext } from "./rpc-proxy-context";
-import type { NexusPreResponse } from "./abstract-request-handler";
-import { AbstractRequestHandler } from "./abstract-request-handler";
+import type { Config } from "../../lib/config";
+import type { ChainRegistry } from "../../lib/chain/chain-registry";
+import { matchPath } from "../../lib/routes";
+import { JsonRPCRequestSchema } from "../../lib/rpc-endpoint/json-rpc-types";
+import type { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import type { Nexus } from "../../lib/nexus";
+import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
+import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
+import { AbstractRequestHandler } from "../../lib/request-handler/abstract-request-handler";
 
-export class NodeRequestHandler extends AbstractRequestHandler<void> {
+export class RequestHandler extends AbstractRequestHandler<void> {
   private readonly req: http.IncomingMessage;
   private readonly res: http.ServerResponse;
 
@@ -32,7 +32,7 @@ export class NodeRequestHandler extends AbstractRequestHandler<void> {
     req: http.IncomingMessage,
     res: http.ServerResponse
   ) {
-    return new NodeRequestHandler({
+    return new RequestHandler({
       config: nexus.config,
       chainRegistry: nexus.chainRegistry,
       rpcEndpointPoolFactory: nexus.rpcEndpointPoolFactory,

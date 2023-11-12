@@ -21,14 +21,19 @@
   },
   "exports": {
     "./fetch": {
-      "require": "./dist/fetch.js",
-      "import": "./dist/fetch.js",
-      "types": "./dist/fetch.d.ts"
+      "require": "./dist/fetch/index.js",
+      "import": "./dist/fetch/index.js",
+      "types": "./dist/fetch/index.d.ts"
     },
     "./node": {
-      "require": "./dist/node.js",
-      "import": "./dist/node.js",
-      "types": "./dist/node.d.ts"
+      "require": "./dist/node/index.js",
+      "import": "./dist/node/index.js",
+      "types": "./dist/node/index.d.ts"
+    },
+    ".": {
+      "require": "./dist/lib/index.js",
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
     }
   },
   "license": "MIT",

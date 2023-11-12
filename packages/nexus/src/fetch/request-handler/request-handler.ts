@@ -1,14 +1,14 @@
-import type { ChainRegistry } from "../chain/chain-registry";
-import type { Config } from "../config";
-import { matchPath } from "../routes/routes";
-import { JsonRPCRequestSchema } from "../rpc-endpoint/json-rpc-types";
-import type { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
-import type { Nexus } from "../nexus";
-import { RpcProxyContext } from "./rpc-proxy-context";
-import type { NexusPreResponse } from "./abstract-request-handler";
-import { AbstractRequestHandler } from "./abstract-request-handler";
+import type { ChainRegistry } from "../../lib/chain/chain-registry";
+import type { Config } from "../../lib/config";
+import { matchPath } from "../../lib/routes";
+import { JsonRPCRequestSchema } from "../../lib/rpc-endpoint/json-rpc-types";
+import type { RpcEndpointPoolFactory } from "../../lib/rpc-endpoint/rpc-endpoint-pool-factory";
+import type { Nexus } from "../../lib/nexus";
+import { RpcProxyContext } from "../../lib/request-handler/rpc-proxy-context";
+import type { NexusPreResponse } from "../../lib/request-handler/abstract-request-handler";
+import { AbstractRequestHandler } from "../../lib/request-handler/abstract-request-handler";
 
-export class FetchRequestHandler extends AbstractRequestHandler<Response> {
+export class RequestHandler extends AbstractRequestHandler<Response> {
   private readonly request: Request;
 
   constructor(params: {
@@ -22,7 +22,7 @@ export class FetchRequestHandler extends AbstractRequestHandler<Response> {
   }
 
   public static init(nexus: Nexus, request: Request) {
-    return new FetchRequestHandler({
+    return new RequestHandler({
       config: nexus.config,
       chainRegistry: nexus.chainRegistry,
       rpcEndpointPoolFactory: nexus.rpcEndpointPoolFactory,

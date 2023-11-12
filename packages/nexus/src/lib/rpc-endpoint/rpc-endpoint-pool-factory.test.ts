@@ -8,6 +8,8 @@ import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 
 describe("provider factory", () => {
   const factory = new RpcEndpointPoolFactory({
+    chainRegistry: defaultChainRegistry,
+    serviceProviderRegistry: defaultServiceProviderRegistry,
     config: new Config({
       providers: {
         alchemy: {
