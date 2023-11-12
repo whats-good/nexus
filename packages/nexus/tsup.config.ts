@@ -3,11 +3,13 @@ import { defineConfig } from "tsup";
 
 export default defineConfig((options: Options) => ({
   treeshake: true,
-  entry: ["./src/**/!(*.test).ts"],
+  entry: ["./src/entrypoints/fetch.ts", "./src/entrypoints/node.ts"],
   format: ["cjs"],
   dts: true,
-  minify: false,
+  minify: true,
   clean: true,
   sourcemap: true,
+  splitting: true,
+  outDir: "dist",
   ...options,
 }));

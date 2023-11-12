@@ -9,7 +9,7 @@ export interface NexusPreResponse {
   type: "json" | "text";
 }
 
-export abstract class RequestHandler<ResponseReturnType> {
+export abstract class AbstractRequestHandler<ResponseReturnType> {
   protected config: Config;
   protected chainRegistry: ChainRegistry;
   protected rpcEndpointPoolFactory: RpcEndpointPoolFactory;

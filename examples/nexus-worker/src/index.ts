@@ -1,4 +1,4 @@
-import { Nexus } from "@whatsgood/nexus";
+import { Nexus, RequestHandler } from "@whatsgood/nexus/fetch";
 
 // TODO: add config alerts to indicate that the key access is incomplete
 // TODO: add onboarding & UX. (setup admin access, login, etc)
@@ -12,6 +12,6 @@ export default {
     const nexus = new Nexus({
       env,
     });
-    return nexus.requestHandler.handleFetch(request);
+    return RequestHandler.init(nexus, request).handle();
   },
 };

@@ -19,9 +19,19 @@
     "type": "git",
     "url": "https://github.com/whats-good/nexus"
   },
+  "exports": {
+    "./fetch": {
+      "require": "./dist/fetch.js",
+      "import": "./dist/fetch.js",
+      "types": "./dist/fetch.d.ts"
+    },
+    "./node": {
+      "require": "./dist/node.js",
+      "import": "./dist/node.js",
+      "types": "./dist/node.d.ts"
+    }
+  },
   "license": "MIT",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.js",
   "scripts": {
     "dev": "echo 'Add dev script here'",
     "build": "tsup",

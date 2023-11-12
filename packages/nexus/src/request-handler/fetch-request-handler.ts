@@ -5,10 +5,10 @@ import { JsonRPCRequestSchema } from "../rpc-endpoint/json-rpc-types";
 import type { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
 import type { Nexus } from "../nexus";
 import { RpcProxyContext } from "./rpc-proxy-context";
-import type { NexusPreResponse } from "./request-handler";
-import { RequestHandler } from "./request-handler";
+import type { NexusPreResponse } from "./abstract-request-handler";
+import { AbstractRequestHandler } from "./abstract-request-handler";
 
-export class FetchRequestHandler extends RequestHandler<Response> {
+export class FetchRequestHandler extends AbstractRequestHandler<Response> {
   private readonly request: Request;
 
   constructor(params: {
