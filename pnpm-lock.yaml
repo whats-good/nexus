@@ -33,8 +33,6 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  docs: {}
-
   examples/nexus-worker:
     dependencies:
       '@whatsgood/nexus':
