@@ -1,17 +1,33 @@
+import type { ChainRegistry } from "../chain/chain-registry";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
-import { RequestHandler } from "../request-handler/request-handler";
+import { RpcEndpointPoolFactory } from "../rpc-endpoint/rpc-endpoint-pool-factory";
+import type { ServiceProviderRegistry } from "../service-provider/service-provider-registry";
+import {
+  defaultChainRegistry,
+  defaultServiceProviderRegistry,
+} from "../setup/data";
 
 export class Nexus {
-  private readonly config: Config;
+  public readonly config: Config;
+  public readonly serviceProviderRegistry: ServiceProviderRegistry;
+  public readonly chainRegistry: ChainRegistry;
+  public readonly rpcEndpointPoolFactory: RpcEndpointPoolFactory;
 
-  public readonly requestHandler: RequestHandler;
-
-  constructor(params: ConfigConstructorParams = {}) {
+  constructor(
+    params: ConfigConstructorParams & {
+      chainRegistry?: ChainRegistry;
+      serviceProviderRegistry?: ServiceProviderRegistry;
+    } = {}
+  ) {
     this.config = new Config(params);
-    this.requestHandler = new RequestHandler({
+    this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
+    this.serviceProviderRegistry =
+      params.serviceProviderRegistry ?? defaultServiceProviderRegistry;
+    this.rpcEndpointPoolFactory = new RpcEndpointPoolFactory({
+      chainRegistry: this.chainRegistry,
       config: this.config,
-      // TODO: make the chain registry part of the config
+      serviceProviderRegistry: this.serviceProviderRegistry,
     });
   }
 }
