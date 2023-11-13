@@ -6,6 +6,7 @@
     "lib": ["es2021"],
     "types": ["@cloudflare/workers-types"],
     "moduleResolution": "NodeNext",
-    "module": "NodeNext"
+    "module": "NodeNext",
+    "noEmit": true
   }
 }
