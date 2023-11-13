@@ -22,23 +22,23 @@
   "exports": {
     "./fetch": {
       "require": "./dist/fetch/index.js",
-      "import": "./dist/fetch/index.js",
+      "import": "./dist/fetch/index.mjs",
       "types": "./dist/fetch/index.d.ts"
     },
     "./node": {
       "require": "./dist/node/index.js",
-      "import": "./dist/node/index.js",
+      "import": "./dist/node/index.mjs",
       "types": "./dist/node/index.d.ts"
     },
     ".": {
       "require": "./dist/lib/index.js",
-      "import": "./dist/lib/index.js",
+      "import": "./dist/lib/index.mjs",
       "types": "./dist/lib/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "license": "MIT",
   "scripts": {
-    "dev": "echo 'Add dev script here'",
     "build": "tsup",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
