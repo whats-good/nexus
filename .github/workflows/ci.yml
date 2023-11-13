@@ -40,6 +40,9 @@ jobs:
       - name: Test
         run: pnpm test:unit
 
+      - name: Docs broken links
+        run: pnpm docs:broken-links
+
       - name: Slack Notification
         id: slack
         uses: slackapi/slack-github-action@v1.24.0

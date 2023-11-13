@@ -12,6 +12,7 @@
       // TODO: see if we can actually cache the deploys
     },
     "docs:dev": {},
+    "docs:broken-links": {},
     "test:unit": {},
     "test:unit:coverage": {
       "outputs": ["coverage/**"]

@@ -39,13 +39,13 @@ sh ./scripts/generate-docs-changelog-mdx.sh
 if [ "$FROZEN" = true ] ; then
     echo "Checking if the changelog has changed"
     if [[ $(git diff --name-only) == *"docs/changelog.mdx"* ]] ; then
-        echo "Error: The changelog has changed. Please run 'pnpm generate:docs' and commit the changes"
+        echo "Error: The changelog has changed. Please run 'pnpm docs:generate' and commit the changes"
         exit 1
     fi
 
     echo "Checking if the readme has changed"
     if [[ $(git diff --name-only) == *"packages/nexus/README.md"* ]] ; then
-        echo "Error: The README has changed. Please run 'pnpm generate:docs' and commit the changes"
+        echo "Error: The README has changed. Please run 'pnpm docs:generate' and commit the changes"
         exit 1
     fi
 fi
