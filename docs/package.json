@@ -7,6 +7,9 @@
   "scripts": {
     "docs:dev": "mintlify dev"
   },
+  "devDependencies": {
+    "mintlify": "4.0.49"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
