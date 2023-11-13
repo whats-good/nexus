@@ -33,7 +33,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  examples/nexus-worker:
+  examples/cloudflare-worker:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
