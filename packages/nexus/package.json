@@ -43,7 +43,7 @@
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
     "lint": "eslint src/",
-    "lint:fix": "pnpm run lint --fix",
+    "lint:fix": "pnpm lint lint --fix",
     "test:unit": "vitest run --config ./vitest.config.ts",
     "test:watch": "vitest --config ./vitest.config.ts",
     "test:unit:coverage": "pnpm test:unit --coverage"

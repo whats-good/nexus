@@ -1,15 +1,11 @@
 {
-  "extends": "tsconfig/base.json",
-  "exclude": ["dist", "build", "node_modules"],
+  "exclude": ["node_modules"],
   "include": ["./src/**/*.ts"],
   "compilerOptions": {
     "target": "es2021",
     "lib": ["es2021"],
     "types": ["@cloudflare/workers-types"],
-    "resolveJsonModule": true,
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "Node16",
-    "module": "Node16"
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext"
   }
 }

@@ -64,60 +64,10 @@ You can now `cd` into your new project directory and open it in your favorite ed
 }
 ```
 
-{/* TODO: add the new tsconfig to make the new exports work */}
-
 ```toml wrangler.toml
 name = "nexus-rpc-worker"
 main = "src/index.ts"
 compatibility_date = "2023-10-30"
-
-# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
-# Note: Use secrets to store sensitive data.
-# Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
-
-# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
-# Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
-# Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
-
-# Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.producers]]
-# binding = "MY_QUEUE"
-# queue = "my-queue"
-
-# Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.consumers]]
-# queue = "my-queue"
-
-# Bind another Worker service. Use this binding to call another Worker without network overhead.
-# Docs: https://developers.cloudflare.com/workers/platform/services
-# [[services]]
-# binding = "MY_SERVICE"
-# service = "my-service"
-
-# Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
-# Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
-# Docs: https://developers.cloudflare.com/workers/runtime-apis/durable-objects
-# [[durable_objects.bindings]]
-# name = "MY_DURABLE_OBJECT"
-# class_name = "MyDurableObject"
-
-# Durable Object migrations.
-# Docs: https://developers.cloudflare.com/workers/learning/using-durable-objects#configure-durable-object-classes-with-migrations
-# [[migrations]]
-# tag = "v1"
-# new_classes = ["MyDurableObject"]
 ```
 
 ```json tsconfig.json
@@ -289,23 +239,42 @@ yarn add @whatsgood/nexus
 
 </CodeGroup>
 
+## Update tsconfig
+
+<Snippet file="warning-module-resolution.mdx" />
+
+Open `tsconfig.json` and update the `compilerOptions` to include the following. Feel free to keep other options as you please, as long as they don't conflict with the ones below.
+
+```json tsconfig.json
+{
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"],
+  "compilerOptions": {
+    "target": "es2021",
+    "lib": ["es2021"],
+    "types": ["@cloudflare/workers-types"],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext"
+  }
+}
+```
+
 ## Write code
 
 Once you have installed Nexus, all you need to do is connect the `RpcProxyResponseHandler` from `@whatsgood/nexus` to your Worker's `fetch` handler.
 
 <Note>
-  Note how we're passing the `env` object from the `fetch` handler to the
-  `RpcProxyResponseHandler`'s `Config` constructor. This is required for Nexus
-  to be able to resolve `Cloudflare Worker` environment variables - as
-  `Cloudflare` does not expose these to the `process.env` object.
+  Note how we pass the `env` object from the `fetch` handler to `Nexus` constructor. This is required for Nexus to be able to resolve `Cloudflare Worker` environment variables - as
+  `Cloudflare` does not expose these to the `process.env` object. Also note how we import the `RequestHandler` from `@whatsgood/nexus/fetch`, and `Nexus` from `@whatsgood/nexus`. This is to ensure that we are using the correct `RequestHandler` instance for the `Cloudflare Worker` environment, as `Nexus` supports multiple runtimes, which are not always compatible with each other.   
 </Note>
 
-For the purposes of this tutorial, update the `"dev"` script in `package.json` from `"dev": wrangler dev` to `"dev": "wrangler dev --port 4005"`
+For the purposes of this tutorial, update the `"dev"` script in `package.json` from `"dev": wrangler dev` to `"dev": "wrangler dev --port 4005"`.  
 
 <CodeGroup>
 
 ```ts src/index.ts
 import { Nexus } from "@whatsgood/nexus";
+import { RequestHandler } from "@whatsgood/nexus/fetch";
 
 export default {
   async fetch(
@@ -315,10 +284,10 @@ export default {
     const nexus = new Nexus({
       env,
     });
-    return nexus.requestHandler.handleFetch(request);
+    const requestHandler = new RequestHandler(nexus, request);
+    return requestHandler.handle();
   },
 };
-
 ```
 
 ```json package.json
@@ -340,6 +309,26 @@ export default {
     "@whatsgood/nexus": "^0.1.8"
   }
 }
+```
+
+```json tsconfig.json
+{
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"],
+  "compilerOptions": {
+    "target": "es2021",
+    "lib": ["es2021"],
+    "types": ["@cloudflare/workers-types"],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext"
+  }
+}
+```
+
+```toml wrangler.toml
+name = "nexus-rpc-worker"
+main = "src/index.ts"
+compatibility_date = "2023-10-30"
 ```
 
 </CodeGroup>
@@ -421,7 +410,7 @@ npm run dev
 ```
 
 ```bash pnpm
-pnpm run dev
+pnpm dev
 ```
 
 ```bash yarn

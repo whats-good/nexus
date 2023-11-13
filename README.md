@@ -49,6 +49,7 @@ yarn add @whatsgood/nexus
 // Cloudflare worker example
 
 import { Nexus } from "@whatsgood/nexus";
+import { RequestHandler } from "@whatsgood/nexus/fetch";
 
 export default {
   async fetch(
@@ -58,10 +59,10 @@ export default {
     const nexus = new Nexus({
       env,
     });
-    return nexus.requestHandler.handleFetch(request);
+    const requestHandler = new RequestHandler(nexus, request);
+    return requestHandler.handle();
   },
 };
-
 
 ```
 
