@@ -11,10 +11,18 @@ export abstract class AbstractRequestHandler<ResponseReturnType> {
   constructor(protected readonly nexus: Nexus) {}
 
   public async handle(): Promise<ResponseReturnType> {
+    console.info("building context...");
     const context = await this.getContext();
+
+    console.info("context built. getting pre-response...");
     const preResponse = await this.getPreResponseFromContext(context);
 
-    return this.handlePreResponse(preResponse);
+    console.info("pre-response received. preparing final response...");
+    const response = this.handlePreResponse(preResponse);
+
+    console.info("final response prepared. returning response...");
+
+    return response;
   }
 
   protected async getPreResponseFromContext(
