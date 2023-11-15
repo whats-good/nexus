@@ -48,21 +48,22 @@ yarn add @whatsgood/nexus
 ```ts
 // Cloudflare worker example
 
-import { Config, RpcProxyResponseHandler } from "@whatsgood/nexus";
+import { Nexus } from "@whatsgood/nexus";
+import { RequestHandler } from "@whatsgood/nexus/fetch";
 
 export default {
   async fetch(
     request: Request,
     env: Record<string, string>
   ): Promise<Response> {
-    const config = new Config({
+    const nexus = new Nexus({
       env,
     });
-    const responseHandler = new RpcProxyResponseHandler({
-      config,
-    });
-    return responseHandler.handle(request);
+    const requestHandler = new RequestHandler(nexus, request);
+    return requestHandler.handle();
   },
 };
 
 ```
+
+<!-- TODO: remove the nexus/README.md from version control, and only generate it pre npm publish -->

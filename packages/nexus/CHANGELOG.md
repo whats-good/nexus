@@ -1,5 +1,17 @@
 # @whatsgood/nexus
 
+## 0.0.6
+
+### Patch Changes
+
+- 30094ad: multi-entrypoint builds added
+- 30094ad: introduced AbstractRequestHandler for cross-platform extensions
+- 578b242: tsup builds with code splitting
+- 30094ad: Introducing esm builds
+- 30094ad: Nexus class created as main library and config object
+- 30094ad: whatwg-node integrated for cross-platform support
+- 30094ad: Config object can now disable providers
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.1.15
+
+### Patch Changes
+
+- 30094ad: whatwg-node integrated for cross-platform support
+- Updated dependencies [30094ad]
+- Updated dependencies [30094ad]
+- Updated dependencies [578b242]
+- Updated dependencies [30094ad]
+- Updated dependencies [30094ad]
+- Updated dependencies [30094ad]
+- Updated dependencies [30094ad]
+  - @whatsgood/nexus@0.0.6
+
 ## 0.1.14
 
 ### Patch Changes
