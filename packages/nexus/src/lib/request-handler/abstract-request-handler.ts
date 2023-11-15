@@ -14,10 +14,24 @@ export abstract class AbstractRequestHandler<ResponseReturnType> {
     console.info("building context...");
     const context = await this.getContext();
 
-    console.info("context built. getting pre-response...");
+    console.info("context built...");
+
+    if (context.jsonRPCRequest) {
+      console.info("jsonRPCRequest received");
+      console.info(JSON.stringify(context.jsonRPCRequest, null, 2));
+    }
+
     const preResponse = await this.getPreResponseFromContext(context);
 
-    console.info("pre-response received. preparing final response...");
+    if (context.relayResult) {
+      console.info("relayResult received");
+      console.info(JSON.stringify(context.relayResult, null, 2));
+    }
+
+    console.info("preResponse received");
+    console.info(JSON.stringify(preResponse, null, 2));
+
+    console.info("preparing final response...");
     const response = this.handlePreResponse(preResponse);
 
     console.info("final response prepared. returning response...");

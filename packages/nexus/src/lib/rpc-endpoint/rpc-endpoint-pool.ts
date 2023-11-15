@@ -103,7 +103,7 @@ export class RpcEndpointPool {
 
       console.warn(
         `Provider: ${endpoint.provider.name} failed to relay request:`,
-        response
+        response.error
       );
 
       errors.push(response);
