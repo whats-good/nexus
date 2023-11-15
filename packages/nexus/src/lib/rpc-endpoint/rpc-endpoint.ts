@@ -54,6 +54,8 @@ export class RpcEndpoint {
       },
     });
 
+    console.info(`Attempting relay to Provider: ${this.provider.name}`);
+
     let relayResponse: Response;
 
     try {

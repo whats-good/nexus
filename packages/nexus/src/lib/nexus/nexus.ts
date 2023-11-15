@@ -10,18 +10,18 @@ import {
   defaultServiceProviderRegistry,
 } from "../setup/data";
 
+interface NexusConstructorParams extends ConfigConstructorParams {
+  chainRegistry?: ChainRegistry;
+  serviceProviderRegistry?: ServiceProviderRegistry;
+}
+
 export class Nexus {
   public readonly config: Config;
   public readonly serviceProviderRegistry: ServiceProviderRegistry;
   public readonly chainRegistry: ChainRegistry;
   public readonly rpcEndpointPoolFactory: RpcEndpointPoolFactory;
 
-  constructor(
-    params: ConfigConstructorParams & {
-      chainRegistry?: ChainRegistry;
-      serviceProviderRegistry?: ServiceProviderRegistry;
-    } = {}
-  ) {
+  private constructor(params: NexusConstructorParams = {}) {
     this.config = new Config(params);
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
     this.serviceProviderRegistry =
@@ -33,11 +33,16 @@ export class Nexus {
     });
   }
 
-  public static createServer() {
+  public static createServer(params: NexusConstructorParams = {}) {
+    // TODO: add process.env for node adapters
     return createServerAdapter(
       (request: Request, env: Record<string, string>) => {
         const nexus = new Nexus({
-          env,
+          env: {
+            ...params.env,
+            ...env,
+          },
+          providers: params.providers,
         });
         const requestHandler = new RequestHandler(nexus, request);
 

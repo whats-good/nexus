@@ -4,7 +4,22 @@ import { Nexus } from "@whatsgood/nexus";
 // TODO: add onboarding & UX. (setup admin access, login, etc)
 // TODO: add tests for the worker
 
-const server = Nexus.createServer();
+const server = Nexus.createServer({
+  providers: {
+    // alchemy: {
+    //   disabled: true,
+    // },
+    base: {
+      disabled: true,
+    },
+    infura: {
+      disabled: true,
+    },
+    ankr: {
+      disabled: true,
+    },
+  },
+});
 
 export default {
   async fetch(
