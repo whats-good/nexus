@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.0.7
+
+### Patch Changes
+
+- c31b125: fixed access control bug introduced in latest release
+
 ## 0.0.6
 
 ### Patch Changes
