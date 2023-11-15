@@ -1,21 +1,23 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
-import { Config } from "../config";
-import { handlers } from "../../tests/mock-server-handlers";
-import { RpcProxyResponseHandler } from "./rpc-proxy-response-handler";
+import { handlers } from "@test/mock-server-handlers";
+import { Config } from "@lib/config";
+import { Nexus } from "@lib/nexus";
+import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
-  const rpcProxyResponseHandler = new RpcProxyResponseHandler({ config });
+  const nexus = new Nexus(config);
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const response = await rpcProxyResponseHandler.handle(request);
+  const requestHandler = new RequestHandler(nexus, request);
+  const response = await requestHandler.handle();
   const data: unknown = await response.json();
 
   return data;
 };
 
-describe("rpc proxy response handler - status", () => {
+describe("fetch request handler - status", () => {
   describe("providers are up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

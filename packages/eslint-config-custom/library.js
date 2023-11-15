@@ -43,6 +43,10 @@ module.exports = {
     "no-console": "off",
     "no-only-tests/no-only-tests": "error",
     "import/no-default-export": "warn",
+    // TODO: this should actually be on, but it doesn't work when
+    // baseURL + paths are used in tsconfig.json. Find a way to
+    // make it work.
+    "import/no-extraneous-dependencies": "off",
     "no-restricted-syntax": [
       "error",
       {

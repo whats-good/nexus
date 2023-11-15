@@ -31,7 +31,7 @@ jobs:
         run: pnpm build
 
       - name: Docs
-        run: pnpm generate:docs --frozen
+        run: pnpm docs:generate --frozen
 
       - name: Slack Notification
         id: slack

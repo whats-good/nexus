@@ -4,7 +4,7 @@
   "description": "A simple TypeScript proxy server for any Ethereum JSON RPC compliant blockchain",
   "private": false,
   "access": "public",
-  "categories": [
+  "keywords": [
     "blockchain",
     "ethereum",
     "json-rpc",
@@ -19,21 +19,38 @@
     "type": "git",
     "url": "https://github.com/whats-good/nexus"
   },
+  "exports": {
+    "./fetch": {
+      "require": "./dist/fetch/index.js",
+      "import": "./dist/fetch/index.mjs",
+      "types": "./dist/fetch/index.d.ts"
+    },
+    "./node": {
+      "require": "./dist/node/index.js",
+      "import": "./dist/node/index.mjs",
+      "types": "./dist/node/index.d.ts"
+    },
+    ".": {
+      "require": "./dist/lib/index.js",
+      "import": "./dist/lib/index.mjs",
+      "types": "./dist/lib/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "MIT",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.js",
   "scripts": {
-    "dev": "echo 'Add dev script here'",
     "build": "tsup",
+    "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
     "lint": "eslint src/",
-    "lint:fix": "pnpm run lint --fix",
+    "lint:fix": "pnpm lint lint --fix",
     "test:unit": "vitest run --config ./vitest.config.ts",
     "test:watch": "vitest --config ./vitest.config.ts",
     "test:unit:coverage": "pnpm test:unit --coverage"
   },
   "dependencies": {
+    "@whatwg-node/server": "^0.9.16",
     "path-to-regexp": "^6.2.1",
     "vitest": "0.34.5",
     "zod": "^3.22.2"

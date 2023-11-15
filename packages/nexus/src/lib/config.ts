@@ -10,11 +10,12 @@ type RpcRelayRecoveryMode = z.infer<typeof RpxRelayRecoveryModeSchema>;
 
 interface ProviderConfig {
   key?: string;
+  disabled?: boolean;
 }
 
 type Env = Partial<Record<string, string>>;
 
-interface ConfigConstructorParams extends Partial<Config> {
+export interface ConfigConstructorParams extends Partial<Config> {
   // some runtimes don't support process.env (e.g. Cloudflare Workers)
   // so we allow them to pass in an object with the same keys as process.env
   env?: Env;
@@ -42,13 +43,19 @@ export class Config {
 
     this.providers = {
       ankr: {
+        ...params.providers?.ankr,
         key: params.providers?.ankr?.key || env.NEXUS_ANKR_KEY,
       },
       infura: {
+        ...params.providers?.infura,
         key: params.providers?.infura?.key || env.NEXUS_INFURA_KEY,
       },
       alchemy: {
+        ...params.providers?.alchemy,
         key: params.providers?.alchemy?.key || env.NEXUS_ALCHEMY_KEY,
+      },
+      base: {
+        ...params.providers?.base,
       },
     };
 

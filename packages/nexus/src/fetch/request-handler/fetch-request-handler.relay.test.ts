@@ -1,9 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
-import { Config } from "../config";
-import { handlers } from "../../tests/mock-server-handlers";
-import { retry } from "../../tests/utils";
-import { RpcProxyResponseHandler } from "./rpc-proxy-response-handler";
+import { handlers } from "@test/mock-server-handlers";
+import { retry } from "@test/utils";
+import { Config } from "@lib/config";
+import { Nexus } from "@lib/nexus";
+import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
   globalAccessKey: "some-key",
@@ -31,7 +32,7 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
-  const requestHandler = new RpcProxyResponseHandler({ config });
+  const nexus = new Nexus(config);
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
@@ -44,11 +45,12 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
+  const requestHandler = new RequestHandler(nexus, request);
 
-  return requestHandler.handle(request);
+  return requestHandler.handle();
 };
 
-describe("rpc proxy response handler - relay", () => {
+describe("fetch request handler - relay", () => {
   describe("all providers up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

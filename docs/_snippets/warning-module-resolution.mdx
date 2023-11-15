@@ -1,0 +1,3 @@
+<Warning>
+`@whatsgood/nexus` makes use of [Package entry points](https://nodejs.org/api/packages.html#package-entry-points), which causes `tsc` to throw errors when compiling your project. To fix this, you need to update the `compilerOptions` section of your `tsconfig.json` to set `"moduleResolution": "NodeNext"` and `"module": "NodeNext"` . Note that `Node16` will also work, but `NodeNext` is preferred.
+</Warning>

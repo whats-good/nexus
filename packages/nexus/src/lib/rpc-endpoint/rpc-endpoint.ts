@@ -1,21 +1,7 @@
-import { z } from "zod";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
-
-// TODO: migrate to the older whatsgood rpc-proxy schema validation,
-// based on the input params.
-const JsonRPCResponseSchema = z.object({
-  jsonrpc: z.literal("2.0"),
-  id: z.number(),
-  result: z.any(),
-});
-
-export const JsonRPCRequestSchema = z.object({
-  jsonrpc: z.literal("2.0"),
-  id: z.number(),
-  method: z.string(),
-  params: z.array(z.any()),
-});
+import type { JsonRPCRequest } from "./json-rpc-types";
+import { JsonRPCResponseSchema } from "./json-rpc-types";
 
 export class RpcEndpoint {
   public readonly url: string;
@@ -56,14 +42,19 @@ export class RpcEndpoint {
     }
   }
 
-  public async req(request: z.TypeOf<typeof JsonRPCRequestSchema>) {
+  public async relay(request: JsonRPCRequest) {
     // TODO: add caching for non-mutating requests
     // TODO: test that the payload from the client actually hits the relayed server
 
     const cleanedRequest = new Request(this.url, {
       body: JSON.stringify(request),
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+
+    console.info(`Attempting relay to Provider: ${this.provider.name}`);
 
     let relayResponse: Response;
 

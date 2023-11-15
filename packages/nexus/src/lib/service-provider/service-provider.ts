@@ -37,6 +37,12 @@ export class ServiceProvider {
       return undefined;
     }
 
+    if (config.providers[this.name]?.disabled) {
+      console.warn(`Service provider: ${this.name} is disabled`);
+
+      return undefined;
+    }
+
     if (chainSupport.type === "url-append-key") {
       const key = config.providers[this.name]?.key;
 

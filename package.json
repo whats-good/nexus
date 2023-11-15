@@ -14,7 +14,8 @@
     "ci:publish": "./scripts/publish.sh",
     "ci:version": "./scripts/version.sh",
     "test:unit": "turbo test:unit",
-    "generate:docs": "./scripts/docs.sh"
+    "docs:generate": "./scripts/docs.sh",
+    "docs:broken-links": "turbo docs:broken-links"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",

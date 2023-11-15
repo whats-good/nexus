@@ -1,4 +1,4 @@
-# @whatsgood/nexus-worker
+# @whatsgood/example-cloudflare-worker
 
 ## 0.1.14
 

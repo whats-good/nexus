@@ -1,5 +1,5 @@
 {
-  "name": "@whatsgood/nexus-worker",
+  "name": "@whatsgood/example-cloudflare-worker",
   "version": "0.1.14",
   "private": true,
   "author": {
@@ -8,16 +8,14 @@
   },
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --port 4005"
+    "dev": "wrangler dev --port 4005",
+    "build": "tsc"
   },
   "dependencies": {
     "@whatsgood/nexus": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230419.0",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*",
-    "tsup": "^6.1.3",
     "typescript": "5.2.2",
     "wrangler": "^3.0.0"
   }
