@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.0.8
+
+### Patch Changes
+
+- 7f6147c: logs now show the jsonrpc requests and json rpc responses
+
 ## 0.0.7
 
 ### Patch Changes
