@@ -1,3 +1,5 @@
+import { createServerAdapter } from "@whatwg-node/server";
+import { RequestHandler } from "src/fetch";
 import type { ChainRegistry } from "../chain/chain-registry";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
@@ -29,5 +31,18 @@ export class Nexus {
       config: this.config,
       serviceProviderRegistry: this.serviceProviderRegistry,
     });
+  }
+
+  public static createServer() {
+    return createServerAdapter(
+      (request: Request, env: Record<string, string>) => {
+        const nexus = new Nexus({
+          env,
+        });
+        const requestHandler = new RequestHandler(nexus, request);
+
+        return requestHandler.handle();
+      }
+    );
   }
 }

@@ -40,6 +40,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsup",
+    "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
     "lint": "eslint src/",
@@ -49,6 +50,8 @@
     "test:unit:coverage": "pnpm test:unit --coverage"
   },
   "dependencies": {
+    "@whatwg-node/server": "^0.9.16",
+    "@whatwg-node/fetch": "0.9.14",
     "path-to-regexp": "^6.2.1",
     "vitest": "0.34.5",
     "zod": "^3.22.2"
