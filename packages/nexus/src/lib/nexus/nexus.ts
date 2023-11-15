@@ -21,7 +21,7 @@ export class Nexus {
   public readonly chainRegistry: ChainRegistry;
   public readonly rpcEndpointPoolFactory: RpcEndpointPoolFactory;
 
-  private constructor(params: NexusConstructorParams = {}) {
+  constructor(params: NexusConstructorParams = {}) {
     this.config = new Config(params);
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
     this.serviceProviderRegistry =
