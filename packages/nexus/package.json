@@ -51,7 +51,6 @@
   },
   "dependencies": {
     "@whatwg-node/server": "^0.9.16",
-    "@whatwg-node/fetch": "0.9.14",
     "path-to-regexp": "^6.2.1",
     "vitest": "0.34.5",
     "zod": "^3.22.2"
