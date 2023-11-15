@@ -126,9 +126,14 @@ export class RpcProxyContext {
       };
     }
 
-    this.relayResult = await this.pool.relay(this.jsonRPCRequest);
+    const access = this.getAccess();
 
-    if (this.relayResult.type === "success") {
+    if (access === "authorized") {
+      this.relayResult = await this.pool.relay(this.jsonRPCRequest);
+    }
+
+    if (this.relayResult?.type === "success") {
+      // TODO: add a test for relay authorization issues, not just status
       return {
         status: 200, // TODO: should this be 200? or should it be adjusted based on the response?
         body: this.relayResult.data,
