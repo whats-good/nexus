@@ -17,7 +17,7 @@ export const requestHelper = async (endpoint: string, config: Config) => {
   return data;
 };
 
-describe("fetch request handler - status", () => {
+describe("request handler - status", () => {
   describe("providers are up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,

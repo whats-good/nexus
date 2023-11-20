@@ -50,7 +50,7 @@ const blockNumberRequestHelper = (config: Config) => {
   return requestHandler.handle();
 };
 
-describe("fetch request handler - relay", () => {
+describe("request handler - relay", () => {
   describe("all providers up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,
