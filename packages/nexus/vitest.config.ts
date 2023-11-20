@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     setupFiles: ["./test/setup.ts"],
     alias: {
-      "@lib": "./src/lib",
+      "@src": "./src",
       "@test": "./test",
     },
     silent: true,

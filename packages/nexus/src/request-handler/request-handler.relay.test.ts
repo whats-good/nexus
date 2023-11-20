@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
+import { Config } from "@src/config";
+import { Nexus } from "@src/nexus";
 import { handlers } from "@test/mock-server-handlers";
 import { retry } from "@test/utils";
-import { Config } from "@lib/config";
-import { Nexus } from "@lib/nexus";
 import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
@@ -50,7 +50,7 @@ const blockNumberRequestHelper = (config: Config) => {
   return requestHandler.handle();
 };
 
-describe("fetch request handler - relay", () => {
+describe("request handler - relay", () => {
   describe("all providers up", () => {
     const server = setupServer(
       handlers.alchemyReturnsBlockNumber,
