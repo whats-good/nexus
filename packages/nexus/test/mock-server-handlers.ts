@@ -3,8 +3,7 @@ import { rest } from "msw";
 const blockNumberMockResponse = {
   jsonrpc: "2.0",
   id: 1,
-  method: "eth_getBlockByNumber",
-  params: ["latest", false],
+  result: "0x4b7", // 1207
 };
 
 export const handlers = {

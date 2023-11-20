@@ -1,5 +1,5 @@
 import { createServerAdapter } from "@whatwg-node/server";
-import { RequestHandler } from "src/fetch";
+import { RequestHandler } from "../../fetch";
 import type { ChainRegistry } from "../chain/chain-registry";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
