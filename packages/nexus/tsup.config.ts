@@ -3,7 +3,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig((options: Options) => ({
   treeshake: true,
-  entry: ["./src/lib/index.ts"],
+  entry: ["./src/index.ts"],
   format: ["cjs", "esm"],
   dts: true,
   minify: false,

@@ -1,5 +1,5 @@
-import { matchPath } from "@lib/routes";
-import { JsonRPCRequestSchema } from "@lib/rpc-endpoint/json-rpc-types";
+import { matchPath } from "@src/routes";
+import { JsonRPCRequestSchema } from "@src/rpc-endpoint/json-rpc-types";
 import type { Nexus } from "../nexus";
 import { RpcProxyContext } from "./rpc-proxy-context";
 

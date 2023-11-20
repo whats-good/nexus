@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
+import { Config } from "@src/config";
+import { Nexus } from "@src/nexus";
 import { handlers } from "@test/mock-server-handlers";
-import { Config } from "@lib/config";
-import { Nexus } from "@lib/nexus";
 import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
