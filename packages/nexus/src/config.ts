@@ -16,7 +16,7 @@ type RpcRelayRecoveryMode = z.infer<typeof RpxRelayRecoveryModeSchema>;
 
 interface ProviderConfig {
   key?: string;
-  disabled?: boolean;
+  enabled?: boolean;
 }
 
 type Env = Partial<Record<string, string>>;
@@ -33,9 +33,6 @@ export class Config {
   // all client-side access to the rpc-proxy should include this key.
   public globalAccessKey?: string;
 
-  // all admin access to the rpc-proxy should include this key.
-  public adminAccessKey?: string;
-
   // sometimes a single provider may go down, so we allow you to configure
   // recovery by trying the next provider in the list.
   public recoveryMode: RpcRelayRecoveryMode;
@@ -44,7 +41,7 @@ export class Config {
 
   public readonly serviceProviderRegistry: ServiceProviderRegistry;
 
-  public readonly env?: Env;
+  public readonly env: Env;
 
   constructor(params: {
     env?: Env;
@@ -62,28 +59,11 @@ export class Config {
       Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
     );
 
-    this.providers = {
-      ankr: {
-        ...params.providers?.ankr,
-        key: params.providers?.ankr?.key || this.env.NEXUS_ANKR_KEY,
-      },
-      infura: {
-        ...params.providers?.infura,
-        key: params.providers?.infura?.key || this.env.NEXUS_INFURA_KEY,
-      },
-      alchemy: {
-        ...params.providers?.alchemy,
-        key: params.providers?.alchemy?.key || this.env.NEXUS_ALCHEMY_KEY,
-      },
-      base: {
-        ...params.providers?.base,
-      },
-    };
+    this.providers = params.providers || {};
 
     this.globalAccessKey =
       params.globalAccessKey || this.env.NEXUS_GLOBAL_ACCESS_KEY;
-    this.adminAccessKey =
-      params.adminAccessKey || this.env.NEXUS_ADMIN_ACCESS_KEY;
+    params.adminAccessKey || this.env.NEXUS_ADMIN_ACCESS_KEY;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
