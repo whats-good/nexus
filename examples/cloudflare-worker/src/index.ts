@@ -1,10 +1,12 @@
-import { Nexus } from "@whatsgood/nexus";
+import { NexusServer } from "@whatsgood/nexus";
 
 // TODO: add config alerts to indicate that the key access is incomplete
 // TODO: add onboarding & UX. (setup admin access, login, etc)
 // TODO: add tests for the worker
 
-const server = Nexus.createServer({
+type Env = Record<string, string>;
+
+const server = NexusServer.create<Env>({
   providers: {
     // alchemy: {
     //   disabled: true,
@@ -19,13 +21,7 @@ const server = Nexus.createServer({
       disabled: true,
     },
   },
+  env: (env) => env,
 });
 
-export default {
-  async fetch(
-    request: Request,
-    env: Record<string, string>
-  ): Promise<Response> {
-    return server.fetch(request, env);
-  },
-};
+export default { fetch: server.fetch };

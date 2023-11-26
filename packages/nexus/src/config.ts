@@ -1,4 +1,10 @@
 import { z } from "zod";
+import type { ChainRegistry } from "./chain/chain-registry";
+import type { ServiceProviderRegistry } from "./service-provider/service-provider-registry";
+import {
+  defaultChainRegistry,
+  defaultServiceProviderRegistry,
+} from "./setup/data";
 
 const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);
 // none -> don't try to recover and fail immediately
@@ -38,6 +44,10 @@ export class Config {
   // recovery by trying the next provider in the list.
   public recoveryMode: RpcRelayRecoveryMode;
 
+  public readonly chainRegistry: ChainRegistry;
+
+  public readonly serviceProviderRegistry: ServiceProviderRegistry;
+
   constructor(params: ConfigConstructorParams) {
     const env: Env = params.env || process.env;
 
@@ -63,6 +73,10 @@ export class Config {
       params.globalAccessKey || env.NEXUS_GLOBAL_ACCESS_KEY;
     this.adminAccessKey = params.adminAccessKey || env.NEXUS_ADMIN_ACCESS_KEY;
     this.recoveryMode = Config.recoveryModeFromConfig(params, env);
+
+    this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
+    this.serviceProviderRegistry =
+      params.serviceProviderRegistry ?? defaultServiceProviderRegistry;
   }
 
   private static recoveryModeFromConfig(

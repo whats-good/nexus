@@ -1,7 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "@src/config";
-import { Nexus } from "@src/nexus";
 import { handlers } from "@test/mock-server-handlers";
 import { retry } from "@test/utils";
 import { RequestHandler } from "./request-handler";
@@ -32,7 +31,6 @@ const configWithNoRecovery = new Config({
 });
 
 const blockNumberRequestHelper = (config: Config) => {
-  const nexus = new Nexus(config);
   const request = new Request(
     "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
     {
@@ -45,9 +43,9 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler(nexus, request);
+  const requestHandler = new RequestHandler();
 
-  return requestHandler.handle();
+  return requestHandler.handle(config, request);
 };
 
 describe("request handler - relay", () => {

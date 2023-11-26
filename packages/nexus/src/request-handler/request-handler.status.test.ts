@@ -1,17 +1,15 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "@src/config";
-import { Nexus } from "@src/nexus";
 import { handlers } from "@test/mock-server-handlers";
 import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
-  const nexus = new Nexus(config);
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const requestHandler = new RequestHandler(nexus, request);
-  const response = await requestHandler.handle();
+  const requestHandler = new RequestHandler();
+  const response = await requestHandler.handle(config, request);
   const data: unknown = await response.json();
 
   return data;

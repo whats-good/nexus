@@ -7,20 +7,18 @@ import { Config } from "../config";
 import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 
 describe("provider factory", () => {
-  const factory = new RpcEndpointPoolFactory({
-    chainRegistry: defaultChainRegistry,
-    serviceProviderRegistry: defaultServiceProviderRegistry,
-    config: new Config({
-      providers: {
-        alchemy: {
-          key: "key1",
-        },
-        infura: {
-          key: "key2",
-        },
+  const config = new Config({
+    providers: {
+      alchemy: {
+        key: "key1",
       },
-    }),
+      infura: {
+        key: "key2",
+      },
+    },
   });
+
+  const factory = new RpcEndpointPoolFactory(config);
 
   const chains = {
     ethMainnet: defaultChainRegistry.getChainByNames("ethereum", "mainnet"),
