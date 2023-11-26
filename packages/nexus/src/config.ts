@@ -21,11 +21,7 @@ interface ProviderConfig {
 
 type Env = Partial<Record<string, string>>;
 
-export interface ConfigConstructorParams extends Partial<Config> {
-  // some runtimes don't support process.env (e.g. Cloudflare Workers)
-  // so we allow them to pass in an object with the same keys as process.env
-  env?: Env;
-}
+export type ConfigConstructorParams = ConstructorParameters<typeof Config>[0];
 
 export class Config {
   // TODO: what if i want to use different keys for the same provider?
@@ -48,21 +44,36 @@ export class Config {
 
   public readonly serviceProviderRegistry: ServiceProviderRegistry;
 
-  constructor(params: ConfigConstructorParams) {
-    const env: Env = params.env || process.env;
+  public readonly env?: Env;
+
+  constructor(params: {
+    env?: Env;
+    providers?: Partial<Record<string, ProviderConfig>>;
+    globalAccessKey?: string;
+    adminAccessKey?: string;
+    recoveryMode?: RpcRelayRecoveryMode;
+    chainRegistry?: ChainRegistry;
+    serviceProviderRegistry?: ServiceProviderRegistry;
+  }) {
+    const envRaw: Env = params.env || process.env;
+
+    // only allow keys that start with NEXUS_ to be used
+    this.env = Object.fromEntries(
+      Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
+    );
 
     this.providers = {
       ankr: {
         ...params.providers?.ankr,
-        key: params.providers?.ankr?.key || env.NEXUS_ANKR_KEY,
+        key: params.providers?.ankr?.key || this.env.NEXUS_ANKR_KEY,
       },
       infura: {
         ...params.providers?.infura,
-        key: params.providers?.infura?.key || env.NEXUS_INFURA_KEY,
+        key: params.providers?.infura?.key || this.env.NEXUS_INFURA_KEY,
       },
       alchemy: {
         ...params.providers?.alchemy,
-        key: params.providers?.alchemy?.key || env.NEXUS_ALCHEMY_KEY,
+        key: params.providers?.alchemy?.key || this.env.NEXUS_ALCHEMY_KEY,
       },
       base: {
         ...params.providers?.base,
@@ -70,31 +81,13 @@ export class Config {
     };
 
     this.globalAccessKey =
-      params.globalAccessKey || env.NEXUS_GLOBAL_ACCESS_KEY;
-    this.adminAccessKey = params.adminAccessKey || env.NEXUS_ADMIN_ACCESS_KEY;
-    this.recoveryMode = Config.recoveryModeFromConfig(params, env);
+      params.globalAccessKey || this.env.NEXUS_GLOBAL_ACCESS_KEY;
+    this.adminAccessKey =
+      params.adminAccessKey || this.env.NEXUS_ADMIN_ACCESS_KEY;
+    this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
     this.serviceProviderRegistry =
       params.serviceProviderRegistry ?? defaultServiceProviderRegistry;
-  }
-
-  private static recoveryModeFromConfig(
-    params: ConfigConstructorParams,
-    env: Partial<Record<string, string>>
-  ): RpcRelayRecoveryMode {
-    if (params.recoveryMode) {
-      return params.recoveryMode;
-    }
-
-    const parsedRecoveryMode = RpxRelayRecoveryModeSchema.safeParse(
-      env.NEXUS_RECOVERY_MODE
-    );
-
-    if (parsedRecoveryMode.success) {
-      return parsedRecoveryMode.data;
-    }
-
-    return "cycle";
   }
 }
