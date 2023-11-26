@@ -23,52 +23,40 @@ export class RequestHandler {
       console.info(JSON.stringify(context.jsonRPCRequest, null, 2));
     }
 
-    const preResponse = await this.getPreResponseFromContext(context);
+    console.info("getting response from context...");
+    const response = await this.getResponseFromContext(context);
 
-    if (context.relayResult) {
-      console.info("relayResult received");
-      console.info(JSON.stringify(context.relayResult, null, 2));
-    }
-
-    console.info("preResponse received");
-    console.info(JSON.stringify(preResponse, null, 2));
-
-    console.info("preparing final response...");
-    const response = this.handlePreResponse(preResponse);
-
-    console.info("final response prepared. returning response...");
+    console.info("response received");
+    console.info(JSON.stringify(response, null, 2));
 
     return response;
   }
 
-  protected async getPreResponseFromContext(
+  private async getResponseFromContext(
     context: RpcProxyContext
-  ): Promise<NexusPreResponse> {
+  ): Promise<Response> {
     if (context.request.method === "GET") {
       const status = await context.getStatus();
 
-      return {
+      return Response.json(status, {
         status: status.code,
-        body: status,
-        type: "json",
-      };
+      });
     } else if (context.request.method === "POST") {
       const result = await context.relay();
 
-      return {
+      return Response.json(result.body, {
         status: result.status,
-        body: result.body,
-        type: "json",
-      };
+      });
     }
 
-    return {
-      status: 404,
-      body: {
-        message: "Not Found",
+    return Response.json(
+      {
+        message: "Method Not Allowed",
       },
-      type: "json",
-    };
+      {
+        status: 405,
+      }
+    );
   }
 
   private async parseJSONRpcRequest(request: Request) {
@@ -116,7 +104,7 @@ export class RequestHandler {
     } as const;
   }
 
-  protected async getContext(request: Request): Promise<RpcProxyContext> {
+  private async getContext(request: Request): Promise<RpcProxyContext> {
     const requestUrl = new URL(request.url);
 
     const route = matchPath(requestUrl.pathname);
@@ -139,24 +127,5 @@ export class RequestHandler {
           ? jsonRPCRequestParseResult.data
           : undefined,
     });
-  }
-
-  protected handlePreResponse(preResponse: NexusPreResponse) {
-    if (preResponse.type === "json") {
-      return Response.json(preResponse.body, {
-        status: preResponse.status,
-      });
-    }
-
-    console.error("Unsupported response type", preResponse);
-
-    return Response.json(
-      {
-        message: "Unsupported response type",
-      },
-      {
-        status: 500,
-      }
-    );
   }
 }
