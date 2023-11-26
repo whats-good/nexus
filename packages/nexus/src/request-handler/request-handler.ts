@@ -1,6 +1,6 @@
 import { matchPath } from "@src/routes";
 import { JsonRPCRequestSchema } from "@src/rpc-endpoint/json-rpc-types";
-import type { Nexus } from "../nexus";
+import type { Nexus } from "..";
 import { RpcProxyContext } from "./rpc-proxy-context";
 
 export interface NexusPreResponse {
@@ -10,11 +10,9 @@ export interface NexusPreResponse {
 }
 
 export class RequestHandler {
-  constructor(private readonly nexus: Nexus) {}
-
-  public async handle(request: Request): Promise<Response> {
+  public async handle(nexus: Nexus, request: Request): Promise<Response> {
     console.info("building context...");
-    const context = await this.getContext(request);
+    const context = await this.getContext(nexus, request);
 
     console.info("context built...");
 
@@ -104,22 +102,25 @@ export class RequestHandler {
     } as const;
   }
 
-  private async getContext(request: Request): Promise<RpcProxyContext> {
+  private async getContext(
+    nexus: Nexus,
+    request: Request
+  ): Promise<RpcProxyContext> {
     const requestUrl = new URL(request.url);
 
     const route = matchPath(requestUrl.pathname);
     const chain = route
-      ? this.nexus.chainRegistry.getByOptionalParams(route.params)
+      ? nexus.chainRegistry.getByOptionalParams(route.params)
       : undefined;
     const pool = chain
-      ? this.nexus.rpcEndpointPoolFactory.fromChain(chain)
+      ? nexus.rpcEndpointPoolFactory.fromChain(chain)
       : undefined;
 
     const jsonRPCRequestParseResult = await this.parseJSONRpcRequest(request);
 
     return new RpcProxyContext({
       pool,
-      config: this.nexus.config,
+      nexus,
       chain,
       request,
       jsonRPCRequest:

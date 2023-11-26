@@ -34,6 +34,8 @@ export class Nexus {
   }
 
   public static createServer(params: NexusConstructorParams = {}) {
+    const requestHandler = new RequestHandler();
+
     // TODO: add process.env for node adapters
     return createServerAdapter(
       (request: Request, env: Record<string, string>) => {
@@ -44,9 +46,8 @@ export class Nexus {
           },
           providers: params.providers,
         });
-        const requestHandler = new RequestHandler(nexus);
 
-        return requestHandler.handle(request);
+        return requestHandler.handle(nexus, request);
       }
     );
   }

@@ -1,7 +1,7 @@
-import type { Config } from "../config";
 import type { RpcEndpointPool } from "../rpc-endpoint/rpc-endpoint-pool";
 import type { Chain, ChainStatus } from "../chain/chain";
 import type { JsonRPCRequest } from "../rpc-endpoint/json-rpc-types";
+import type { Nexus } from "..";
 
 type Access = "unprotected" | "unauthorized" | "authorized";
 
@@ -32,7 +32,7 @@ export class RpcProxyContext {
   public readonly request: Request;
   public readonly jsonRPCRequest?: JsonRPCRequest;
   public relayResult?: Awaited<ReturnType<RpcEndpointPool["relay"]>>;
-  private readonly config: Config;
+  private readonly nexus: Nexus;
   public readonly path: string;
 
   private readonly clientAccessKey?: string;
@@ -40,12 +40,12 @@ export class RpcProxyContext {
   constructor(params: {
     pool?: RpcEndpointPool;
     chain?: Chain;
-    config: Config;
+    nexus: Nexus;
     request: Request;
     jsonRPCRequest?: JsonRPCRequest;
   }) {
     this.chain = params.chain;
-    this.config = params.config;
+    this.nexus = params.nexus;
     this.jsonRPCRequest = params.jsonRPCRequest;
     this.pool = params.pool;
     this.request = params.request;
@@ -94,9 +94,9 @@ export class RpcProxyContext {
   }
 
   private getAccess(): Access {
-    if (!this.config.globalAccessKey) {
+    if (!this.nexus.config.globalAccessKey) {
       return "unprotected";
-    } else if (this.clientAccessKey === this.config.globalAccessKey) {
+    } else if (this.clientAccessKey === this.nexus.config.globalAccessKey) {
       return "authorized";
     }
 

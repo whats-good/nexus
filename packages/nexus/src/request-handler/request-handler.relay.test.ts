@@ -45,9 +45,9 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler(nexus);
+  const requestHandler = new RequestHandler();
 
-  return requestHandler.handle(request);
+  return requestHandler.handle(nexus, request);
 };
 
 describe("request handler - relay", () => {
