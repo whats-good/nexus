@@ -75,7 +75,6 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
     },
   },
   ankr: {
-    envSecretKeyName: "NEXUS_ANKR_KEY",
     supportedChains: {
       1: {
         type: "url-append-key",
@@ -100,7 +99,6 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
     },
   },
   alchemy: {
-    envSecretKeyName: "NEXUS_ALCHEMY_KEY",
     supportedChains: {
       1: {
         type: "url-append-key",
@@ -143,7 +141,6 @@ export const serviceProviderDescriptors: ServiceProviderDescriptors = {
     },
   },
   infura: {
-    envSecretKeyName: "NEXUS_INFURA_KEY",
     supportedChains: {
       1: {
         type: "url-append-key",

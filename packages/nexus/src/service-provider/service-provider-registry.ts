@@ -8,7 +8,6 @@ type ChainSupportDescriptor = {
 
 interface ServiceProviderDescriptor {
   supportedChains: Record<number, ChainSupportDescriptor>;
-  envSecretKeyName?: string;
 }
 
 export type ServiceProviderDescriptors = Record<
@@ -72,7 +71,6 @@ export class ServiceProviderRegistry {
       serviceProviders[serviceProviderName] = new ServiceProvider({
         name: serviceProviderName,
         supportedChains,
-        envSecretKeyName: serviceProviderDescriptor.envSecretKeyName,
       });
     }
 

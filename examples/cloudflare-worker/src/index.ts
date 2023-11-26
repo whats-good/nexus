@@ -7,12 +7,8 @@ import { NexusServer } from "@whatsgood/nexus";
 type Env = Record<string, string>;
 
 const server = NexusServer.create<Env>({
-  env: (env) => env,
-  providers: {
-    alchemy: {
-      enabled: true,
-    },
-  },
+  env: (ctx) => ctx,
+  providers: ["alchemy"],
 });
 
 export default { fetch: server.fetch };

@@ -19,6 +19,12 @@ interface ProviderConfig {
   enabled?: boolean;
 }
 
+interface ProviderConfigWithName extends ProviderConfig {
+  name: string;
+}
+
+type ProviderConfigParam = string | ProviderConfigWithName;
+
 type Env = Partial<Record<string, string>>;
 
 export type ConfigConstructorParams = ConstructorParameters<typeof Config>[0];
@@ -28,7 +34,7 @@ export class Config {
   // should i allow my users to specify a key per chain?
   // or should i force them to create a separate rpc-proxy if they want to do that?
 
-  public providers: Partial<Record<string, ProviderConfig>>;
+  public providers: Partial<Record<string, ProviderConfig>> = {};
 
   // all client-side access to the rpc-proxy should include this key.
   public globalAccessKey?: string;
@@ -45,9 +51,8 @@ export class Config {
 
   constructor(params: {
     env?: Env;
-    providers?: Partial<Record<string, ProviderConfig>>;
+    providers?: [ProviderConfigParam, ...ProviderConfigParam[]];
     globalAccessKey?: string;
-    adminAccessKey?: string;
     recoveryMode?: RpcRelayRecoveryMode;
     chainRegistry?: ChainRegistry;
     serviceProviderRegistry?: ServiceProviderRegistry;
@@ -59,11 +64,18 @@ export class Config {
       Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
     );
 
-    this.providers = params.providers || {};
+    params.providers?.forEach((provider) => {
+      if (typeof provider === "string") {
+        this.providers[provider] = {
+          enabled: true,
+        };
+      } else {
+        this.providers[provider.name] = provider;
+      }
+    });
 
     this.globalAccessKey =
       params.globalAccessKey || this.env.NEXUS_GLOBAL_ACCESS_KEY;
-    params.adminAccessKey || this.env.NEXUS_ADMIN_ACCESS_KEY;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.chainRegistry = params.chainRegistry ?? defaultChainRegistry;
