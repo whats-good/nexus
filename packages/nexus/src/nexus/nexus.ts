@@ -10,9 +10,42 @@ import {
   defaultServiceProviderRegistry,
 } from "../setup/data";
 
+type ServerContext<T = any> = Record<string, T>;
+type EmptyServerContext = Record<string, never>;
+
 interface NexusConstructorParams extends ConfigConstructorParams {
   chainRegistry?: ChainRegistry;
   serviceProviderRegistry?: ServiceProviderRegistry;
+}
+
+type ServerContextConfigMap<
+  TServerContext extends ServerContext = EmptyServerContext,
+> = {
+  [K in keyof ConfigConstructorParams]:
+    | ((ctx: TServerContext) => ConfigConstructorParams[K])
+    // TODO: make this promisable
+    | ConfigConstructorParams[K];
+};
+
+export function createNexus<
+  TServerContext extends ServerContext = EmptyServerContext,
+>(options: ServerContextConfigMap<TServerContext>) {
+  const requestHandler = new RequestHandler();
+
+  // TODO: add process.env for node adapters
+  return createServerAdapter<TServerContext>(
+    (request: Request, serverContext: TServerContext) => {
+      const nexusParams = Object.fromEntries(
+        Object.entries(options).map(([key, value]) => [
+          key,
+          typeof value === "function" ? value(serverContext) : value,
+        ])
+      );
+      const nexus = new Nexus(nexusParams);
+
+      return requestHandler.handle(nexus, request);
+    }
+  );
 }
 
 export class Nexus {
@@ -31,24 +64,5 @@ export class Nexus {
       config: this.config,
       serviceProviderRegistry: this.serviceProviderRegistry,
     });
-  }
-
-  public static createServer(params: NexusConstructorParams = {}) {
-    const requestHandler = new RequestHandler();
-
-    // TODO: add process.env for node adapters
-    return createServerAdapter(
-      (request: Request, env: Record<string, string>) => {
-        const nexus = new Nexus({
-          env: {
-            ...params.env,
-            ...env,
-          },
-          providers: params.providers,
-        });
-
-        return requestHandler.handle(nexus, request);
-      }
-    );
   }
 }
