@@ -1,0 +1,19 @@
+{
+  "name": "@whatsgood/example-nodejs-standalone-server",
+  "version": "0.0.1",
+  "private": true,
+  "author": {
+    "name": "Kerem Kazan",
+    "email": "kerem@whatsgood.dog"
+  },
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@whatsgood/nexus": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.2.2"
+  }
+}

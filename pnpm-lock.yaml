@@ -55,6 +55,16 @@ importers:
         specifier: ^3.0.0
         version: 3.1.0
 
+  examples/nodejs-standalone-server:
+    dependencies:
+      '@whatsgood/nexus':
+        specifier: workspace:*
+        version: link:../../packages/nexus
+    devDependencies:
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+
   packages/eslint-config-custom:
     devDependencies:
       '@vercel/style-guide':

@@ -37,3 +37,7 @@ dist/
 
 # cloudflare
 .dev.vars
+
+# env secrets
+.envrc
+.env

@@ -1,0 +1,12 @@
+{
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts"],
+  "compilerOptions": {
+    "target": "es2021",
+    "lib": ["es2021"],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "noEmit": true,
+    "skipLibCheck": true
+  }
+}
