@@ -10,14 +10,11 @@ export interface NexusPreResponse {
 }
 
 export class RequestHandler {
-  constructor(
-    private readonly nexus: Nexus,
-    private readonly request: Request
-  ) {}
+  constructor(private readonly nexus: Nexus) {}
 
-  public async handle(): Promise<Response> {
+  public async handle(request: Request): Promise<Response> {
     console.info("building context...");
-    const context = await this.getContext();
+    const context = await this.getContext(request);
 
     console.info("context built...");
 
@@ -47,7 +44,7 @@ export class RequestHandler {
   protected async getPreResponseFromContext(
     context: RpcProxyContext
   ): Promise<NexusPreResponse> {
-    if (context.httpMethod === "GET") {
+    if (context.request.method === "GET") {
       const status = await context.getStatus();
 
       return {
@@ -55,7 +52,7 @@ export class RequestHandler {
         body: status,
         type: "json",
       };
-    } else if (context.httpMethod === "POST") {
+    } else if (context.request.method === "POST") {
       const result = await context.relay();
 
       return {
@@ -74,17 +71,17 @@ export class RequestHandler {
     };
   }
 
-  private async parseJSONRpcRequest() {
+  private async parseJSONRpcRequest(request: Request) {
     // we clean the request to remove any non-required pieces
     let payload: unknown;
 
     try {
-      payload = await this.request.json();
+      payload = await request.json();
     } catch (error) {
       console.error(
         JSON.stringify(
           {
-            request: this.request,
+            request,
             error,
           },
           null,
@@ -94,7 +91,7 @@ export class RequestHandler {
 
       return {
         type: "invalid-json-request",
-        request: this.request,
+        request,
         error,
       } as const;
     }
@@ -106,7 +103,7 @@ export class RequestHandler {
 
       return {
         type: "invalid-json-rpc-request",
-        request: this.request,
+        request,
         payload,
         error: parsedPayload.error,
       } as const;
@@ -114,14 +111,13 @@ export class RequestHandler {
 
     return {
       type: "success",
-      request: this.request,
+      request,
       data: parsedPayload.data,
     } as const;
   }
 
-  protected async getContext(): Promise<RpcProxyContext> {
-    const requestUrl = new URL(this.request.url);
-    const requestPath = requestUrl.pathname;
+  protected async getContext(request: Request): Promise<RpcProxyContext> {
+    const requestUrl = new URL(request.url);
 
     const route = matchPath(requestUrl.pathname);
     const chain = route
@@ -131,17 +127,13 @@ export class RequestHandler {
       ? this.nexus.rpcEndpointPoolFactory.fromChain(chain)
       : undefined;
 
-    const jsonRPCRequestParseResult = await this.parseJSONRpcRequest();
-
-    const clientAccessKey = requestUrl.searchParams.get("key") || undefined;
+    const jsonRPCRequestParseResult = await this.parseJSONRpcRequest(request);
 
     return new RpcProxyContext({
       pool,
       config: this.nexus.config,
       chain,
-      path: requestPath,
-      clientAccessKey,
-      httpMethod: this.request.method,
+      request,
       jsonRPCRequest:
         jsonRPCRequestParseResult.type === "success"
           ? jsonRPCRequestParseResult.data

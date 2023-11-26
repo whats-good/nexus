@@ -29,7 +29,7 @@ type Status = SuccessStatus | ErrorStatus;
 export class RpcProxyContext {
   public readonly chain?: Chain;
   public readonly pool?: RpcEndpointPool;
-  public readonly httpMethod?: string;
+  public readonly request: Request;
   public readonly jsonRPCRequest?: JsonRPCRequest;
   public relayResult?: Awaited<ReturnType<RpcEndpointPool["relay"]>>;
   private readonly config: Config;
@@ -41,18 +41,19 @@ export class RpcProxyContext {
     pool?: RpcEndpointPool;
     chain?: Chain;
     config: Config;
+    request: Request;
     jsonRPCRequest?: JsonRPCRequest;
-    path: string;
-    clientAccessKey?: string;
-    httpMethod?: string;
   }) {
     this.chain = params.chain;
     this.config = params.config;
     this.jsonRPCRequest = params.jsonRPCRequest;
     this.pool = params.pool;
-    this.path = params.path;
-    this.clientAccessKey = params.clientAccessKey;
-    this.httpMethod = params.httpMethod;
+    this.request = params.request;
+
+    const requestUrl = new URL(params.request.url);
+
+    this.path = requestUrl.pathname;
+    this.clientAccessKey = requestUrl.searchParams.get("key") || undefined;
   }
 
   private buildStatus(params: {

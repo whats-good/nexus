@@ -44,9 +44,9 @@ export class Nexus {
           },
           providers: params.providers,
         });
-        const requestHandler = new RequestHandler(nexus, request);
+        const requestHandler = new RequestHandler(nexus);
 
-        return requestHandler.handle();
+        return requestHandler.handle(request);
       }
     );
   }
