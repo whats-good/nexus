@@ -51,7 +51,7 @@ export class Config {
 
   constructor(params: {
     env?: Env;
-    providers?: [ProviderConfigParam, ...ProviderConfigParam[]];
+    providers?: ProviderConfigParam[];
     globalAccessKey?: string;
     recoveryMode?: RpcRelayRecoveryMode;
     chainRegistry?: ChainRegistry;
