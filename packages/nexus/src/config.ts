@@ -16,7 +16,7 @@ type RpcRelayRecoveryMode = z.infer<typeof RpxRelayRecoveryModeSchema>;
 
 interface ProviderConfig {
   key?: string;
-  enabled?: boolean;
+  disabled?: boolean;
 }
 
 interface ProviderConfigWithName extends ProviderConfig {
@@ -67,7 +67,7 @@ export class Config {
     params.providers?.forEach((provider) => {
       if (typeof provider === "string") {
         this.providers[provider] = {
-          enabled: true,
+          disabled: false,
         };
       } else {
         this.providers[provider.name] = provider;

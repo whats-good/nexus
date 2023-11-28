@@ -8,14 +8,16 @@ import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 
 describe("provider factory", () => {
   const config = new Config({
-    providers: {
-      alchemy: {
-        key: "key1",
+    providers: [
+      {
+        name: "alchemy",
+        key: "key-1",
       },
-      infura: {
-        key: "key2",
+      {
+        name: "infura",
+        key: "key-2",
       },
-    },
+    ],
   });
 
   const factory = new RpcEndpointPoolFactory(config);

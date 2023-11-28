@@ -7,17 +7,20 @@ import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
   globalAccessKey: "some-key",
-  providers: {
-    alchemy: {
+  providers: [
+    {
+      name: "alchemy",
       key: "key-1",
     },
-    infura: {
+    {
+      name: "infura",
       key: "key-2",
     },
-    ankr: {
+    {
+      name: "ankr",
       key: "key-3",
     },
-  },
+  ],
 };
 
 const configWithCycleRecovery = new Config({

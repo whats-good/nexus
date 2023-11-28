@@ -38,27 +38,18 @@ export class ServiceProvider {
   }
 
   private getEnvSecretKeyName(): string {
-    return `NEXUS_${toUpperSnakeCase(this.name)}_KEY`;
-  }
-
-  private getEnvSecretEnabledName(): string {
-    return `NEXUS_${toUpperSnakeCase(this.name)}_ENABLED`;
+    // TODO: update env vars and documentation to reflect this change
+    return `NEXUS_PROVIDER_${toUpperSnakeCase(this.name)}_KEY`;
   }
 
   private isEnabled(config: Config): boolean {
-    const directEnabled = config.providers[this.name]?.enabled;
+    const providerConfig = config.providers[this.name];
 
-    if (typeof directEnabled === "boolean") {
-      return directEnabled;
+    if (typeof providerConfig === "undefined") {
+      return true;
     }
 
-    const envEnabled = config.env[this.getEnvSecretEnabledName()];
-
-    if (typeof envEnabled === "boolean") {
-      return envEnabled;
-    }
-
-    return false;
+    return !providerConfig.disabled;
   }
 
   private getKey(config: Config): string | undefined {
