@@ -1,4 +1,5 @@
 import { toUpperSnakeCase } from "@src/utils";
+import type { Registry } from "@src/registry";
 import type { Config } from "../config";
 import { RpcEndpoint } from "../rpc-endpoint/rpc-endpoint";
 import type { Chain } from "../chain/chain";
@@ -18,19 +19,26 @@ export type EndpointConstructor =
   | PureUrlChainEndpointConstructor;
 
 export type ChainSupport = EndpointConstructor & {
-  isProduction: boolean;
+  // TODO: add isProduction
+  // isProduction: boolean;
 };
 
 export class ServiceProvider {
-  public readonly name: string;
-  public readonly supportedChains: Partial<Record<number, ChainSupport>>;
+  private readonly supportedChains = new Map<number, ChainSupport>();
+  private constructor(public readonly name: string) {}
 
-  constructor(params: {
-    name: string;
-    supportedChains: Partial<Record<number, ChainSupport>>;
-  }) {
-    this.name = params.name;
-    this.supportedChains = params.supportedChains;
+  public static init(registry: Registry, name: string): ServiceProvider {
+    const existingServiceProvider = registry.getServiceProvider(name);
+    const serviceProvider =
+      existingServiceProvider || new ServiceProvider(name);
+
+    registry.registerServiceProvider(serviceProvider);
+
+    return serviceProvider;
+  }
+
+  public addChainSupport(chainId: number, support: ChainSupport) {
+    this.supportedChains.set(chainId, support);
   }
 
   public isConfiguredForChain(chain: Chain, config: Config): boolean {
@@ -60,7 +68,7 @@ export class ServiceProvider {
   }
 
   public getRpcEndpoint(chain: Chain, config: Config): RpcEndpoint | undefined {
-    const chainSupport = this.supportedChains[chain.chainId];
+    const chainSupport = this.supportedChains.get(chain.chainId);
 
     if (!chainSupport) {
       return undefined;

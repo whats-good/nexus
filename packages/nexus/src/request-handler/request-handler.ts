@@ -115,7 +115,7 @@ export class RequestHandler {
     const route = matchPath(requestUrl.pathname);
     const rpcEndpointPoolFactory = new RpcEndpointPoolFactory(config);
     const chain = route
-      ? config.chainRegistry.getByOptionalParams(route.params)
+      ? config.registry.getChainByOptionalParams(route.params)
       : undefined;
     const pool = chain ? rpcEndpointPoolFactory.fromChain(chain) : undefined;
 
