@@ -1,5 +1,19 @@
 # @whatsgood/nexus
 
+## 0.1.0
+
+### Minor Changes
+
+- 3503f54: created a new unified and reusable registry class, along with builders
+- 3503f54: streamlined env vars for provider keys
+- 3503f54: simplified provider configuration via string arrays
+- f95431e: Universal server adapter created. All integrations will now use the @whatwg-node/server adapters.
+
+### Patch Changes
+
+- 3503f54: improved logging and error reporting
+- fd24420: Reverted back to single-entrypoint module, in alignment with whatwg-node/server
+
 ## 0.0.8
 
 ### Patch Changes
