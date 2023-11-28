@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defaultRegistry } from "./setup/data";
+import { defaultRegistry } from "./registry/default-registry";
 import type { Registry } from "./registry";
 
 const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultRegistry } from "../setup/data";
+import { defaultRegistry } from "../registry/default-registry";
 import { Config } from "../config";
 import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 

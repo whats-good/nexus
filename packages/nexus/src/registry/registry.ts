@@ -1,6 +1,6 @@
-import { Network, Chain } from "./chain/chain";
-import type { ChainSupport } from "./service-provider/service-provider";
-import { ServiceProvider } from "./service-provider/service-provider";
+import { Network, Chain } from "@src/chain";
+import type { ChainSupport } from "@src/service-provider";
+import { ServiceProvider } from "@src/service-provider";
 
 type RecursiveChainFn = (
   chainId: number,
