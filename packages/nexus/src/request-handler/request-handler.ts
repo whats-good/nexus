@@ -25,8 +25,7 @@ export class RequestHandler {
     console.info("getting response from context...");
     const response = await this.getResponseFromContext(context);
 
-    console.info("response received");
-    console.info(JSON.stringify(response, null, 2));
+    console.info("response received. returning...");
 
     return response;
   }
@@ -37,11 +36,15 @@ export class RequestHandler {
     if (context.request.method === "GET") {
       const status = await context.getStatus();
 
+      console.info("status", JSON.stringify(status, null, 2));
+
       return Response.json(status, {
         status: status.code,
       });
     } else if (context.request.method === "POST") {
       const result = await context.relay();
+
+      console.info("result", JSON.stringify(result, null, 2));
 
       return Response.json(result.body, {
         status: result.status,
@@ -112,7 +115,7 @@ export class RequestHandler {
     const route = matchPath(requestUrl.pathname);
     const rpcEndpointPoolFactory = new RpcEndpointPoolFactory(config);
     const chain = route
-      ? config.chainRegistry.getByOptionalParams(route.params)
+      ? config.registry.getChainByOptionalParams(route.params)
       : undefined;
     const pool = chain ? rpcEndpointPoolFactory.fromChain(chain) : undefined;
 

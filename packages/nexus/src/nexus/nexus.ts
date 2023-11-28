@@ -40,7 +40,7 @@ export class NexusServer<TServerContext = EmptyServerContext>
   };
 
   public static create<TServerContext = EmptyServerContext>(
-    options: ServerContextConfigMap<TServerContext> = {}
+    options: ServerContextConfigMap<TServerContext>
   ) {
     const server = new NexusServer(options);
 

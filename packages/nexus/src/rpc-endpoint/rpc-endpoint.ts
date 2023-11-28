@@ -65,16 +65,8 @@ export class RpcEndpoint {
 
       return {
         type: "fetch-failed",
-        request: cleanedRequest,
+        request,
         error,
-      } as const;
-    }
-
-    if (!relayResponse.ok) {
-      return {
-        type: "request-failed",
-        request: cleanedRequest,
-        result: relayResponse,
       } as const;
     }
 
@@ -90,9 +82,17 @@ export class RpcEndpoint {
 
       return {
         type: "invalid-json",
-        request: cleanedRequest,
-        result: relayResponse,
+        request,
+        // relayResponse TODO: should this be relayResponse.text()?
         error,
+      } as const;
+    }
+
+    if (!relayResponse.ok) {
+      return {
+        type: "request-failed",
+        request,
+        relayResponse: json,
       } as const;
     }
 
@@ -101,16 +101,15 @@ export class RpcEndpoint {
     if (!parsedResult.success) {
       return {
         type: "invalid-json-rpc-response",
-        request: cleanedRequest,
-        result: relayResponse,
-        json,
+        request,
+        relayResponse: json,
       } as const;
     }
 
     return {
       type: "success",
-      request: cleanedRequest,
-      data: parsedResult.data,
+      request,
+      result: parsedResult.data,
     } as const;
   }
 }

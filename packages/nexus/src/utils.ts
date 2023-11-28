@@ -9,3 +9,12 @@ export const shuffle = <T>(arr: T[]): T[] => {
 
   return newArr;
 };
+
+export const toSnakeCase = (str: string): string => {
+  // ignore all letters that are preceeded by any number of underscores
+  return str.replace(/(?<!_)[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+};
+
+export const toUpperSnakeCase = (str: string): string => {
+  return toSnakeCase(str).toUpperCase();
+};

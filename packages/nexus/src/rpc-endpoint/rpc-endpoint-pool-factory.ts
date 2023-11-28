@@ -8,7 +8,7 @@ export class RpcEndpointPoolFactory {
 
   public fromChain(chain: Chain): RpcEndpointPool {
     const eligibleServiceProviders =
-      this.config.serviceProviderRegistry.findManyByChain(chain);
+      this.config.registry.getServiceProvidersSupportingChain(chain);
 
     const configuredServiceProviders = eligibleServiceProviders.filter((sp) =>
       sp.isConfiguredForChain(chain, this.config)

@@ -41,11 +41,12 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet",
         new Config({
-          providers: {
-            alchemy: {
+          providers: [
+            {
+              name: "alchemy",
               key: "key-1",
             },
-          },
+          ],
         })
       );
 
@@ -66,11 +67,12 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet?key=some-key",
         new Config({
-          providers: {
-            alchemy: {
+          providers: [
+            {
+              name: "alchemy",
               key: "key-1",
             },
-          },
+          ],
           globalAccessKey: "some-key",
         })
       );
@@ -92,11 +94,12 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet",
         new Config({
-          providers: {
-            alchemy: {
+          providers: [
+            {
+              name: "alchemy",
               key: "key-1",
             },
-          },
+          ],
           globalAccessKey: "some-key",
         })
       );
@@ -193,11 +196,12 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet?key=some-key",
         new Config({
-          providers: {
-            alchemy: {
+          providers: [
+            {
+              name: "alchemy",
               key: "key-1",
             },
-          },
+          ],
           globalAccessKey: "some-key",
         })
       );

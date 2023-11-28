@@ -137,7 +137,7 @@ export class RpcProxyContext {
       // TODO: add a test for relay authorization issues, not just status
       return {
         status: 200, // TODO: should this be 200? or should it be adjusted based on the response?
-        body: this.relayResult.data,
+        body: this.relayResult.result,
       };
     }
 
@@ -161,7 +161,7 @@ export class RpcProxyContext {
       // TODO: communicate the provider failures to the client
       console.error(
         "All providers failed to relay the request",
-        this.relayResult.errors
+        JSON.stringify(this.relayResult.errors, null, 2)
       );
 
       return this.buildStatus({
