@@ -1,8 +1,8 @@
 import { Registry } from "./registry";
 
-export const defaultRegistry = new Registry();
+export const globalSingletonRegistry = new Registry();
 
-defaultRegistry
+globalSingletonRegistry
   .network("ethereum", ["eth"])
   .chain(1, "mainnet")
   .chain(4, "rinkeby")
@@ -19,7 +19,7 @@ defaultRegistry
   .network("local", ["hardhat", "foundry"])
   .chain(31337, "local");
 
-defaultRegistry
+globalSingletonRegistry
   .provider("alchemy")
   .support(1, {
     baseURL: "https://eth-mainnet.alchemyapi.io/v2",

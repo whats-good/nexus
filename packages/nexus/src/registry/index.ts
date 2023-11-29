@@ -1,2 +1,2 @@
 export * from "./registry";
-export * from "./default-registry";
+export * from "./global-singleton-registry";

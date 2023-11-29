@@ -79,7 +79,7 @@ export class RpcProxyContext {
         ...baseStatus,
         success: params.success,
         access,
-        chain: this.chain.status,
+        chain: this.chain.getStatus(this.config),
       };
     }
 
@@ -89,7 +89,7 @@ export class RpcProxyContext {
       ...baseStatus,
       success: false,
       access,
-      chain: this.chain?.status ?? null,
+      chain: this.chain?.getStatus(this.config) ?? null,
     };
   }
 
@@ -112,6 +112,15 @@ export class RpcProxyContext {
         status: 400,
         body: {
           message: "Invalid Json RPC Request",
+        },
+      };
+    }
+
+    if (!this.chain?.getStatus(this.config).isEnabled) {
+      return {
+        status: 400,
+        body: {
+          message: "Chain is disabled.",
         },
       };
     }
@@ -168,6 +177,14 @@ export class RpcProxyContext {
         message: "All providers failed.",
         success: false,
         code: 500,
+      });
+    }
+
+    if (this.chain?.getStatus(this.config).isEnabled === false) {
+      return this.buildStatus({
+        message: "Chain is disabled.",
+        success: false,
+        code: 400,
       });
     }
 

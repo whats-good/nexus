@@ -26,11 +26,13 @@ const sharedConfig = {
 const configWithCycleRecovery = new Config({
   ...sharedConfig,
   recoveryMode: "cycle",
+  chains: [1],
 });
 
 const configWithNoRecovery = new Config({
   ...sharedConfig,
   recoveryMode: "none",
+  chains: [1],
 });
 
 const blockNumberRequestHelper = (config: Config) => {
