@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { defaultRegistry } from "./registry/default-registry";
 import type { Registry } from "./registry";
+import { toUpperSnakeCase } from "./utils";
 
 const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);
 // none -> don't try to recover and fail immediately
@@ -12,14 +13,16 @@ type RpcRelayRecoveryMode = z.infer<typeof RpxRelayRecoveryModeSchema>;
 
 interface ProviderConfig {
   key?: string;
-  disabled?: boolean;
+  enabled: boolean;
 }
 
-interface ProviderConfigWithName extends ProviderConfig {
-  name: string;
-}
-
-type ProviderConfigParam = string | ProviderConfigWithName;
+type ProviderConfigParam =
+  | string
+  | {
+      name: string;
+      key?: string;
+      enabled?: boolean;
+    };
 
 type Env = Partial<Record<string, string>>;
 
@@ -60,10 +63,14 @@ export class Config {
     params.providers?.forEach((provider) => {
       if (typeof provider === "string") {
         this.providers[provider] = {
-          disabled: false,
+          enabled: true,
         };
       } else {
-        this.providers[provider.name] = provider;
+        this.providers[provider.name] = {
+          enabled: provider.enabled ?? true,
+          key:
+            provider.key || this.env[this.getEnvSecretKeyName(provider.name)],
+        };
       }
     });
 
@@ -72,5 +79,10 @@ export class Config {
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.registry = params.registry || defaultRegistry;
+  }
+
+  private getEnvSecretKeyName(name: string): string {
+    // TODO: update env vars and documentation to reflect this change
+    return `NEXUS_PROVIDER_${toUpperSnakeCase(name)}_KEY`;
   }
 }

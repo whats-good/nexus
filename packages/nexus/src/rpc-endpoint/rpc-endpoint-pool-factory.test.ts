@@ -6,6 +6,7 @@ import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 describe("provider factory", () => {
   const config = new Config({
     providers: [
+      "base",
       {
         name: "alchemy",
         key: "key-1",
