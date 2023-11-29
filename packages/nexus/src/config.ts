@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defaultRegistry } from "./registry/default-registry";
+import { globalSingletonRegistry } from "./registry/global-singleton-registry";
 import type { Registry } from "./registry";
 import { toUpperSnakeCase } from "./utils";
 
@@ -104,7 +104,7 @@ export class Config {
       params.globalAccessKey || env.NEXUS_GLOBAL_ACCESS_KEY;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
-    this.registry = params.registry || defaultRegistry;
+    this.registry = params.registry || globalSingletonRegistry;
   }
 
   private getEnvSecretKeyName(name: string): string {

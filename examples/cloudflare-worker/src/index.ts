@@ -4,6 +4,8 @@ import { NexusServer } from "@whatsgood/nexus";
 // TODO: add onboarding & UX. (setup admin access, login, etc)
 // TODO: add tests for the worker
 
+// TODO: add documentation for registry extensions
+
 type Env = Record<string, string>;
 
 const server = NexusServer.create<Env>({
