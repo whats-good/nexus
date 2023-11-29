@@ -5,6 +5,7 @@ import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 
 describe("provider factory", () => {
   const config = new Config({
+    chains: [1, 84531, 5],
     providers: [
       "base",
       {

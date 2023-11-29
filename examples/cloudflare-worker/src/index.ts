@@ -9,6 +9,7 @@ type Env = Record<string, string>;
 const server = NexusServer.create<Env>({
   env: (ctx) => ctx,
   providers: ["alchemy"],
+  chains: [84531],
 });
 
 export default { fetch: server.fetch };

@@ -41,6 +41,7 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet",
         new Config({
+          chains: [1],
           providers: [
             {
               name: "alchemy",
@@ -67,6 +68,7 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet?key=some-key",
         new Config({
+          chains: [1],
           providers: [
             {
               name: "alchemy",
@@ -94,6 +96,7 @@ describe("request handler - status", () => {
       const data = await requestHelper(
         "/ethereum/mainnet",
         new Config({
+          chains: [1],
           providers: [
             {
               name: "alchemy",
@@ -118,7 +121,13 @@ describe("request handler - status", () => {
     });
 
     it("not configured, via chain name", async () => {
-      const data = await requestHelper("/ethereum/mainnet", new Config({}));
+      const data = await requestHelper(
+        "/ethereum/mainnet",
+        new Config({
+          chains: [1],
+          providers: ["random-provider"],
+        })
+      );
 
       expect(data).toMatchObject({
         success: false,
@@ -135,7 +144,13 @@ describe("request handler - status", () => {
     });
 
     it("not configured, via chain id", async () => {
-      const data = await requestHelper("/1", new Config({}));
+      const data = await requestHelper(
+        "/1",
+        new Config({
+          chains: [1],
+          providers: ["random-provider"],
+        })
+      );
 
       expect(data).toMatchObject({
         success: false,
@@ -202,6 +217,7 @@ describe("request handler - status", () => {
               key: "key-1",
             },
           ],
+          chains: [1],
           globalAccessKey: "some-key",
         })
       );

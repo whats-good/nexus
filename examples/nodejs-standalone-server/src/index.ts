@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 
 const server = NexusServer.create({
   providers: ["base"],
+  chains: [84531],
 });
 
 createServer(server).listen(4005, () => {

@@ -1,10 +1,12 @@
 import type { Registry } from "@src/registry";
+import type { Config } from "@src/config";
 import type { Network } from "./network";
 
 export interface ChainStatus {
   chainId: number;
   chainName: string;
   networkName: string;
+  isEnabled: boolean;
   // TODO: add isDeprecated
   // isDeprecated: boolean;
 }
@@ -16,11 +18,12 @@ export class Chain {
     public readonly name: string
   ) {}
 
-  public get status(): ChainStatus {
+  public getStatus(config: Config): ChainStatus {
     return {
       chainName: this.name,
       chainId: this.chainId,
       networkName: this.network.name,
+      isEnabled: !!config.chains[this.chainId]?.enabled,
       // isDeprecated: this.isDeprecated,
     };
   }

@@ -24,6 +24,17 @@ type ProviderConfigParam =
       enabled?: boolean;
     };
 
+interface ChainConfig {
+  enabled: boolean;
+}
+
+type ChainConfigParam =
+  | number
+  | {
+      chainId: number;
+      enabled?: boolean;
+    };
+
 type Env = Partial<Record<string, string>>;
 
 export type ConfigConstructorParams = ConstructorParameters<typeof Config>[0];
@@ -34,6 +45,8 @@ export class Config {
   // or should i force them to create a separate rpc-proxy if they want to do that?
 
   public providers: Partial<Record<string, ProviderConfig>> = {};
+
+  public chains: Partial<Record<number, ChainConfig>> = {};
 
   // all client-side access to the rpc-proxy should include this key.
   public globalAccessKey?: string;
@@ -46,7 +59,8 @@ export class Config {
 
   constructor(params: {
     env?: Env;
-    providers?: ProviderConfigParam[];
+    providers: [ProviderConfigParam, ...ProviderConfigParam[]];
+    chains: [ChainConfigParam, ...ChainConfigParam[]];
     globalAccessKey?: string;
     recoveryMode?: RpcRelayRecoveryMode;
     registry?: Registry;
@@ -54,19 +68,34 @@ export class Config {
     const envRaw: Env = params.env || process.env;
 
     // only allow keys that start with NEXUS_ to be used
+    // TODO: is this necessary now that we're not exporting the env object?
     const env = Object.fromEntries(
       Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
     );
 
-    params.providers?.forEach((provider) => {
+    params.providers.forEach((provider) => {
       if (typeof provider === "string") {
         this.providers[provider] = {
           enabled: true,
         };
       } else {
+        // TODO: scan all NEXUS_PROVIDER_*_KEY env vars and warn if there are any unused ones
+        // or alternatively automatically enable the provider if there is a key for it
         this.providers[provider.name] = {
           enabled: provider.enabled ?? true,
           key: provider.key || env[this.getEnvSecretKeyName(provider.name)],
+        };
+      }
+    });
+
+    params.chains.forEach((chain) => {
+      if (typeof chain === "number") {
+        this.chains[chain] = {
+          enabled: true,
+        };
+      } else {
+        this.chains[chain.chainId] = {
+          enabled: chain.enabled ?? true,
         };
       }
     });

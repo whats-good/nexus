@@ -34,7 +34,7 @@ export class NexusServer<TServerContext = EmptyServerContext>
         typeof value === "function" ? value(serverContext, request) : value,
       ])
     );
-    const config = new Config(configParams);
+    const config = new Config(configParams as ConfigConstructorParams);
 
     return this.requestHandler.handle(config, request);
   };

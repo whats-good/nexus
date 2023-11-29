@@ -254,6 +254,7 @@ describe("registry", () => {
     it("should override existing service provider chain support", () => {
       const registry = new Registry();
       const config = new Config({
+        chains: [1],
         providers: [
           {
             name: "alchemy",
