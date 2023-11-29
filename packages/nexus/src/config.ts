@@ -44,8 +44,6 @@ export class Config {
 
   public readonly registry: Registry;
 
-  public readonly env: Env;
-
   constructor(params: {
     env?: Env;
     providers?: ProviderConfigParam[];
@@ -56,7 +54,7 @@ export class Config {
     const envRaw: Env = params.env || process.env;
 
     // only allow keys that start with NEXUS_ to be used
-    this.env = Object.fromEntries(
+    const env = Object.fromEntries(
       Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
     );
 
@@ -68,14 +66,13 @@ export class Config {
       } else {
         this.providers[provider.name] = {
           enabled: provider.enabled ?? true,
-          key:
-            provider.key || this.env[this.getEnvSecretKeyName(provider.name)],
+          key: provider.key || env[this.getEnvSecretKeyName(provider.name)],
         };
       }
     });
 
     this.globalAccessKey =
-      params.globalAccessKey || this.env.NEXUS_GLOBAL_ACCESS_KEY;
+      params.globalAccessKey || env.NEXUS_GLOBAL_ACCESS_KEY;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.registry = params.registry || defaultRegistry;
