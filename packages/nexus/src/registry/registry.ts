@@ -1,4 +1,5 @@
-import { Network, Chain } from "@src/chain";
+import { Chain } from "@src/chain";
+import { Network } from "@src/chain/network";
 import type { ChainSupport } from "@src/service-provider";
 import { ServiceProvider } from "@src/service-provider";
 
@@ -54,7 +55,7 @@ export class Registry {
   private readonly networks = new Map<string, Network>();
   private readonly chains = new Map<number, Chain>();
   private readonly serviceProviders = new Map<string, ServiceProvider>();
-  private readonly supportedChains = new Map<number, ServiceProvider[]>();
+  private readonly supportedChains = new Map<number, Set<ServiceProvider>>();
 
   private readonly networkBuilder = new NetworkBuilder(this);
   private readonly serviceProviderBuilder = new ServiceProviderBuilder(this);
@@ -123,7 +124,7 @@ export class Registry {
   }
 
   public getServiceProvidersSupportingChain(chain: Chain): ServiceProvider[] {
-    return this.supportedChains.get(chain.chainId) || [];
+    return Array.from(this.supportedChains.get(chain.chainId) ?? []);
   }
 
   public registerSupportedChain(
@@ -146,9 +147,9 @@ export class Registry {
     const existingChainSupport = this.supportedChains.get(chainId);
 
     if (existingChainSupport) {
-      existingChainSupport.push(serviceProvider);
+      existingChainSupport.add(serviceProvider);
     } else {
-      this.supportedChains.set(chainId, [serviceProvider]);
+      this.supportedChains.set(chainId, new Set([serviceProvider]));
     }
   }
 
