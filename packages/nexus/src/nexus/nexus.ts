@@ -5,6 +5,7 @@ import {
 import { RequestHandler } from "../request-handler/request-handler";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
+import { createDefaultRegistry } from "../registry";
 
 type EmptyServerContext = Record<string, never>;
 
@@ -19,6 +20,7 @@ export class NexusServer<TServerContext = EmptyServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
   private readonly requestHandler = new RequestHandler();
+  private readonly defaultRegistry = createDefaultRegistry();
 
   private constructor(
     private readonly options: ServerContextConfigMap<TServerContext>
@@ -34,6 +36,11 @@ export class NexusServer<TServerContext = EmptyServerContext>
         typeof value === "function" ? value(serverContext, request) : value,
       ])
     );
+
+    if (!configParams.registry) {
+      configParams.registry = this.defaultRegistry;
+    }
+
     const config = new Config(configParams as ConfigConstructorParams);
 
     return this.requestHandler.handle(config, request);
