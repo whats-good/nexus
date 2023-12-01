@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { globalSingletonRegistry } from "./registry/global-singleton-registry";
 import type { Registry } from "./registry";
-import { toUpperSnakeCase } from "./utils";
 
 const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);
 // none -> don't try to recover and fail immediately
@@ -35,8 +34,6 @@ type ChainConfigParam =
       enabled?: boolean;
     };
 
-type Env = Partial<Record<string, string>>;
-
 export type ConfigConstructorParams = ConstructorParameters<typeof Config>[0];
 
 export class Config {
@@ -58,32 +55,21 @@ export class Config {
   public readonly registry: Registry;
 
   constructor(params: {
-    env?: Env;
     providers: [ProviderConfigParam, ...ProviderConfigParam[]];
     chains: [ChainConfigParam, ...ChainConfigParam[]];
     globalAccessKey?: string;
     recoveryMode?: RpcRelayRecoveryMode;
     registry?: Registry;
   }) {
-    const envRaw: Env = params.env || process.env;
-
-    // only allow keys that start with NEXUS_ to be used
-    // TODO: is this necessary now that we're not exporting the env object?
-    const env = Object.fromEntries(
-      Object.entries(envRaw).filter(([key]) => key.startsWith("NEXUS_"))
-    );
-
     params.providers.forEach((provider) => {
       if (typeof provider === "string") {
         this.providers[provider] = {
           enabled: true,
         };
       } else {
-        // TODO: scan all NEXUS_PROVIDER_*_KEY env vars and warn if there are any unused ones
-        // or alternatively automatically enable the provider if there is a key for it
         this.providers[provider.name] = {
           enabled: provider.enabled ?? true,
-          key: provider.key || env[this.getEnvSecretKeyName(provider.name)],
+          key: provider.key,
         };
       }
     });
@@ -100,15 +86,9 @@ export class Config {
       }
     });
 
-    this.globalAccessKey =
-      params.globalAccessKey || env.NEXUS_GLOBAL_ACCESS_KEY;
+    this.globalAccessKey = params.globalAccessKey;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.registry = params.registry || globalSingletonRegistry;
-  }
-
-  private getEnvSecretKeyName(name: string): string {
-    // TODO: update env vars and documentation to reflect this change
-    return `NEXUS_PROVIDER_${toUpperSnakeCase(name)}_KEY`;
   }
 }
