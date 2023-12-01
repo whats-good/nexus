@@ -9,11 +9,13 @@ import { createDefaultRegistry } from "../registry";
 
 type EmptyServerContext = Record<string, never>;
 
-type ServerContextConfigMap<TServerContext = EmptyServerContext> = {
+type ServerContextConfigMap<TServerContext> = {
   [K in keyof ConfigConstructorParams]:
-    | ((ctx: TServerContext, request: Request) => ConfigConstructorParams[K])
-    // TODO: make this promisable
-    | ConfigConstructorParams[K];
+    | ConfigConstructorParams[K]
+    | ((
+        serverContext: TServerContext,
+        request: Request
+      ) => ConfigConstructorParams[K]);
 };
 
 export class NexusServer<TServerContext = EmptyServerContext>
@@ -26,22 +28,62 @@ export class NexusServer<TServerContext = EmptyServerContext>
     private readonly options: ServerContextConfigMap<TServerContext>
   ) {}
 
+  private getValueOrExecute<T>(
+    valueOrFunction:
+      | T
+      | ((serverContext: TServerContext, request: Request) => T),
+    serverContext: TServerContext,
+    request: Request
+  ): T {
+    if (typeof valueOrFunction === "function") {
+      return (
+        valueOrFunction as (
+          serverContext: TServerContext,
+          request: Request
+        ) => T
+      )(serverContext, request);
+    }
+
+    return valueOrFunction;
+  }
+
   public handle = async (
     request: Request,
     serverContext: TServerContext
   ): Promise<Response> => {
-    const configParams = Object.fromEntries(
-      Object.entries(this.options).map(([key, value]) => [
-        key,
-        typeof value === "function" ? value(serverContext, request) : value,
-      ])
+    const registryParam = this.getValueOrExecute(
+      this.options.registry,
+      serverContext,
+      request
     );
 
-    if (!configParams.registry) {
-      configParams.registry = this.defaultRegistry;
-    }
+    // TODO: cleanup
 
-    const config = new Config(configParams as ConfigConstructorParams);
+    const configParams: ConfigConstructorParams = {
+      registry: registryParam || this.defaultRegistry,
+      chains: this.getValueOrExecute(
+        this.options.chains,
+        serverContext,
+        request
+      ),
+      providers: this.getValueOrExecute(
+        this.options.providers,
+        serverContext,
+        request
+      ),
+      globalAccessKey: this.getValueOrExecute(
+        this.options.globalAccessKey,
+        serverContext,
+        request
+      ),
+      recoveryMode: this.getValueOrExecute(
+        this.options.recoveryMode,
+        serverContext,
+        request
+      ),
+    };
+
+    const config = new Config(configParams);
 
     return this.requestHandler.handle(config, request);
   };
