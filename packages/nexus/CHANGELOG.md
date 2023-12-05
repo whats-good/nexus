@@ -1,5 +1,19 @@
 # @whatsgood/nexus
 
+## 0.2.0
+
+### Minor Changes
+
+- 6f49cd0: chains need to be explicitly configured via config now
+- 9582453: default registry no longer global singleton
+- 9def7a8: Implicit config derivations from env vars removed. All configs should be explicit moving forward.
+- 6f49cd0: Global singleton registry exported now. Clients can now extend the registry to change chain, network and provider behavior
+
+### Patch Changes
+
+- 6f49cd0: requiring provider configs
+- cc464ba: Updated registry override behavior: additional chain support statements will override previous ones for the same chain id
+
 ## 0.1.0
 
 ### Minor Changes
