@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { globalSingletonRegistry } from "./registry/global-singleton-registry";
+import { createDefaultRegistry } from "./registry/default-registry";
 import type { Registry } from "./registry";
 
 const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);
@@ -89,6 +89,6 @@ export class Config {
     this.globalAccessKey = params.globalAccessKey;
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
-    this.registry = params.registry || globalSingletonRegistry;
+    this.registry = params.registry || createDefaultRegistry();
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { globalSingletonRegistry } from "../registry/global-singleton-registry";
+import { createDefaultRegistry } from "../registry/default-registry";
 import { Config } from "../config";
 import { RpcEndpointPoolFactory } from "./rpc-endpoint-pool-factory";
 
@@ -21,16 +21,18 @@ describe("provider factory", () => {
 
   const factory = new RpcEndpointPoolFactory(config);
 
+  const registry = createDefaultRegistry();
+
   const chains = {
-    ethMainnet: globalSingletonRegistry.getChainByNames("ethereum", "mainnet"),
-    baseGoerli: globalSingletonRegistry.getChainByNames("base", "goerli"),
-    rinkeby: globalSingletonRegistry.getChainByNames("ethereum", "rinkeby"),
+    ethMainnet: registry.getChainByNames("ethereum", "mainnet"),
+    baseGoerli: registry.getChainByNames("base", "goerli"),
+    rinkeby: registry.getChainByNames("ethereum", "rinkeby"),
   };
   const providers = {
-    alchemy: globalSingletonRegistry.getServiceProviderByName("alchemy"),
-    infura: globalSingletonRegistry.getServiceProviderByName("infura"),
-    ankr: globalSingletonRegistry.getServiceProviderByName("ankr"),
-    base: globalSingletonRegistry.getServiceProviderByName("base"),
+    alchemy: registry.getServiceProviderByName("alchemy"),
+    infura: registry.getServiceProviderByName("infura"),
+    ankr: registry.getServiceProviderByName("ankr"),
+    base: registry.getServiceProviderByName("base"),
   };
 
   describe("routes", () => {
