@@ -1,5 +1,21 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.2.0
+
+### Minor Changes
+
+- 9def7a8: Implicit config derivations from env vars removed. All configs should be explicit moving forward.
+
+### Patch Changes
+
+- Updated dependencies [6f49cd0]
+- Updated dependencies [6f49cd0]
+- Updated dependencies [9582453]
+- Updated dependencies [cc464ba]
+- Updated dependencies [9def7a8]
+- Updated dependencies [6f49cd0]
+  - @whatsgood/nexus@0.2.0
+
 ## 0.1.18
 
 ### Patch Changes
