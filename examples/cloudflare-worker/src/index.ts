@@ -8,7 +8,7 @@ import { NexusServer } from "@whatsgood/nexus";
 
 type Env = Record<string, string>;
 
-const server = NexusServer.create<Env>({
+const nexus = NexusServer.create<Env>({
   // TODO: add a `createUserContext` function that generates the ctx object from the server context
   providers: (ctx) => [
     "base",
@@ -21,4 +21,4 @@ const server = NexusServer.create<Env>({
   chains: [84531],
 });
 
-export default { fetch: server.fetch };
+export default { fetch: nexus.fetch };
