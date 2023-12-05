@@ -29,7 +29,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && pnpm api-extractor:local",
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
@@ -38,7 +38,8 @@
     "test:unit": "vitest run --config ./vitest.config.ts",
     "test:watch": "vitest --config ./vitest.config.ts",
     "test:unit:coverage": "pnpm test:unit --coverage",
-    "api-extractor:run": "api-extractor run --local --verbose"
+    "api-extractor:local": "api-extractor run --local --verbose",
+    "api-documenter:generate": "api-documenter markdown --input-folder temp --output-folder docs"
   },
   "dependencies": {
     "@whatwg-node/server": "^0.9.16",
@@ -47,6 +48,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@microsoft/api-documenter": "^7.23.13",
     "@microsoft/api-extractor": "^7.38.4",
     "@types/express": "^4.17.18",
     "@vitest/coverage-v8": "^0.34.6",
