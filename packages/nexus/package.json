@@ -37,7 +37,8 @@
     "lint:fix": "pnpm lint lint --fix",
     "test:unit": "vitest run --config ./vitest.config.ts",
     "test:watch": "vitest --config ./vitest.config.ts",
-    "test:unit:coverage": "pnpm test:unit --coverage"
+    "test:unit:coverage": "pnpm test:unit --coverage",
+    "api-extractor:run": "api-extractor run --local --verbose"
   },
   "dependencies": {
     "@whatwg-node/server": "^0.9.16",
@@ -46,6 +47,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.38.4",
     "@types/express": "^4.17.18",
     "@vitest/coverage-v8": "^0.34.6",
     "eslint-config-custom": "workspace:*",
