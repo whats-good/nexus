@@ -15,6 +15,34 @@ describe("routes", () => {
         chainName: "mainnet",
       });
     });
+
+    it("chain id with prefix", () => {
+      expect(matchPath("some-prefix/1")?.params).toEqual({
+        chainId: 1,
+      });
+    });
+
+    it("network name and chain name with prefix", () => {
+      expect(matchPath("some-prefix/ethereum/mainnet")?.params).toEqual({
+        networkName: "ethereum",
+        chainName: "mainnet",
+      });
+    });
+
+    it("chain id with longer prefix", () => {
+      expect(matchPath("some-prefix/another-prefix/1")?.params).toEqual({
+        chainId: 1,
+      });
+    });
+
+    it("network name and chain name with prefix", () => {
+      expect(
+        matchPath("some-prefix/another-prefix/ethereum/mainnet")?.params
+      ).toEqual({
+        networkName: "ethereum",
+        chainName: "mainnet",
+      });
+    });
   });
 
   describe("unhappy path", () => {
