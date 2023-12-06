@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.2.1
+
+### Patch Changes
+
+- 97d902b: fixed bug on optional method params
+
 ## 0.2.0
 
 ### Minor Changes
