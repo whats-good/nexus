@@ -1,13 +1,17 @@
-import {
-  createServerAdapter,
-  type ServerAdapterBaseObject,
+import { createServerAdapter } from "@whatwg-node/server";
+import type {
+  ServerAdapter,
+  ServerAdapterBaseObject,
 } from "@whatwg-node/server";
 import { RequestHandler } from "../request-handler/request-handler";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
 import { createDefaultRegistry } from "../registry";
 
-type EmptyServerContext = Record<string, never>;
+type NexusServerInstance<TServerContext extends Record<string, unknown>> =
+  ServerAdapter<TServerContext, Nexus<TServerContext>>;
+
+type ServerContext = Record<string, unknown>;
 
 type ServerContextConfigMap<TServerContext> = {
   [K in keyof ConfigConstructorParams]:
@@ -18,7 +22,7 @@ type ServerContextConfigMap<TServerContext> = {
       ) => ConfigConstructorParams[K]);
 };
 
-export class NexusServer<TServerContext = EmptyServerContext>
+export class Nexus<TServerContext extends ServerContext = ServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
   private readonly requestHandler = new RequestHandler();
@@ -88,13 +92,13 @@ export class NexusServer<TServerContext = EmptyServerContext>
     return this.requestHandler.handle(config, request);
   };
 
-  public static create<TServerContext = EmptyServerContext>(
+  public static create<TServerContext extends ServerContext = ServerContext>(
     options: ServerContextConfigMap<TServerContext>
   ) {
-    const server = new NexusServer(options);
+    const server = new Nexus(options);
 
-    return createServerAdapter<TServerContext, NexusServer<TServerContext>>(
+    return createServerAdapter<TServerContext, Nexus<TServerContext>>(
       server
-    );
+    ) as unknown as NexusServerInstance<TServerContext>;
   }
 }

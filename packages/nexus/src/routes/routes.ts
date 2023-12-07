@@ -14,11 +14,12 @@ const IntString = z
   })
   .int();
 
+// TODO: write docs for this feature
 const routes = [
-  r("/:chainId", {
+  r("(.*)/:chainId", {
     chainId: IntString,
   }),
-  r("/:networkName/:chainName", {
+  r("(.*)/:networkName/:chainName", {
     networkName: z.string(),
     chainName: z.string(),
   }),
