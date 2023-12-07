@@ -1,4 +1,4 @@
-import { NexusServer } from "@whatsgood/nexus";
+import { Nexus } from "@whatsgood/nexus";
 
 // TODO: add config alerts to indicate that the key access is incomplete
 // TODO: add onboarding & UX. (setup admin access, login, etc)
@@ -8,7 +8,7 @@ import { NexusServer } from "@whatsgood/nexus";
 
 type Env = Record<string, string>;
 
-const nexus = NexusServer.create<Env>({
+const nexus = Nexus.create<Env>({
   // TODO: add a `createUserContext` function that generates the ctx object from the server context
   providers: (ctx) => [
     "base",
@@ -17,6 +17,7 @@ const nexus = NexusServer.create<Env>({
       key: ctx.NEXUS_PROVIDER_ALCHEMY_KEY,
     },
   ],
+  // TODO: maybe this should actually be just an env var?
   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
   chains: [84531],
 });

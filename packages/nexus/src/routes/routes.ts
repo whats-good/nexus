@@ -14,6 +14,7 @@ const IntString = z
   })
   .int();
 
+// TODO: write docs for this feature
 const routes = [
   r("(.*)/:chainId", {
     chainId: IntString,

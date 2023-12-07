@@ -1,11 +1,22 @@
-import { NexusServer } from "@whatsgood/nexus";
-import { createServer } from "node:http";
+import { Nexus } from "@whatsgood/nexus";
+import express from "express";
+import type { Request as Req, Response as Res } from "express";
 
-const nexus = NexusServer.create({
+const app = express();
+
+interface ExpressContext extends Record<string, any> {
+  req: Req;
+  res: Res;
+}
+
+const nexus = Nexus.create<ExpressContext>({
   providers: ["base"],
   chains: [84531],
+  globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
 });
 
-createServer(nexus).listen(4005, () => {
-  console.log(`🚀 Server ready at http://localhost:4005`);
+app.use("/", nexus);
+
+app.listen(4005, () => {
+  console.log("Running on port 4005");
 });

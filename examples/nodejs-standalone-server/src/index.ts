@@ -1,9 +1,10 @@
-import { NexusServer } from "@whatsgood/nexus";
+import { Nexus } from "@whatsgood/nexus";
 import { createServer } from "node:http";
 
-const nexus = NexusServer.create({
+const nexus = Nexus.create({
   providers: ["base"],
   chains: [84531],
+  globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
 });
 
 createServer(nexus).listen(4005, () => {
