@@ -40,7 +40,7 @@
     {
       "group": "Development",
       "pages": [
-        "development/introduction",
+        "development/setup",
         {
           "group": "Features",
           "pages": [
