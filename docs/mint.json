@@ -35,31 +35,43 @@
   "navigation": [
     {
       "group": "Get Started",
+      "pages": ["introduction", "use-cases", "quickstart"]
+    },
+    {
+      "group": "Development",
       "pages": [
-        "introduction",
-        "use-cases",
-        "quickstart",
-        "development",
+        "development/introduction",
+        {
+          "group": "Features",
+          "pages": [
+            "features/provider-configuration",
+            "features/request-cycling",
+            "features/adaptive-performance",
+            "features/authorization",
+            "features/caching",
+            "features/quorum",
+            "features/lifecycle-hooks",
+            "features/rate-limiting",
+            "features/observability"
+          ]
+        },
+        {
+          "group": "Integrations",
+          "pages": [
+            "integrations/cloudflare-worker",
+            "integrations/node-js",
+            "integrations/express",
+            "integrations/fastify",
+            "integrations/koa",
+            "integrations/hapi",
+            "integrations/next-js",
+            "integrations/nest-js",
+            "integrations/bun",
+            "integrations/deno"
+          ]
+        },
         "changelog"
       ]
-    },
-    {
-      "group": "Features",
-      "pages": [
-        "features/provider-configuration",
-        "features/request-cycling",
-        "features/adaptive-performance",
-        "features/authorization",
-        "features/caching",
-        "features/quorum",
-        "features/lifecycle-hooks",
-        "features/rate-limiting",
-        "features/observability"
-      ]
-    },
-    {
-      "group": "Recipes",
-      "pages": ["recipes/cloudflare-worker", "recipes/express-js-middleware"]
     }
   ],
   "feedback": {
