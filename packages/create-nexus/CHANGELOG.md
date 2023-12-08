@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.6.0
+
+### Minor Changes
+
+- aebbf42: Bugfix: package.json import fixed
+
 ## 0.5.0
 
 ### Minor Changes
