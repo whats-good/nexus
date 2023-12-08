@@ -1,15 +1,32 @@
 {
-  "name": "@whatsgood/create-nexus",
-  "version": "1.0.0",
-  "description": "",
+  "name": "create-nexus",
+  "version": "0.2.1",
+  "description": "Create @whatsgood/nexus RPC apps in one command",
+  "private": false,
+  "access": "public",
   "bin": "./src/index.mjs",
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "json-rpc",
+    "proxy",
+    "typescript",
+    "nexus",
+    "cli"
+  ],
+  "author": {
+    "name": "Kerem Kazan",
+    "email": "kerem@whatsgood.dog"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whats-good/nexus"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "chalk": "4.1.2",
     "commander": "^11.1.0",
