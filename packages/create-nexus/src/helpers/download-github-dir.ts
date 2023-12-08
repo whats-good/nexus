@@ -17,8 +17,7 @@ export async function downloadGitHubDir(
 ) {
   // Fetch the directory content
 
-  const nodeFetch = await import("node-fetch");
-  const response = await nodeFetch.default(
+  const response = await fetch(
     `${GITHUB_API_BASE}/${owner}/${repo}/contents/${dirPath}`
   );
   const directoryContent = await response.json();
@@ -49,16 +48,11 @@ export async function downloadGitHubDir(
 }
 
 async function downloadFile(fileUrl: string, outputPath: string) {
-  const nodeFetch = await import("node-fetch");
-  const response = await nodeFetch.default(fileUrl);
+  const response = await fetch(fileUrl);
   const fileStream = fs.createWriteStream(outputPath);
   if (!fileStream) {
     console.error(`Could not write to file ${outputPath}`);
     process.exit(1);
   }
-  if (!response.body) {
-    console.error(`Could not read response body`);
-    process.exit(1);
-  }
-  response.body.pipe(fileStream);
+  fs.writeFileSync(outputPath, await response.text());
 }
