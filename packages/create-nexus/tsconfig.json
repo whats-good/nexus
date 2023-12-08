@@ -1,0 +1,11 @@
+{
+  "exclude": ["dist", "build", "node_modules"],
+  "include": ["./src/**/*.ts", "test/**/*.ts"],
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["es2017", "dom"]
+  }
+}
