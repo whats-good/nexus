@@ -218,7 +218,11 @@ export async function init() {
 }
 
 async function setNexusPackageVersion(config: ProjectConfig) {
-  const currentNexusVersion = packageJson.dependencies["@whatsgood/nexus"];
+  const readPackageJsonSync = fs.readFileSync("./package.json", "utf-8");
+  const packageJsonParsed = JSON.parse(readPackageJsonSync);
+  const currentNexusVersion =
+    packageJsonParsed.dependencies["@whatsgood/nexus"];
+
   const generatedPackageJsonPath = path.join(
     config.projectPath,
     "package.json"
