@@ -1,10 +1,10 @@
 {
   "name": "@whatsgood/create-nexus",
-  "version": "0.3.0",
-  "description": "Create @whatsgood/nexus RPC apps in one command",
+  "version": "0.0.1",
   "private": false,
   "access": "public",
-  "bin": "./src/index.mjs",
+  "description": "Create @whatsgood/nexus RPC apps in one command",
+  "bin": "./dist/index.mjs",
   "keywords": [
     "blockchain",
     "ethereum",
