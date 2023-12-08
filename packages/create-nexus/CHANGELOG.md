@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.4.0
+
+### Minor Changes
+
+- 7d4a16b: Bugfix: reading source package.json via fs.readFileSync now
+
 ## 0.3.0
 
 ### Minor Changes
