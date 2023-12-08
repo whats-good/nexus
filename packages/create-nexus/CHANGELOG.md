@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.5.0
+
+### Minor Changes
+
+- cda0710: Bugfix: using require to get package.json
+
 ## 0.4.0
 
 ### Minor Changes
