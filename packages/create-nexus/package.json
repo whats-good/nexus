@@ -1,5 +1,5 @@
 {
-  "name": "create-nexus",
+  "name": "@whatsgood/create-nexus",
   "version": "0.2.1",
   "description": "Create @whatsgood/nexus RPC apps in one command",
   "private": false,

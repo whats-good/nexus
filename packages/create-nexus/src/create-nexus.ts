@@ -7,18 +7,15 @@ import * as commander from "commander";
 import prompts from "prompts";
 import validateProjectName from "validate-npm-package-name";
 import packageJson from "../package.json";
-import { getPkgManager } from "./helpers/get-pkg-manager";
+import {
+  VALID_PACKAGE_MANAGERS,
+  getPackageManagerFromEnv,
+} from "./helpers/get-pkg-manager";
 import { downloadGitHubDir } from "./helpers/download-github-dir";
 
 function getPackageManager(program: commander.Command) {
   const options = program.opts();
-  return !!options.useNpm
-    ? "npm"
-    : !!options.usePnpm
-    ? "pnpm"
-    : !!options.useYarn
-    ? "yarn"
-    : getPkgManager();
+  return options.packageManager || getPackageManagerFromEnv();
 }
 
 const PLATFORMS = {
@@ -65,9 +62,33 @@ async function getPlatform(program: commander.Command) {
 }
 
 async function getProjectPathAndName(program: commander.Command) {
-  const projectName = program.args[0];
-  let projectPath: string | undefined = program.opts().path;
+  const projectNameArg = program.args[0];
+  let projectName = projectNameArg;
 
+  if (!projectNameArg) {
+    // prompt for project name
+    const res = await prompts({
+      type: "text",
+      name: "projectName",
+      message: "What is your project name?",
+      validate: (name) => {
+        const { validForNewPackages, errors } = validateProjectName(name);
+        if (!validForNewPackages) {
+          return errors?.join("\n");
+        }
+        return true;
+      },
+    });
+
+    if (!res.projectName) {
+      console.error("A project name is required.");
+      process.exit(1);
+    }
+
+    projectName = res.projectName;
+  }
+
+  let projectPath: string | undefined = program.opts().path;
   if (typeof projectPath === "string") {
     projectPath = projectPath.trim();
   } else {
@@ -130,51 +151,48 @@ async function confirmProjectConfig(
 
 export async function init() {
   const program = new commander.Command(packageJson.name)
-    .version(packageJson.version)
-    .arguments("<project-name>")
-    .usage(`${chalk.green("<project-name>")} [options]`)
+    .version(packageJson.version, "-v, --version", "output the current version")
+    .argument("[project-name]", "name of your nexus rpc project")
+    .usage(`${chalk.green("[project-name]")} [options]`)
     .option("--path <project-path>", "project path")
-    .option("--verbose", "print additional logs")
-    .option("--info", "print environment debug info")
-    .option(
-      "--yes",
-      "skip confirmation step and automatically create the project"
-    )
-    .on("--help", () => {
-      console.log(
-        `    Only ${chalk.green("<project-directory>")} is required.`
-      );
-      console.log();
-    })
+
+    // TODO: add verbose and info support
+    // .option("--verbose", "print additional logs")
+    // .option("--info", "print environment debug info")
+    .option("--yes", "skip the confirmation step")
     // .option(
     //   "--ts, --typescript",
     //   "Initialize as a TypeScript project. (default)"
     // )
     // .option("--js, --javascript", "Initialize as a JavaScript project.")
     // TODO: add js support
+
     .option(
-      "--use-npm",
-      "Explicitly tell the CLI to bootstrap the application using npm"
-    )
-    .option(
-      "--use-pnpm",
-      "Explicitly tell the CLI to bootstrap the application using pnpm"
-    )
-    .option(
-      "--use-yarn",
-      "Explicitly tell the CLI to bootstrap the application using Yarn"
+      "--package-manager, --pm <package-manager>",
+      "package manager to use",
+      function (value) {
+        if (!VALID_PACKAGE_MANAGERS.includes(value)) {
+          console.error(
+            `Invalid package manager: ${chalk.red(
+              `"${value}"`
+            )}. Must be one of: ${VALID_PACKAGE_MANAGERS.join(", ")}`
+          );
+          process.exit(1);
+        }
+        return value;
+      }
     )
     // TODO: add bun support
 
     // TODO: add git support
     // .option("--no-git", "Skip git initialization")
 
-    .option("--platform <platform>", "Platform to use")
+    .option("--platform <platform>", "platform to use")
     .parse(process.argv);
 
+  const { projectName, projectPath } = await getProjectPathAndName(program);
   const pkgManager = getPackageManager(program);
   const platform = await getPlatform(program);
-  const { projectName, projectPath } = await getProjectPathAndName(program);
 
   const projectConfig: ProjectConfig = {
     pkgManager,

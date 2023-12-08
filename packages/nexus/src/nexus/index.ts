@@ -7,3 +7,5 @@ export * from "./nexus";
 
 // TODO: maybe this should actually be just an env var?
 //   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
+
+// TODO: make the readme badge links like npm package actually link to the package
