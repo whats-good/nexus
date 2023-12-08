@@ -4,12 +4,15 @@ import path from "path";
 import * as commander from "commander";
 import prompts from "prompts";
 import validateProjectName from "validate-npm-package-name";
-import packageJson from "../package.json";
 import {
   VALID_PACKAGE_MANAGERS,
   getPackageManagerFromEnv,
 } from "./helpers/get-pkg-manager";
 import { downloadGitHubDir } from "./helpers/download-github-dir";
+
+function getPackageJson(path) {
+  return require(path);
+}
 
 function getPackageManager(program: commander.Command) {
   const options = program.opts();
@@ -148,6 +151,9 @@ async function confirmProjectConfig(
 }
 
 export async function init() {
+  const packageJson = getPackageJson(
+    path.join(__dirname, "..", "package.json")
+  );
   const program = new commander.Command(packageJson.name)
     .version(packageJson.version, "-v, --version", "output the current version")
     .argument("[project-name]", "name of your nexus rpc project")
@@ -218,9 +224,10 @@ export async function init() {
 }
 
 async function setNexusPackageVersion(config: ProjectConfig) {
-  const requiredPackageJson = require("../package.json");
-  const currentNexusVersion =
-    requiredPackageJson.dependencies["@whatsgood/nexus"];
+  const packageJson = getPackageJson(
+    path.join(__dirname, "..", "package.json")
+  );
+  const currentNexusVersion = packageJson.dependencies["@whatsgood/nexus"];
 
   const generatedPackageJsonPath = path.join(
     config.projectPath,
