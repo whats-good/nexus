@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.2.0
+
+### Minor Changes
+
+- 31bd7d7: Converted into a module
+
 ## 0.1.0
 
 ### Minor Changes
