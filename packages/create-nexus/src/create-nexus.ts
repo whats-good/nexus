@@ -3,7 +3,7 @@
 import fs from "fs";
 import chalk from "chalk";
 import path from "path";
-import commander from "commander";
+import * as commander from "commander";
 import prompts from "prompts";
 import validateProjectName from "validate-npm-package-name";
 import packageJson from "../package.json";

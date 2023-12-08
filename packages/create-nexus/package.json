@@ -2,9 +2,10 @@
   "name": "@whatsgood/create-nexus",
   "version": "1.0.0",
   "description": "",
-  "bin": "./src/index.js",
+  "bin": "./src/index.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup"
   },
   "keywords": [],
   "author": "",
@@ -25,8 +26,8 @@
     "eslint-config-custom": "workspace:*",
     "msw": "^1.3.2",
     "ts-node": "10.9.1",
-    "tsconfig": "workspace:*",
     "tsup": "^6.1.3",
+    "tsconfig": "workspace:*",
     "typescript": "5.2.2"
   }
 }
