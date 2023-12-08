@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.3.0
+
+### Minor Changes
+
+- 36c5976: Supporting nested routes. No longer required to run at path root.
+- 3f6c2f6: NexusServer replaced with Nexus. Typecasting ServerAdapter.ServerContext for Express.js compatibility
+
 ## 0.2.1
 
 ### Patch Changes
