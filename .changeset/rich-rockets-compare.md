@@ -1,5 +1,5 @@
 ---
-"create-nexus": minor
+"@whatsgood/create-nexus": minor
 ---
 
-Introducing the create-nexus package
+Introducing the @whatsgood/create-nexus package
