@@ -190,6 +190,8 @@ export class RpcProxyContext {
       });
     }
 
+    // TODO: consolidate error messages between GET and POST
+
     if (this.chain?.getStatus(this.config).isEnabled === false) {
       return this.buildStatus({
         message: "Chain is disabled.",

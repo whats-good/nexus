@@ -4,6 +4,7 @@ import type { ProviderConfigParam } from "@src/config";
 import { Config } from "@src/config";
 import { handlers } from "@test/mock-server-handlers";
 import { retry } from "@test/utils";
+import { Registry } from "../registry";
 import { RequestHandler } from "./request-handler";
 
 const sharedConfig = {
@@ -256,6 +257,65 @@ describe("request handler - relay", () => {
       expect(body).toMatchObject({
         message: "Chain not enabled: 1",
       });
+    });
+  });
+
+  describe("relaying with custom registry", () => {
+    const server = setupServer(handlers.alchemyReturnsBlockNumber);
+
+    beforeAll(() => {
+      server.listen({
+        onUnhandledRequest: "error",
+      });
+    });
+
+    afterAll(() => {
+      server.close();
+    });
+
+    afterEach(() => {
+      server.resetHandlers();
+    });
+
+    it("should successfully relay", async () => {
+      const registry = new Registry();
+
+      registry.network("ethereum", ["eth"]).chain(1, "mainnet");
+      registry.provider("alchemy").support(1, {
+        baseURL: "https://eth-mainnet.alchemyapi.io/v2",
+        type: "url-append-key",
+      });
+
+      const config = new Config({
+        chains: [1],
+        providers: [
+          {
+            name: "alchemy",
+            key: "key-1",
+          },
+        ],
+        globalAccessKey: "some-key",
+        registry,
+      });
+
+      const request = new Request(
+        "https://my-test-rpc-provider.com/eth/mainnet?key=some-key",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_blockNumber",
+            params: [],
+          }),
+        }
+      );
+
+      const requestHandler = new RequestHandler();
+
+      const result = await requestHandler.handle(config, request);
+
+      expect(result.ok).toBe(true);
     });
   });
 });
