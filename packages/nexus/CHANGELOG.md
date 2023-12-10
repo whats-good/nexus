@@ -1,5 +1,25 @@
 # @whatsgood/nexus
 
+## 0.5.0
+
+### Minor Changes
+
+- d39cf30: Relaxed ServerContext generic type requirements
+- d39cf30: Added hardhat and foundry to default providers
+
+## 0.4.0
+
+### Minor Changes
+
+- 449b332: Improved chain support error messages
+
+## 0.3.0
+
+### Minor Changes
+
+- 36c5976: Supporting nested routes. No longer required to run at path root.
+- 3f6c2f6: NexusServer replaced with Nexus. Typecasting ServerAdapter.ServerContext for Express.js compatibility
+
 ## 0.2.1
 
 ### Patch Changes

@@ -17,6 +17,7 @@ export const createDefaultRegistry = () => {
 
     .network("polygon")
     .chain(80001, "mumbai")
+
     .network("local", ["hardhat", "foundry"])
     .chain(31337, "local");
 
@@ -98,6 +99,16 @@ export const createDefaultRegistry = () => {
       type: "url-append-key",
       baseURL: "https://rpc.ankr.com/base_goerli",
     });
+
+  defaultRegistry.provider("hardhat").support(31337, {
+    type: "url",
+    url: "http://localhost:8545",
+  });
+
+  defaultRegistry.provider("foundry").support(31337, {
+    type: "url",
+    url: "http://localhost:8545",
+  });
 
   return defaultRegistry;
 };
