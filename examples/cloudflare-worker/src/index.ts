@@ -4,14 +4,23 @@ type Env = Record<string, string>;
 
 const nexus = Nexus.create<Env>({
   providers: (ctx) => [
-    "base",
     {
       name: "alchemy",
-      key: ctx.NEXUS_PROVIDER_ALCHEMY_KEY,
+      key: ctx.ALCHEMY_KEY,
+    },
+    {
+      name: "infura",
+      key: ctx.INFURA_KEY,
+    },
+    {
+      name: "ankr",
+      key: ctx.ANKR_KEY,
     },
   ],
   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
-  chains: [84531],
+  chains: [1, 11155111],
 });
 
-export default { fetch: nexus.fetch };
+export default {
+  fetch: nexus.fetch,
+};

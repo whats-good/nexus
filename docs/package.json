@@ -9,7 +9,7 @@
     "docs:broken-links": "mintlify broken-links"
   },
   "devDependencies": {
-    "mintlify": "4.0.49"
+    "mintlify": "4.0.70"
   },
   "keywords": [],
   "author": "",
