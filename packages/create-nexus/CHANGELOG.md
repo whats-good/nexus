@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.7.0
+
+### Minor Changes
+
+- aa28a06: Bugfix: no longer forcing nexus version
+
 ## 0.6.1
 
 ### Patch Changes
