@@ -1,0 +1,11 @@
+```bash
+#                                          ⌄ replace this with your own key
+curl -X POST http://localhost:4005/1\?key\=my-random-string \
+     -H "Content-Type: application/json" \
+     -d '{
+           "jsonrpc": "2.0", 
+           "method": "eth_blockNumber", 
+           "params": [], 
+           "id": 1
+         }'
+```

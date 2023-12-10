@@ -49,6 +49,7 @@
           "group": "Features",
           "pages": [
             "features/provider-configuration",
+            "features/registry",
             "features/request-cycling",
             "features/adaptive-performance",
             "features/authorization",

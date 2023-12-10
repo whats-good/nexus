@@ -256,9 +256,9 @@ async function generateEnvFiles(config: ProjectConfig) {
   const file = platform === "cloudflare" ? ".dev.vars" : ".env";
 
   const envVars = [
-    "# All clients must supply their requests with ?key=XXXXX. Set your global key value here.",
+    "# Set your global access key here",
     "NEXUS_GLOBAL_ACCESS_KEY=",
-    "\n",
+    "",
     "# Add your service provider keys here",
     "ALCHEMY_KEY=",
     "INFURA_KEY=",
