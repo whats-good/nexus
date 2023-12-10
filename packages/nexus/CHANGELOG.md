@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.5.0
+
+### Minor Changes
+
+- d39cf30: Relaxed ServerContext generic type requirements
+- d39cf30: Added hardhat and foundry to default providers
+
 ## 0.4.0
 
 ### Minor Changes

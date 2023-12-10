@@ -1,5 +1,17 @@
 # @whatsgood/create-nexus
 
+## 0.8.0
+
+### Minor Changes
+
+- d39cf30: Added bun runtime and package manager support
+
+### Patch Changes
+
+- Updated dependencies [d39cf30]
+- Updated dependencies [d39cf30]
+  - @whatsgood/nexus@0.5.0
+
 ## 0.7.0
 
 ### Minor Changes
