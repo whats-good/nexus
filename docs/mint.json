@@ -35,7 +35,11 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "use-cases", "quickstart"]
+      "pages": [
+        "get-started/introduction",
+        "get-started/use-cases",
+        "get-started/quickstart"
+      ]
     },
     {
       "group": "Development",
@@ -45,6 +49,7 @@
           "group": "Features",
           "pages": [
             "features/provider-configuration",
+            "features/registry",
             "features/request-cycling",
             "features/adaptive-performance",
             "features/authorization",
@@ -70,7 +75,7 @@
             "integrations/deno"
           ]
         },
-        "changelog"
+        "development/changelog"
       ]
     }
   ],

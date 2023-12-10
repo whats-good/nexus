@@ -1,0 +1,71 @@
+---
+title: "Quickstart"
+description: "Get up and running with your Nexus RPC server in a few simple steps"
+---
+
+## Initialize the project
+
+<CodeGroup>
+```bash npm
+npm init @whatsgood/nexus
+```
+```bash pnpm
+pnpm create @whatsgood/nexus
+```
+```bash yarn
+yarn create @whatsgood/nexus
+```
+```bash bun
+bun create @whatsgood/nexus
+```
+</CodeGroup>
+
+This will prompt you to install the [@whatsgood/create-nexus](https://npmjs.com/package/@whatsgood/create-nexus) CLI tool. Press `y` to install it, and go through the project creation flow:
+
+1. Name your project (e.g. `my-nexus-rpc`).
+2. For this example, pick `express` as the target platform.
+3. Confirm the project details and press `y` to create the project.
+
+## Set environment variables
+
+<Snippet file="note-limited-providers.mdx" />
+
+1. <Snippet file="prerequisite-providers.mdx" />
+2. Open the `.env` file that was created for you. 
+3. Set a random string as the `NEXUS_GLOBAL_ACCESS_KEY` variable. This will be used to authenticate your requests to the Nexus RPC server.
+4. Add your service provider keys to the file. We're using [Alchemy](https://alchemy.com) as a placeholder example here, but you pick any provider you want. 
+
+```bash .env
+# Set your global access key here
+NEXUS_GLOBAL_ACCESS_KEY=my-random-string
+#                       ^ replace this with your own random string
+
+# Add your service provider keys here
+ALCHEMY_KEY=my-alchemy-key
+#           ^ replace this with your own key
+INFURA_KEY=
+ANKR_KEY=
+```
+
+## Start the server
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+```bash pnpm
+pnpm dev
+```
+```bash yarn
+yarn dev
+```
+```bash bun
+bun dev
+```
+</CodeGroup>
+
+## Send a request
+
+<Snippet file="send-a-request.mdx" />
+
+You should see a response like: `{ "jsonrpc": "2.0", "id": 1, "result": "0x11e3b03" }`

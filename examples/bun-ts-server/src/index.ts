@@ -1,8 +1,21 @@
 import { Nexus } from "@whatsgood/nexus";
 
 const nexus = Nexus.create({
-  providers: ["base"],
-  chains: [84531],
+  providers: [
+    {
+      name: "alchemy",
+      key: process.env.ALCHEMY_KEY,
+    },
+    {
+      name: "infura",
+      key: process.env.INFURA_KEY,
+    },
+    {
+      name: "ankr",
+      key: process.env.ANKR_KEY,
+    },
+  ],
+  chains: [1],
   globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
 });
 

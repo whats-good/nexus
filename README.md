@@ -70,7 +70,7 @@ const nexus = Nexus.create<Env>({
     },
   ],
   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
-  chains: [1, 11155111],
+  chains: [1],
 });
 
 export default {

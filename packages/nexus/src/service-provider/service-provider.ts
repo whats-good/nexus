@@ -64,7 +64,7 @@ export class ServiceProvider {
     if (chainSupport.type === "url-append-key") {
       const key = config.providers[this.name]?.key;
 
-      if (!key) {
+      if (!key || key.length === 0) {
         console.warn(`Key for service provider: ${this.name} not found`);
 
         return undefined;

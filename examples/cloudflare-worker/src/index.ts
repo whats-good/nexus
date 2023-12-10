@@ -17,8 +17,8 @@ const nexus = Nexus.create<Env>({
       key: ctx.ANKR_KEY,
     },
   ],
+  chains: [1],
   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
-  chains: [1, 11155111],
 });
 
 export default {
