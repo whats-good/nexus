@@ -90,7 +90,7 @@ importers:
   packages/create-nexus:
     dependencies:
       '@whatsgood/nexus':
-        specifier: 0.3.0
+        specifier: workspace:*
         version: link:../nexus
       chalk:
         specifier: 4.1.2
