@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.4.0
+
+### Minor Changes
+
+- 449b332: Improved chain support error messages
+
 ## 0.3.0
 
 ### Minor Changes
