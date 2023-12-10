@@ -1,6 +1,6 @@
 {
   "exclude": ["dist", "build", "node_modules"],
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "src/.gitignore.reference"],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "./",

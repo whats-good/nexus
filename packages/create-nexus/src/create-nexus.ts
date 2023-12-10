@@ -3,7 +3,7 @@ import chalk from "chalk";
 import path from "path";
 import * as commander from "commander";
 import prompts from "prompts";
-import validateProjectName from "validate-npm-package-name";
+import validateNpmPackageName from "validate-npm-package-name";
 import {
   VALID_PACKAGE_MANAGERS,
   getPackageManagerFromEnv,
@@ -40,29 +40,32 @@ async function getPlatform(program: commander.Command) {
   const VALID_PLATFORMS = Object.keys(PLATFORMS) as unknown as Platform[];
   let platform = program.opts().platform;
 
-  if (typeof platform === "string") {
-    platform = platform.trim();
-
-    if (VALID_PLATFORMS.includes(platform)) {
-      return platform;
-    } else {
-      console.error(
-        `Invalid platform: ${chalk.red(
-          `"${platform}"`
-        )}. Must be one of: ${VALID_PLATFORMS.join(", ")}`
-      );
-      process.exit(1);
-    }
-  } else {
-    const res = await prompts({
+  if (!platform) {
+    platform = await prompts({
       type: "select",
       name: "platform",
       message: "What platform are you targeting?",
       choices: VALID_PLATFORMS.map((p) => ({ title: p, value: p })),
+      validate: validatePlatform,
     });
-
-    return res.platform;
   }
+  return platform;
+}
+
+function validateProjectName(name: string) {
+  const { validForNewPackages, errors } = validateNpmPackageName(name);
+  if (!validForNewPackages) {
+    console.error(
+      `Could not create a project called ${chalk.red(
+        `"${name}"`
+      )} because of npm naming restrictions:`
+    );
+    errors?.forEach((err) => {
+      console.error(`    ${chalk.red.bold("*")} ${err}`);
+    });
+    process.exit(1);
+  }
+  return name;
 }
 
 async function getProjectPathAndName(program: commander.Command) {
@@ -74,14 +77,9 @@ async function getProjectPathAndName(program: commander.Command) {
     const res = await prompts({
       type: "text",
       name: "projectName",
+      initial: "my-nexus-rpc",
       message: "What is your project name?",
-      validate: (name) => {
-        const { validForNewPackages, errors } = validateProjectName(name);
-        if (!validForNewPackages) {
-          return errors?.join("\n");
-        }
-        return true;
-      },
+      validate: validateProjectName,
     });
 
     if (!res.projectName) {
@@ -101,19 +99,6 @@ async function getProjectPathAndName(program: commander.Command) {
 
   const resolvedProjectPath = path.resolve(projectPath);
 
-  const { validForNewPackages, errors } = validateProjectName(projectName);
-  if (!validForNewPackages) {
-    console.error(
-      `Could not create a project called ${chalk.red(
-        `"${projectName}"`
-      )} because of npm naming restrictions:`
-    );
-    errors?.forEach((err) => {
-      console.error(`    ${chalk.red.bold("*")} ${err}`);
-    });
-    process.exit(1);
-  }
-
   return { projectPath: resolvedProjectPath, projectName };
 }
 
@@ -123,6 +108,7 @@ type ProjectConfig = {
   pkgManager: string;
   platform: Platform;
   autoConfirm: boolean;
+  noGit: boolean;
 };
 
 async function confirmProjectConfig(
@@ -153,13 +139,29 @@ async function confirmProjectConfig(
   }
 }
 
+function validatePlatform(value: string) {
+  if (!Object.keys(PLATFORMS).includes(value)) {
+    console.error(
+      `Invalid platform: ${chalk.red(
+        `"${value}"`
+      )}. Must be one of: ${Object.keys(PLATFORMS).join(", ")}`
+    );
+    process.exit(1);
+  }
+  return value;
+}
+
 export async function init() {
   const packageJson = getPackageJson(
     path.join(__dirname, "..", "package.json")
   );
   const program = new commander.Command(packageJson.name)
     .version(packageJson.version, "-v, --version", "output the current version")
-    .argument("[project-name]", "name of your nexus rpc project")
+    .argument(
+      "[project-name]",
+      "name of your nexus rpc project",
+      validateProjectName
+    )
     .usage(`${chalk.green("[project-name]")} [options]`)
     .option("--path <project-path>", "project path")
 
@@ -167,6 +169,7 @@ export async function init() {
     // .option("--verbose", "print additional logs")
     // .option("--info", "print environment debug info")
     .option("--yes", "skip the confirmation step")
+    .option("--no-git", "skip git initialization")
     // .option(
     //   "--ts, --typescript",
     //   "Initialize as a TypeScript project. (default)"
@@ -193,7 +196,7 @@ export async function init() {
     // TODO: add git support
     // .option("--no-git", "Skip git initialization")
 
-    .option("--platform <platform>", "platform to use")
+    .option("--platform <platform>", "platform to use", validatePlatform)
     .parse(process.argv);
 
   const { projectName, projectPath } = await getProjectPathAndName(program);
@@ -206,6 +209,7 @@ export async function init() {
     projectName,
     projectPath,
     autoConfirm: program.opts().yes,
+    noGit: program.opts().noGit,
   };
 
   const root = path.resolve(projectConfig.projectPath);
@@ -225,7 +229,7 @@ export async function init() {
   await createProject(projectConfig);
 }
 
-async function setNexusPackageVersion(config: ProjectConfig) {
+async function updatePackageJson(config: ProjectConfig) {
   const packageJson = getPackageJson(
     path.join(__dirname, "..", "package.json")
   );
@@ -239,14 +243,67 @@ async function setNexusPackageVersion(config: ProjectConfig) {
     fs.readFileSync(generatedPackageJsonPath, "utf-8")
   );
   generatedPackageJson.dependencies["@whatsgood/nexus"] = currentNexusVersion;
+  generatedPackageJson.name = config.projectName;
   fs.writeFileSync(
     generatedPackageJsonPath,
     JSON.stringify(generatedPackageJson, null, 2)
   );
 }
 
+async function generateEnvFiles(config: ProjectConfig) {
+  console.log(`${chalk.green("Generating environment files...")}`);
+  const { platform } = config;
+  const file = platform === "cloudflare" ? ".dev.vars" : ".env";
+
+  const envVars = [
+    "# All clients must supply their requests with ?key=XXXXX. Set your global key value here.",
+    "NEXUS_GLOBAL_ACCESS_KEY=",
+    "\n",
+    "# Add your service provider keys here",
+    "ALCHEMY_KEY=",
+    "INFURA_KEY=",
+    "ANKR_KEY=",
+  ];
+
+  fs.writeFileSync(path.join(config.projectPath, file), envVars.join("\n"));
+}
+
+async function configGit(config: ProjectConfig) {
+  console.log(`${chalk.green("Generating .gitignore...")}`);
+
+  const gitignoreReference = fs.readFileSync(
+    path.join(__dirname, "../.gitignore.reference")
+  );
+
+  fs.writeFileSync(
+    path.join(config.projectPath, ".gitignore"),
+    gitignoreReference
+  );
+
+  if (config.noGit) {
+    console.log(`${chalk.green("Skipping git initialization")}`);
+  } else {
+    console.log(`${chalk.green("Initializing git...")}`);
+    const childProcess = await import("child_process");
+    childProcess.execSync("git init", {
+      cwd: config.projectPath,
+      stdio: "inherit",
+    });
+    childProcess.execSync("git add .", {
+      cwd: config.projectPath,
+      stdio: "inherit",
+    });
+    childProcess.execSync('git commit -m "Initial commit"', {
+      cwd: config.projectPath,
+      stdio: "inherit",
+    });
+  }
+}
+
 async function installDependencies(config: ProjectConfig) {
   const { pkgManager, projectPath } = config;
+
+  // TODO: standardize chalk.green, chalk.cyan, and how `...` is colored
 
   console.log(
     `${chalk.green("Installing dependencies using: ")} ${chalk.cyan(
@@ -272,10 +329,8 @@ async function createProject(config: ProjectConfig) {
     config.projectPath
   );
   // TODO: add a setting to allow users to choose their version
-  // TODO: add a README to this "create" project
-  // TODO: generate .env files
-  // TODO: if cloudflare worker, generate wrangler.toml and .dev.vars
-  // TODO: generate .gitignore
-  await setNexusPackageVersion(config);
+  await updatePackageJson(config);
+  await generateEnvFiles(config);
   await installDependencies(config);
+  await configGit(config);
 }
