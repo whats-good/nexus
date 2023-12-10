@@ -85,7 +85,6 @@ export class Nexus<TServerContext>
         serverContext,
         request
       ),
-      port: this.getValueOrExecute(this.options.port, serverContext, request),
     };
 
     const config = new Config(configParams);
