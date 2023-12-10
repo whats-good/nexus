@@ -116,11 +116,21 @@ export class RpcProxyContext {
       };
     }
 
-    if (!this.chain?.getStatus(this.config).isEnabled) {
+    if (!this.chain) {
       return {
         status: 400,
         body: {
-          message: "Chain is disabled.",
+          message:
+            "Chain not found. Make sure you have the correct chain id, or the networkName + chainName defined in the url.",
+        },
+      };
+    }
+
+    if (!this.chain.getStatus(this.config).isEnabled) {
+      return {
+        status: 400,
+        body: {
+          message: `Chain not enabled: ${this.chain.chainId}`,
         },
       };
     }
@@ -179,6 +189,8 @@ export class RpcProxyContext {
         code: 500,
       });
     }
+
+    // TODO: consolidate error messages between GET and POST
 
     if (this.chain?.getStatus(this.config).isEnabled === false) {
       return this.buildStatus({

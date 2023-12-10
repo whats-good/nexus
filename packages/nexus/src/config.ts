@@ -15,7 +15,7 @@ interface ProviderConfig {
   enabled: boolean;
 }
 
-type ProviderConfigParam =
+export type ProviderConfigParam =
   | string
   | {
       name: string;
