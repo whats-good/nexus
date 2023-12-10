@@ -35,7 +35,11 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "use-cases", "quickstart"]
+      "pages": [
+        "get-started/introduction",
+        "get-started/use-cases",
+        "get-started/quickstart"
+      ]
     },
     {
       "group": "Development",
@@ -70,7 +74,7 @@
             "integrations/deno"
           ]
         },
-        "changelog"
+        "development/changelog"
       ]
     }
   ],
