@@ -1,0 +1,23 @@
+{
+  "name": "@whatsgood/example-bun-ts-server",
+  "version": "0.0.5",
+  "private": true,
+  "author": {
+    "name": "Kerem Kazan",
+    "email": "kerem@whatsgood.dog"
+  },
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@whatsgood/nexus": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "5.2.2",
+    "bun-types": "1.0.16"
+  }
+}
