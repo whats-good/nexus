@@ -1,5 +1,12 @@
 # @whatsgood/create-nexus
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [449b332]
+  - @whatsgood/nexus@0.4.0
+
 ## 0.6.0
 
 ### Minor Changes

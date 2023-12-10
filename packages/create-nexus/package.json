@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/create-nexus",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": false,
   "access": "public",
   "description": "Create @whatsgood/nexus RPC apps in one command",
@@ -29,7 +29,7 @@
     "commander": "^11.1.0",
     "prompts": "2.4.2",
     "validate-npm-package-name": "^5.0.0",
-    "@whatsgood/nexus": "0.3.0"
+    "@whatsgood/nexus": "0.4.0"
   },
   "devDependencies": {
     "@types/node": "20.10.4",
