@@ -7,11 +7,13 @@ This CLI tool enables you to quickly start building a new [@whatsgood/nexus](htt
 You can create a new project by running:
 
 ```
-npx @whatsgood/create-nexus
+npm init @whatsgood/nexus
 # or
-yarn @whatsgood/create-nexus
+yarn create @whatsgood/nexus
 # or
-pnpm @whatsgood/create-nexus
+pnpm create @whatsgood/nexus
+# or
+bun create @whatsgood/nexus
 
 ```
 

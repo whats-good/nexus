@@ -39,6 +39,22 @@ importers:
         specifier: 4.0.49
         version: 4.0.49
 
+  examples/bun-ts-server:
+    dependencies:
+      '@whatsgood/nexus':
+        specifier: workspace:*
+        version: link:../../packages/nexus
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.10.4
+      bun-types:
+        specifier: 1.0.16
+        version: 1.0.16
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+
   examples/cloudflare-worker:
     dependencies:
       '@whatsgood/nexus':
@@ -2726,6 +2742,10 @@ packages:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
     dependencies:
       semver: 7.5.4
+
+  /bun-types@1.0.16:
+    resolution: {integrity: sha512-GnElqUSGWvFP1Hxv2FdxLuCDzUcHZ1ac/QrOOpZ18r2RHig+S+JXIOT0YIvrHo4XwqLeurlB6CqYminiCxQIEw==}
+    dev: true
 
   /bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}

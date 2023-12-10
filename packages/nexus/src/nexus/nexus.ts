@@ -8,10 +8,10 @@ import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
 import { createDefaultRegistry } from "../registry";
 
-type NexusServerInstance<TServerContext extends Record<string, unknown>> =
-  ServerAdapter<TServerContext, Nexus<TServerContext>>;
-
-type ServerContext = Record<string, unknown>;
+type NexusServerInstance<TServerContext> = ServerAdapter<
+  TServerContext,
+  Nexus<TServerContext>
+>;
 
 type ServerContextConfigMap<TServerContext> = {
   [K in keyof ConfigConstructorParams]:
@@ -22,7 +22,7 @@ type ServerContextConfigMap<TServerContext> = {
       ) => ConfigConstructorParams[K]);
 };
 
-export class Nexus<TServerContext extends ServerContext = ServerContext>
+export class Nexus<TServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
   private readonly requestHandler = new RequestHandler();
@@ -92,7 +92,7 @@ export class Nexus<TServerContext extends ServerContext = ServerContext>
     return this.requestHandler.handle(config, request);
   };
 
-  public static create<TServerContext extends ServerContext = ServerContext>(
+  public static create<TServerContext>(
     options: ServerContextConfigMap<TServerContext>
   ) {
     const server = new Nexus(options);

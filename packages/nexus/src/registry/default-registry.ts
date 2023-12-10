@@ -100,5 +100,15 @@ export const createDefaultRegistry = () => {
       baseURL: "https://rpc.ankr.com/base_goerli",
     });
 
+  defaultRegistry.provider("hardhat").support(31337, {
+    type: "url",
+    url: "http://localhost:8545",
+  });
+
+  defaultRegistry.provider("foundry").support(31337, {
+    type: "url",
+    url: "http://localhost:8545",
+  });
+
   return defaultRegistry;
 };

@@ -23,6 +23,9 @@ const PLATFORMS = {
   express: {
     referenceGitHubDirectory: "examples/express-ts-server",
   },
+  bun: {
+    referenceGitHubDirectory: "examples/bun-ts-server",
+  },
   node: {
     referenceGitHubDirectory: "examples/nodejs-standalone-server",
   },
@@ -186,7 +189,6 @@ export async function init() {
         return value;
       }
     )
-    // TODO: add bun support
 
     // TODO: add git support
     // .option("--no-git", "Skip git initialization")
