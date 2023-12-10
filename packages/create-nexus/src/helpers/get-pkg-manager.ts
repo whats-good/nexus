@@ -1,4 +1,4 @@
-export const VALID_PACKAGE_MANAGERS = ["npm", "pnpm", "yarn"];
+export const VALID_PACKAGE_MANAGERS = ["npm", "pnpm", "yarn", "bun"];
 
 export type PackageManager = (typeof VALID_PACKAGE_MANAGERS)[number];
 
