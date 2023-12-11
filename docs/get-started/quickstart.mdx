@@ -5,20 +5,9 @@ description: "Get up and running with your Nexus RPC server in a few simple step
 
 ## Initialize the project
 
-<CodeGroup>
-```bash npm
+```bash
 npm init @whatsgood/nexus
 ```
-```bash pnpm
-pnpm create @whatsgood/nexus
-```
-```bash yarn
-yarn create @whatsgood/nexus
-```
-```bash bun
-bun create @whatsgood/nexus
-```
-</CodeGroup>
 
 This will prompt you to install the [@whatsgood/create-nexus](https://npmjs.com/package/@whatsgood/create-nexus) CLI tool. Press `y` to install it, and go through the project creation flow:
 
@@ -47,25 +36,9 @@ INFURA_KEY=
 ANKR_KEY=
 ```
 
-## Start the server
+## Send your first request
 
-<CodeGroup>
-```bash npm
-npm run dev
-```
-```bash pnpm
-pnpm dev
-```
-```bash yarn
-yarn dev
-```
-```bash bun
-bun dev
-```
-</CodeGroup>
+First, start the server: ```npm run dev```. And then, open a new terminal window and send a request to the server.  You should see a response like: `{ "jsonrpc": "2.0", "id": 1, "result": "0x11e3b03" }`. Don't forget to use your own global access key. 
 
-## Send a request
 
 <Snippet file="send-a-request.mdx" />
-
-You should see a response like: `{ "jsonrpc": "2.0", "id": 1, "result": "0x11e3b03" }`
