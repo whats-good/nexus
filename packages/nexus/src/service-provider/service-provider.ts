@@ -56,7 +56,7 @@ export class ServiceProvider {
     }
 
     if (!this.isEnabled(config)) {
-      console.warn(`Service provider: ${this.name} is not enabled`);
+      config.logger.warn(`Service provider: ${this.name} is not enabled`);
 
       return undefined;
     }
@@ -65,7 +65,7 @@ export class ServiceProvider {
       const key = config.providers[this.name]?.key;
 
       if (!key || key.length === 0) {
-        console.warn(`Key for service provider: ${this.name} not found`);
+        config.logger.warn(`Key for service provider: ${this.name} not found`);
 
         return undefined;
       }
@@ -74,6 +74,7 @@ export class ServiceProvider {
         url: `${chainSupport.baseURL}/${key}`,
         chain,
         provider: this,
+        logger: config.logger,
       });
     }
 
@@ -81,6 +82,7 @@ export class ServiceProvider {
       url: chainSupport.url,
       chain,
       provider: this,
+      logger: config.logger,
     });
   }
 }

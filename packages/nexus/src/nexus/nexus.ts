@@ -25,7 +25,6 @@ type ServerContextConfigMap<TServerContext> = {
 export class Nexus<TServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
-  private readonly requestHandler = new RequestHandler();
   private readonly defaultRegistry = createDefaultRegistry();
 
   private constructor(
@@ -85,11 +84,17 @@ export class Nexus<TServerContext>
         serverContext,
         request
       ),
+      logger: this.getValueOrExecute(
+        this.options.logger,
+        serverContext,
+        request
+      ),
     };
 
     const config = new Config(configParams);
+    const requestHandler = new RequestHandler(config, request);
 
-    return this.requestHandler.handle(config, request);
+    return requestHandler.handle();
   };
 
   public static create<TServerContext>(

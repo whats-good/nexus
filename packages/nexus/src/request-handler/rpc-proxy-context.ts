@@ -1,4 +1,4 @@
-import type { Config } from "@src/config";
+import type { Config, Logger } from "@src/config";
 import type { RpcEndpointPool } from "../rpc-endpoint/rpc-endpoint-pool";
 import type { Chain, ChainStatus } from "../chain/chain";
 import type { JsonRPCRequest } from "../rpc-endpoint/json-rpc-types";
@@ -33,9 +33,10 @@ export class RpcProxyContext {
   public readonly jsonRPCRequest?: JsonRPCRequest;
   public relayResult?: Awaited<ReturnType<RpcEndpointPool["relay"]>>;
   public readonly path: string;
-  private readonly config: Config;
 
+  private readonly config: Config;
   private readonly clientAccessKey?: string;
+  private readonly logger: Logger;
 
   constructor(params: {
     pool?: RpcEndpointPool;
@@ -54,6 +55,8 @@ export class RpcProxyContext {
 
     this.path = requestUrl.pathname;
     this.clientAccessKey = requestUrl.searchParams.get("key") || undefined;
+
+    this.logger = this.config.logger;
   }
 
   private buildStatus(params: {
@@ -178,7 +181,7 @@ export class RpcProxyContext {
 
     if (this.relayResult?.type === "all-failed") {
       // TODO: communicate the provider failures to the client
-      console.error(
+      this.logger.error(
         "All providers failed to relay the request",
         JSON.stringify(this.relayResult.errors, null, 2)
       );
@@ -212,7 +215,7 @@ export class RpcProxyContext {
 
       const message = `Unexpected Error: Pool could not be built, even though the chain was found: ${this.chain.chainId}`;
 
-      console.error(message);
+      this.logger.error(message);
 
       return this.buildStatus({
         message,

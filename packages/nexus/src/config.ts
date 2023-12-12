@@ -15,6 +15,13 @@ interface ProviderConfig {
   enabled: boolean;
 }
 
+export interface Logger {
+  debug: (message: string) => unknown;
+  info: (message: string) => unknown;
+  warn: (message: string) => unknown;
+  error: (message: string) => unknown;
+}
+
 export type ProviderConfigParam =
   | string
   | {
@@ -54,12 +61,15 @@ export class Config {
 
   public readonly registry: Registry;
 
+  public readonly logger: Logger;
+
   constructor(params: {
     providers: [ProviderConfigParam, ...ProviderConfigParam[]];
     chains: [ChainConfigParam, ...ChainConfigParam[]];
     globalAccessKey?: string;
     recoveryMode?: RpcRelayRecoveryMode;
     registry?: Registry;
+    logger?: Logger;
   }) {
     params.providers.forEach((provider) => {
       if (typeof provider === "string") {
@@ -90,5 +100,6 @@ export class Config {
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.registry = params.registry || createDefaultRegistry();
+    this.logger = params.logger || console;
   }
 }

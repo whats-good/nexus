@@ -1,6 +1,7 @@
 import { Nexus } from "@whatsgood/nexus";
 import express from "express";
 import type { Request as Req, Response as Res } from "express";
+import { logger } from "./logger";
 
 const app = express();
 
@@ -26,10 +27,11 @@ const nexus = Nexus.create<ExpressContext>({
   ],
   chains: [1],
   globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
+  logger,
 });
 
 app.use("/", nexus);
 
 app.listen(4005, () => {
-  console.log("Running on port 4005");
+  logger.info("Running on port 4005");
 });
