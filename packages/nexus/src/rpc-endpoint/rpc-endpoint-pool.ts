@@ -1,4 +1,4 @@
-import type { Config } from "../config";
+import type { Config, Logger } from "../config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
 import type { JsonRPCRequest } from "./json-rpc-types";
@@ -15,6 +15,7 @@ export class RpcEndpointPool {
   public readonly configuredServiceProviders: ServiceProvider[];
   private readonly config: Config;
   private currentServiceProviderIndex = 0;
+  private readonly logger: Logger;
 
   constructor(params: {
     chain: Chain;
@@ -26,6 +27,7 @@ export class RpcEndpointPool {
     this.eligibleServiceProviders = params.eligibleServiceProviders;
     this.configuredServiceProviders = params.configuredServiceProviders;
     this.config = params.config;
+    this.logger = this.config.logger;
   }
 
   // TODO: maybe we should allow recycling of endpoints? what if one comes back up?
@@ -101,7 +103,7 @@ export class RpcEndpointPool {
         return response;
       }
 
-      console.warn(
+      this.logger.warn(
         `Provider: ${endpoint.provider.name} failed to relay request:`,
         JSON.stringify(response, null, 2)
       );

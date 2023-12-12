@@ -41,3 +41,9 @@ dist/
 # env secrets
 .envrc
 .env
+
+# log files
+logs
+log
+*.log
+*.logs

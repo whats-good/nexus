@@ -50,9 +50,9 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler();
+  const requestHandler = new RequestHandler(config, request);
 
-  return requestHandler.handle(config, request);
+  return requestHandler.handle();
 };
 
 describe("request handler - relay", () => {
@@ -210,12 +210,12 @@ describe("request handler - relay", () => {
           }),
         }
       );
-      const requestHandler = new RequestHandler();
-
-      const result = await requestHandler.handle(
+      const requestHandler = new RequestHandler(
         configWithCycleRecovery,
         request
       );
+
+      const result = await requestHandler.handle();
 
       expect(result.ok).toBe(false);
 
@@ -246,9 +246,9 @@ describe("request handler - relay", () => {
           }),
         }
       );
-      const requestHandler = new RequestHandler();
+      const requestHandler = new RequestHandler(config, request);
 
-      const result = await requestHandler.handle(config, request);
+      const result = await requestHandler.handle();
 
       expect(result.ok).toBe(false);
 
@@ -311,9 +311,9 @@ describe("request handler - relay", () => {
         }
       );
 
-      const requestHandler = new RequestHandler();
+      const requestHandler = new RequestHandler(config, request);
 
-      const result = await requestHandler.handle(config, request);
+      const result = await requestHandler.handle();
 
       expect(result.ok).toBe(true);
     });

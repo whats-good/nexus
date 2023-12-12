@@ -1,3 +1,4 @@
+import type { Logger } from "@src/config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
 import type { JsonRPCRequest } from "./json-rpc-types";
@@ -7,17 +8,20 @@ export class RpcEndpoint {
   public readonly url: string;
   public readonly chain: Chain;
   public readonly provider: ServiceProvider;
+  private readonly logger: Logger;
 
   constructor(params: {
     url: string;
     chain: Chain;
     provider: ServiceProvider;
+    logger: Logger;
   }) {
     const { url, chain } = params;
 
     this.url = url;
     this.chain = chain;
     this.provider = params.provider;
+    this.logger = params.logger;
   }
 
   public async isUp(): Promise<boolean> {
@@ -36,7 +40,8 @@ export class RpcEndpoint {
 
       return response.ok;
     } catch (e) {
-      console.warn("provider.isUp returned error", e);
+      this.logger.warn("provider.isUp returned error: ");
+      this.logger.warn(JSON.stringify(e, null, 2));
 
       return false;
     }
@@ -54,14 +59,14 @@ export class RpcEndpoint {
       },
     });
 
-    console.info(`Attempting relay to Provider: ${this.provider.name}`);
+    this.logger.info(`Attempting relay to Provider: ${this.provider.name}`);
 
     let relayResponse: Response;
 
     try {
       relayResponse = await fetch(cleanedRequest);
     } catch (error) {
-      console.error(error);
+      this.logger.error(JSON.stringify(error));
 
       return {
         type: "fetch-failed",
@@ -75,7 +80,8 @@ export class RpcEndpoint {
     try {
       json = await relayResponse.json();
     } catch (error) {
-      console.error("provider failure", error);
+      this.logger.error("provider failure: ");
+      this.logger.error(JSON.stringify(error, null, 2));
 
       // TODO: i should have different error logging for errors that are caught,
       // or not caught.
