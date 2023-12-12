@@ -3,7 +3,7 @@
 # All scripts are assumed to be run from the root of the repo
 
 SOURCE_FILE=./packages/nexus/CHANGELOG.md
-DESTINATION_FILE=./docs/changelog.mdx
+DESTINATION_FILE=./docs/development/changelog.mdx
 
 # Read the contents of file.txt into a variable, preserving newlines
 content=$(while IFS= read -r line; do echo "$line"; done < $SOURCE_FILE)
