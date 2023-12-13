@@ -1,5 +1,18 @@
 # @whatsgood/create-nexus
 
+## 0.9.0
+
+### Minor Changes
+
+- 3a9a0c3: Setting up git and .env
+- 97a0603: Added logger extensions
+
+### Patch Changes
+
+- Updated dependencies [97a0603]
+- Updated dependencies [6445de4]
+  - @whatsgood/nexus@0.6.0
+
 ## 0.8.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.2.5
+
+### Patch Changes
+
+- 6445de4: Pino selected as the default logger
+- Updated dependencies [97a0603]
+- Updated dependencies [6445de4]
+  - @whatsgood/nexus@0.6.0
+
 ## 0.2.4
 
 ### Patch Changes
