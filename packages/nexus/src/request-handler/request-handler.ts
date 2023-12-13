@@ -56,7 +56,13 @@ export class RequestHandler {
       const result = await context.relay();
 
       this.logger.info("result: ");
-      this.logger.info(JSON.stringify(result, null, 2));
+      const statusFirstDigit = Math.floor(result.status / 100);
+
+      if (statusFirstDigit === 4 || statusFirstDigit === 5) {
+        this.logger.error(JSON.stringify(result, null, 2));
+      } else {
+        this.logger.info(JSON.stringify(result, null, 2));
+      }
 
       return Response.json(result.body, {
         status: result.status,

@@ -17,6 +17,7 @@ const nexus = Nexus.create({
   ],
   chains: [1],
   globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
+  environment: process.env.NODE_ENV,
 });
 
 // TODO: fix this workaround. Make ports an official part of the API.
