@@ -19,6 +19,7 @@ const nexus = Nexus.create<Env>({
   ],
   chains: [1],
   globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
+  environment: (ctx) => ctx.NODE_ENV,
 });
 
 export default {

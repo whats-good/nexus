@@ -1,4 +1,5 @@
 import { z } from "zod";
+import pino from "pino";
 import { createDefaultRegistry } from "./registry/default-registry";
 import type { Registry } from "./registry";
 
@@ -63,6 +64,8 @@ export class Config {
 
   public readonly logger: Logger;
 
+  public readonly environment: string;
+
   constructor(params: {
     providers: [ProviderConfigParam, ...ProviderConfigParam[]];
     chains: [ChainConfigParam, ...ChainConfigParam[]];
@@ -70,6 +73,7 @@ export class Config {
     recoveryMode?: RpcRelayRecoveryMode;
     registry?: Registry;
     logger?: Logger;
+    environment?: string;
   }) {
     params.providers.forEach((provider) => {
       if (typeof provider === "string") {
@@ -100,6 +104,19 @@ export class Config {
     this.recoveryMode = params.recoveryMode ?? "cycle";
 
     this.registry = params.registry || createDefaultRegistry();
-    this.logger = params.logger || console;
+
+    this.environment = params.environment || "development";
+
+    if (params.logger) {
+      this.logger = params.logger;
+    } else if (this.environment === "development") {
+      this.logger = pino({
+        transport: {
+          target: "pino-pretty",
+        },
+      });
+    } else {
+      this.logger = pino();
+    }
   }
 }

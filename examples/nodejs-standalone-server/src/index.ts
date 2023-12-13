@@ -18,6 +18,7 @@ const nexus = Nexus.create({
   ],
   chains: [1],
   globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
+  environment: process.env.NODE_ENV,
 });
 
 createServer(nexus).listen(4005, () => {

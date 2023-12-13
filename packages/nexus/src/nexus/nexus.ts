@@ -89,6 +89,11 @@ export class Nexus<TServerContext>
         serverContext,
         request
       ),
+      environment: this.getValueOrExecute(
+        this.options.environment,
+        serverContext,
+        request
+      ),
     };
 
     const config = new Config(configParams);
