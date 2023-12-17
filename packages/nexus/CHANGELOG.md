@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.7.0
+
+### Minor Changes
+
+- 5028b97: Updated @whatwg-node/server version
+
 ## 0.6.0
 
 ### Minor Changes
