@@ -32,6 +32,9 @@ const PLATFORMS = {
   cloudflare: {
     referenceGitHubDirectory: "examples/cloudflare-worker",
   },
+  fastify: {
+    referenceGitHubDirectory: "examples/fastify-ts-server",
+  },
 } as const;
 
 type Platform = keyof typeof PLATFORMS;
