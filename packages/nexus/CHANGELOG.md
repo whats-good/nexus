@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.6.0
+
+### Minor Changes
+
+- 97a0603: Added logger extensions
+- 6445de4: Pino selected as the default logger
+
 ## 0.5.0
 
 ### Minor Changes
