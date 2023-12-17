@@ -1,5 +1,18 @@
 # @whatsgood/example-nodejs-standalone-server
 
+## 0.1.0
+
+### Minor Changes
+
+- 97a0603: Added logger extensions
+
+### Patch Changes
+
+- 6445de4: Pino selected as the default logger
+- Updated dependencies [97a0603]
+- Updated dependencies [6445de4]
+  - @whatsgood/nexus@0.6.0
+
 ## 0.0.6
 
 ### Patch Changes
