@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.11.0
+
+### Minor Changes
+
+- ddae609: (fix) Fixed cli bug on platform picker and project name validation
+
 ## 0.10.0
 
 ### Minor Changes
