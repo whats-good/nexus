@@ -28,6 +28,9 @@ export async function downloadGitHubDir(
   // Download each file in the directory
   for (const item of directoryContent) {
     if (item.type === "file") {
+      if (item.download_url.includes("CHANGELOG.md")) {
+        continue;
+      }
       console.log(`Downloading ${path.join(dirPath, item.name)}...`);
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir);
