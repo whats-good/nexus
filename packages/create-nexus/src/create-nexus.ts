@@ -44,31 +44,21 @@ async function getPlatform(program: commander.Command) {
   let platform = program.opts().platform;
 
   if (!platform) {
-    platform = await prompts({
+    const result = await prompts({
       type: "select",
       name: "platform",
       message: "What platform are you targeting?",
       choices: VALID_PLATFORMS.map((p) => ({ title: p, value: p })),
       validate: validatePlatform,
     });
+    platform = result.platform;
   }
   return platform;
 }
 
-function validateProjectName(name: string) {
-  const { validForNewPackages, errors } = validateNpmPackageName(name);
-  if (!validForNewPackages) {
-    console.error(
-      `Could not create a project called ${chalk.red(
-        `"${name}"`
-      )} because of npm naming restrictions:`
-    );
-    errors?.forEach((err) => {
-      console.error(`    ${chalk.red.bold("*")} ${err}`);
-    });
-    process.exit(1);
-  }
-  return name;
+function validateProjectName(name: string): boolean {
+  const { validForNewPackages } = validateNpmPackageName(name);
+  return validForNewPackages;
 }
 
 async function getProjectPathAndName(program: commander.Command) {
@@ -82,7 +72,13 @@ async function getProjectPathAndName(program: commander.Command) {
       name: "projectName",
       initial: "my-nexus-rpc",
       message: "What is your project name?",
-      validate: validateProjectName,
+      validate: (name) => {
+        if (!validateProjectName(name)) {
+          return "Not a valid npm package name.";
+        } else {
+          return true;
+        }
+      },
     });
 
     if (!res.projectName) {
@@ -160,11 +156,14 @@ export async function init() {
   );
   const program = new commander.Command(packageJson.name)
     .version(packageJson.version, "-v, --version", "output the current version")
-    .argument(
-      "[project-name]",
-      "name of your nexus rpc project",
-      validateProjectName
-    )
+    .argument("[project-name]", "name of your nexus rpc project", (name) => {
+      if (!validateProjectName(name)) {
+        throw new commander.InvalidArgumentError(
+          "Not a valid npm package name."
+        );
+      }
+      return name;
+    })
     .usage(`${chalk.green("[project-name]")} [options]`)
     .option("--path <project-path>", "project path")
 
