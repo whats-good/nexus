@@ -1,5 +1,11 @@
 # @whatsgood/create-nexus
 
+## 0.10.0
+
+### Minor Changes
+
+- d52e08f: Added fastify support
+
 ## 0.9.0
 
 ### Minor Changes
