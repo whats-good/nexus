@@ -47,3 +47,8 @@ logs
 log
 *.log
 *.logs
+
+# build files
+build
+dist
+tsconfig.tsbuildinfo
