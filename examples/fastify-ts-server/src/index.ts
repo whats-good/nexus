@@ -33,16 +33,29 @@ app.route({
   method: ["GET", "POST", "OPTIONS"],
 
   handler: async (req, reply) => {
-    const response = await nexus.handleNodeRequest(req, {
-      req,
-      reply,
-    });
-    response.headers.forEach((value, key) => {
-      reply.header(key, value);
-    });
-    reply.status(response.status);
-    reply.send(response.body || undefined);
-    return reply;
+    try {
+      const response = await nexus.handleNodeRequest(req, {
+        req,
+        reply,
+      });
+      response.headers.forEach((value, key) => {
+        reply.header(key, value);
+      });
+      reply.status(response.status);
+      const contentType = response.headers.get("content-type");
+      if (contentType.includes("application/json")) {
+        const data = await response.json();
+        reply.send(data);
+      } else if (contentType.includes("text/")) {
+        const data = await response.text();
+        reply.send(data);
+      } else {
+        const buffer = await response.arrayBuffer();
+        reply.type(contentType).send(buffer);
+      }
+    } catch (e) {
+      reply.send(e);
+    }
   },
 });
 

@@ -198,8 +198,8 @@ importers:
   packages/nexus:
     dependencies:
       '@whatwg-node/server':
-        specifier: ^0.9.16
-        version: 0.9.16
+        specifier: 0.9.22
+        version: 0.9.22
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.1
@@ -2328,8 +2328,8 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@whatwg-node/server@0.9.16:
-    resolution: {integrity: sha512-gktQkRyONEw2EGpx7UZaC6zNlUm21CGlqAHQXU3QC6W0zlLM5ZQNDCeD66q/nsPHDV08X2NTHlABsuAEk5rh/w==}
+  /@whatwg-node/server@0.9.22:
+    resolution: {integrity: sha512-DDzJtPnQj+HzxseHcSqA/u6TwqNCDB90chrabN1UznpIGOkeA4mpR1LF/zDzqcgjBA/TjFkSeHItwOyl+6FfWw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.14
