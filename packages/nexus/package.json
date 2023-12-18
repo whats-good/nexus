@@ -29,7 +29,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsup",
+    "build": "tsc && tsup",
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",

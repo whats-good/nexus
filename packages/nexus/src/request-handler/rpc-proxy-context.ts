@@ -181,10 +181,8 @@ export class RpcProxyContext {
 
     if (this.relayResult?.type === "all-failed") {
       // TODO: communicate the provider failures to the client
-      this.logger.error(
-        "All providers failed to relay the request",
-        JSON.stringify(this.relayResult.errors, null, 2)
-      );
+      this.logger.error("All providers failed to relay the request");
+      this.logger.error(JSON.stringify(this.relayResult.errors, null, 2));
 
       return this.buildStatus({
         message: "All providers failed.",

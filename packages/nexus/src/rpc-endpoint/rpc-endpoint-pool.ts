@@ -104,9 +104,9 @@ export class RpcEndpointPool {
       }
 
       this.logger.warn(
-        `Provider: ${endpoint.provider.name} failed to relay request:`,
-        JSON.stringify(response, null, 2)
+        `Provider: ${endpoint.provider.name} failed to relay request:`
       );
+      this.logger.warn(JSON.stringify(response, null, 2));
 
       errors.push({
         provider: endpoint.provider.name,
