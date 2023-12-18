@@ -43,6 +43,10 @@ export const createDefaultRegistry = () => {
       baseURL: "https://base-goerli.g.alchemy.com/v2",
       type: "url-append-key",
     })
+    .support(84532, {
+      baseURL: "https://base-sepolia.g.alchemy.com/v2",
+      type: "url-append-key",
+    })
 
     .provider("base")
     .support(8453, {
