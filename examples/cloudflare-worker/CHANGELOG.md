@@ -1,5 +1,12 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [0e37a90]
+  - @whatsgood/nexus@0.8.0
+
 ## 0.2.6
 
 ### Patch Changes

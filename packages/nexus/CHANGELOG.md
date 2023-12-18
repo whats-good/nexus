@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.8.0
+
+### Minor Changes
+
+- 0e37a90: Added base-sepoli & alchemy support
+
 ## 0.7.0
 
 ### Minor Changes
