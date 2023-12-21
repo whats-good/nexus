@@ -40,6 +40,7 @@
     "test:unit:coverage": "pnpm test:unit --coverage"
   },
   "dependencies": {
+    "@whatwg-node/fetch": "^0.9.14",
     "@whatwg-node/server": "0.9.22",
     "path-to-regexp": "^6.2.1",
     "pino": "^8.17.0",

@@ -1,3 +1,4 @@
+import { Request, fetch } from "@whatwg-node/fetch";
 import type { Logger } from "@src/config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
@@ -26,7 +27,7 @@ export class RpcEndpoint {
 
   public async isUp(): Promise<boolean> {
     try {
-      const response = await fetch(this.url, {
+      const request = new Request(this.url, {
         method: "POST",
         body: JSON.stringify({
           jsonrpc: "2.0",
@@ -35,6 +36,7 @@ export class RpcEndpoint {
           id: 1,
         }),
       });
+      const response = await fetch(request);
 
       // TODO: check for the parsed response
 

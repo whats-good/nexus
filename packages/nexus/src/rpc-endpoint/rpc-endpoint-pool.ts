@@ -1,3 +1,4 @@
+import { Response } from "@whatwg-node/fetch";
 import type { Config, Logger } from "../config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
