@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.9.0
+
+### Minor Changes
+
+- d2fdc7a: Using @whatwg-node/fetch instead of out of the box fetch api
+
 ## 0.8.0
 
 ### Minor Changes

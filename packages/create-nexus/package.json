@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/create-nexus",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "private": false,
   "access": "public",
   "description": "Create @whatsgood/nexus RPC apps in one command",
