@@ -3,6 +3,7 @@ import type {
   ServerAdapter,
   ServerAdapterBaseObject,
 } from "@whatwg-node/server";
+import type { Response } from "@whatwg-node/fetch";
 import { RequestHandler } from "../request-handler/request-handler";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";

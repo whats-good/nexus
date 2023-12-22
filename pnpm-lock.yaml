@@ -197,6 +197,9 @@ importers:
 
   packages/nexus:
     dependencies:
+      '@whatwg-node/fetch':
+        specifier: ^0.9.14
+        version: 0.9.14
       '@whatwg-node/server':
         specifier: 0.9.22
         version: 0.9.22

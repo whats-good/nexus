@@ -1,3 +1,4 @@
+import { Response } from "@whatwg-node/fetch";
 import { matchPath } from "@src/routes";
 import { JsonRPCRequestSchema } from "@src/rpc-endpoint/json-rpc-types";
 import { RpcEndpointPoolFactory } from "@src/rpc-endpoint/rpc-endpoint-pool-factory";
