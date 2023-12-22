@@ -1,5 +1,16 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.4.0
+
+### Minor Changes
+
+- d2fdc7a: Using @whatwg-node/fetch instead of out of the box fetch api
+
+### Patch Changes
+
+- Updated dependencies [d2fdc7a]
+  - @whatsgood/nexus@0.9.0
+
 ## 0.3.1
 
 ### Patch Changes
