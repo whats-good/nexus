@@ -1,5 +1,6 @@
 import { Chain } from "@src/chain";
 import { Network } from "@src/chain/network";
+import { methodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
 import type { ChainSupport } from "@src/service-provider";
 import { ServiceProvider } from "@src/service-provider";
 
@@ -52,19 +53,41 @@ class ChainBuilder {
 }
 
 export class Registry {
-  private readonly networks = new Map<string, Network>();
-  private readonly chains = new Map<number, Chain>();
-  private readonly serviceProviders = new Map<string, ServiceProvider>();
-  private readonly supportedChains = new Map<number, Set<ServiceProvider>>();
-
+  private readonly networks: Map<string, Network>;
+  private readonly chains: Map<number, Chain>;
+  private readonly serviceProviders: Map<string, ServiceProvider>;
+  private readonly supportedChains: Map<number, Set<ServiceProvider>>;
   private readonly networkBuilder = new NetworkBuilder(this);
   private readonly serviceProviderBuilder = new ServiceProviderBuilder(this);
 
-  public network(name: string, aliases?: string[]) {
+  public readonly methodDescriptorRegistry = methodDescriptorRegistry;
+
+  constructor(
+    params: {
+      networks?: Map<string, Network>;
+      chains?: Map<number, Chain>;
+      serviceProviders?: Map<string, ServiceProvider>;
+      supportedChains?: Map<number, Set<ServiceProvider>>;
+    } = {}
+  ) {
+    this.networks = params.networks || new Map<string, Network>();
+    this.chains = params.chains || new Map<number, Chain>();
+    this.serviceProviders =
+      params.serviceProviders || new Map<string, ServiceProvider>();
+    this.supportedChains =
+      params.supportedChains || new Map<number, Set<ServiceProvider>>();
+  }
+
+  public network(
+    name: string,
+    aliases?: string[]
+  ): ReturnType<RecursiveChainFn> {
     return this.networkBuilder.network(name, aliases);
   }
 
-  public provider(name: string) {
+  public provider(
+    name: string
+  ): ReturnType<ServiceProviderBuilder<Registry>["serviceProvider"]> {
     return this.serviceProviderBuilder.serviceProvider(name);
   }
 
@@ -190,8 +213,8 @@ export class Registry {
   }
 }
 
-class ServiceProviderBuilder {
-  constructor(private readonly registry: Registry) {}
+class ServiceProviderBuilder<R extends Registry> {
+  constructor(private readonly registry: R) {}
 
   public serviceProvider(name: string) {
     const serviceProvider = ServiceProvider.init(this.registry, name);
@@ -207,25 +230,25 @@ class ServiceProviderBuilder {
   }
 }
 
-type RecursiveChainSupportFn = (
+type RecursiveChainSupportFn<R extends Registry> = (
   chainId: number,
   support: ChainSupport
 ) => {
-  support: RecursiveChainSupportFn;
-  provider: ServiceProviderBuilder["serviceProvider"];
+  support: RecursiveChainSupportFn<R>;
+  provider: ServiceProviderBuilder<R>["serviceProvider"];
 };
 
-class ChainSupportBuilder {
+class ChainSupportBuilder<R extends Registry> {
   constructor(
-    private readonly registry: Registry,
-    private readonly serviceProviderBuilder: ServiceProviderBuilder,
+    private readonly registry: R,
+    private readonly serviceProviderBuilder: ServiceProviderBuilder<R>,
     private readonly serviceProvider: ServiceProvider
   ) {}
 
   public chainSupport(
     chainId: number,
     support: ChainSupport
-  ): ReturnType<RecursiveChainSupportFn> {
+  ): ReturnType<RecursiveChainSupportFn<R>> {
     this.serviceProvider.addChainSupport(chainId, support);
     this.registry.registerSupportedChain(chainId, this.serviceProvider);
 

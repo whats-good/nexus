@@ -3,6 +3,8 @@ import { Registry } from "./registry";
 export const createDefaultRegistry = () => {
   const defaultRegistry = new Registry();
 
+  // TODO: cleanup the builder api. make it immutable.
+
   defaultRegistry
     .network("ethereum", ["eth"])
     .chain(1, "mainnet")

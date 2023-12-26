@@ -295,5 +295,20 @@ describe("registry", () => {
 
       expect(endpointAfter?.url).toEqual("https://second-url.com/key-1");
     });
+
+    // it("should return existing method descriptors when queried", () => {
+    //   const registry1 = new Registry();
+    //   const registry2 = registry1.methodDescriptor({
+    //     name: "eth_blockNumber",
+    //     params: [],
+    //     result: z.number(),
+    //   });
+
+    //   const eth_blockNumber = registry2.methodDescriptorMap.eth_blockNumber;
+
+    //   expect(eth_blockNumber).toBeDefined();
+    // });
+
+    // // TODO: add standalone tests to the method descriptors
   });
 });
