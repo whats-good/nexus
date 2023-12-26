@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { Chain, Network } from "@src/chain";
 import { Config } from "@src/config";
 import { Registry } from "./registry";
@@ -6,20 +7,20 @@ import { Registry } from "./registry";
 describe("registry", () => {
   describe("init apis", () => {
     it("should return undefined for unregistered networks", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       expect(registry.getNetwork("mainnet")).toBeUndefined();
     });
 
     it("should return registered networks", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const eth = Network.init(registry, "ethereum");
 
       expect(registry.getNetwork("ethereum")).toEqual(eth);
     });
 
     it("should respect aliases", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const eth = Network.init(registry, "ethereum", ["eth"]);
 
       expect(registry.getNetwork("ethereum")).toEqual(eth);
@@ -27,7 +28,7 @@ describe("registry", () => {
     });
 
     it("should not respect non-existing aliases", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       Network.init(registry, "ethereum", ["eth"]);
 
@@ -35,7 +36,7 @@ describe("registry", () => {
     });
 
     it("should extend and override existing networks", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       const network1 = Network.init(registry, "ethereum");
 
@@ -50,7 +51,7 @@ describe("registry", () => {
     });
 
     it("should not retrieve unregistered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       expect(registry.getChainById(1)).toBeUndefined();
       Network.init(registry, "ethereum");
@@ -58,7 +59,7 @@ describe("registry", () => {
     });
 
     it("should retrieve registered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const ethereum = Network.init(registry, "ethereum");
       const mainnet = Chain.init(registry, {
         chainId: 1,
@@ -70,7 +71,7 @@ describe("registry", () => {
     });
 
     it("should allow retrieving chains by network and name", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const ethereum = Network.init(registry, "ethereum");
       const mainnet = Chain.init(registry, {
         chainId: 1,
@@ -82,7 +83,7 @@ describe("registry", () => {
     });
 
     it("should allow retrieving chains by network and name post update", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const ethereum = Network.init(registry, "ethereum");
       const mainnet = Chain.init(registry, {
         chainId: 1,
@@ -100,28 +101,28 @@ describe("registry", () => {
 
   describe("builder apis", () => {
     it("should return registered networks", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum");
       expect(registry.getNetwork("ethereum")?.name).toEqual("ethereum");
     });
 
     it("should respect aliases", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum", ["eth"]);
       expect(registry.getNetwork("eth")?.name).toEqual("ethereum");
     });
 
     it("should not respect non-existing aliases", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum", ["eth"]);
       expect(registry.getNetwork("ether")).toBeUndefined();
     });
 
     it("should extend and override existing networks", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum");
       expect(registry.getNetwork("ethereum")?.name).toEqual("ethereum");
@@ -132,21 +133,21 @@ describe("registry", () => {
     });
 
     it("should not retrieve unregistered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum");
       expect(registry.getChainById(1)).toBeUndefined();
     });
 
     it("should retrieve registered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       expect(registry.getChainById(1)?.name).toEqual("mainnet");
     });
 
     it("should allow retrieving chains by network and name", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       expect(registry.getChainByNames("ethereum", "mainnet")?.name).toEqual(
@@ -155,7 +156,7 @@ describe("registry", () => {
     });
 
     it("should allow retrieving chains by network and name post update", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       expect(registry.getChainByNames("ethereum", "mainnet")?.name).toEqual(
@@ -171,7 +172,7 @@ describe("registry", () => {
     });
 
     it("should not allow registering service providers to unregistered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       expect(() =>
         registry.provider("alchemy").support(1, {
@@ -182,7 +183,7 @@ describe("registry", () => {
     });
 
     it("should allow registering service providers to registered chains", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       registry.provider("alchemy").support(1, {
@@ -192,7 +193,7 @@ describe("registry", () => {
     });
 
     it("should allow retrieving service providers by chain and name", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       registry
@@ -225,7 +226,7 @@ describe("registry", () => {
     });
 
     it("provider.support should be idempotent from registry perspective", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum").chain(1, "mainnet");
       registry.provider("alchemy").support(1, {
@@ -252,7 +253,7 @@ describe("registry", () => {
     });
 
     it("should override existing service provider chain support", () => {
-      const registry = new Registry();
+      const registry = Registry.init();
       const config = new Config({
         registry,
         chains: [1],
@@ -295,5 +296,20 @@ describe("registry", () => {
 
       expect(endpointAfter?.url).toEqual("https://second-url.com/key-1");
     });
+
+    it("should return existing method descriptors when queried", () => {
+      const registry1 = Registry.init();
+      const registry2 = registry1.methodDescriptor({
+        name: "eth_blockNumber",
+        params: [],
+        result: z.number(),
+      });
+
+      const eth_blockNumber = registry2.methodDescriptorMap.eth_blockNumber;
+
+      expect(eth_blockNumber).toBeDefined();
+    });
+
+    // TODO: add standalone tests to the method descriptors
   });
 });

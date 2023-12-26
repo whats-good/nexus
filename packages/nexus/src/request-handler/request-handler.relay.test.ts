@@ -278,7 +278,7 @@ describe("request handler - relay", () => {
     });
 
     it("should successfully relay", async () => {
-      const registry = new Registry();
+      const registry = Registry.init();
 
       registry.network("ethereum", ["eth"]).chain(1, "mainnet");
       registry.provider("alchemy").support(1, {
