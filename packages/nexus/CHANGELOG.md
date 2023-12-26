@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.10.0
+
+### Minor Changes
+
+- c40d25b: Introducing method-descriptors: a type-safety measure to describe rpc methods
+
 ## 0.9.0
 
 ### Minor Changes
