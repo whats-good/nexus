@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { Registry } from "./registry";
 
 export const createDefaultRegistry = () => {

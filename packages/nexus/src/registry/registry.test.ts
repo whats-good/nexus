@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
 import { Chain, Network } from "@src/chain";
 import { Config } from "@src/config";
 import { Registry } from "./registry";
