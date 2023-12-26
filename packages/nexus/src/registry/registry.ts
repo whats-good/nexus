@@ -1,30 +1,24 @@
-import { z } from "zod";
 import { Chain } from "@src/chain";
 import { Network } from "@src/chain/network";
+import { methodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
 import type { ChainSupport } from "@src/service-provider";
 import { ServiceProvider } from "@src/service-provider";
-import { MethodDescriptor, descriptor } from "@src/method-descriptor";
-import type {
-  AnyMethodDescriptorTuple,
-  MethodDescriptorMapOf,
-  AnyResultSchema,
-} from "@src/method-descriptor";
 
-type RecursiveChainFn<R extends Registry<any>> = (
+type RecursiveChainFn = (
   chainId: number,
   name: string
 ) => {
-  chain: RecursiveChainFn<R>;
-  network: NetworkBuilder<R>["network"];
+  chain: RecursiveChainFn;
+  network: NetworkBuilder["network"];
 };
 
-class NetworkBuilder<R extends Registry<any>> {
-  constructor(private readonly registry: R) {}
+class NetworkBuilder {
+  constructor(private readonly registry: Registry) {}
 
   public network(
     name: string,
     aliases?: string[]
-  ): ReturnType<RecursiveChainFn<R>> {
+  ): ReturnType<RecursiveChainFn> {
     const network = Network.init(this.registry, name, aliases);
     const chainBuilder = new ChainBuilder(this.registry, this, network);
 
@@ -37,14 +31,14 @@ class NetworkBuilder<R extends Registry<any>> {
   }
 }
 
-class ChainBuilder<R extends Registry<any>> {
+class ChainBuilder {
   constructor(
-    private readonly registry: R,
-    private readonly networkBuilder: NetworkBuilder<R>,
+    private readonly registry: Registry,
+    private readonly networkBuilder: NetworkBuilder,
     private readonly network: Network
   ) {}
 
-  public init(chainId: number, name: string): ReturnType<RecursiveChainFn<R>> {
+  public init(chainId: number, name: string): ReturnType<RecursiveChainFn> {
     Chain.init(this.registry, {
       chainId,
       name,
@@ -58,7 +52,7 @@ class ChainBuilder<R extends Registry<any>> {
   }
 }
 
-export class Registry<T extends AnyMethodDescriptorTuple> {
+export class Registry {
   private readonly networks: Map<string, Network>;
   private readonly chains: Map<number, Chain>;
   private readonly serviceProviders: Map<string, ServiceProvider>;
@@ -66,53 +60,34 @@ export class Registry<T extends AnyMethodDescriptorTuple> {
   private readonly networkBuilder = new NetworkBuilder(this);
   private readonly serviceProviderBuilder = new ServiceProviderBuilder(this);
 
-  public readonly methodDescriptorMap: MethodDescriptorMapOf<T>;
-  public readonly methodDescriptorTuple: T;
+  public readonly methodDescriptorRegistry = methodDescriptorRegistry;
 
-  public static init() {
-    return new Registry({
-      methodDescriptorTuple: [descriptor("__ignore", [z.never()], z.never())],
-    });
-  }
-
-  constructor(params: {
-    methodDescriptorTuple: T;
-    networks?: Map<string, Network>;
-    chains?: Map<number, Chain>;
-    serviceProviders?: Map<string, ServiceProvider>;
-    supportedChains?: Map<number, Set<ServiceProvider>>;
-  }) {
-    this.methodDescriptorTuple = params.methodDescriptorTuple;
-
+  constructor(
+    params: {
+      networks?: Map<string, Network>;
+      chains?: Map<number, Chain>;
+      serviceProviders?: Map<string, ServiceProvider>;
+      supportedChains?: Map<number, Set<ServiceProvider>>;
+    } = {}
+  ) {
     this.networks = params.networks || new Map<string, Network>();
     this.chains = params.chains || new Map<number, Chain>();
     this.serviceProviders =
       params.serviceProviders || new Map<string, ServiceProvider>();
     this.supportedChains =
       params.supportedChains || new Map<number, Set<ServiceProvider>>();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the object can't be initialized as the final desired type.
-    this.methodDescriptorMap = params.methodDescriptorTuple.reduce(
-      (acc, cur) => {
-        return {
-          ...acc,
-          [cur.methodName]: cur,
-        };
-      },
-      {}
-    ) as any;
   }
 
   public network(
     name: string,
     aliases?: string[]
-  ): ReturnType<RecursiveChainFn<Registry<T>>> {
+  ): ReturnType<RecursiveChainFn> {
     return this.networkBuilder.network(name, aliases);
   }
 
   public provider(
     name: string
-  ): ReturnType<ServiceProviderBuilder<Registry<T>>["serviceProvider"]> {
+  ): ReturnType<ServiceProviderBuilder<Registry>["serviceProvider"]> {
     return this.serviceProviderBuilder.serviceProvider(name);
   }
 
@@ -236,25 +211,9 @@ export class Registry<T extends AnyMethodDescriptorTuple> {
   public getServiceProviderByName(name: string): ServiceProvider | undefined {
     return this.serviceProviders.get(name);
   }
-
-  public methodDescriptor<
-    MN extends string,
-    P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
-    R extends AnyResultSchema,
-  >({ name, params, result }: { name: MN; params: P; result: R }) {
-    const newDescriptor = MethodDescriptor.init(name, params, result);
-
-    return new Registry({
-      methodDescriptorTuple: [newDescriptor, ...this.methodDescriptorTuple],
-      chains: this.chains,
-      networks: this.networks,
-      serviceProviders: this.serviceProviders,
-      supportedChains: this.supportedChains,
-    });
-  }
 }
 
-class ServiceProviderBuilder<R extends Registry<any>> {
+class ServiceProviderBuilder<R extends Registry> {
   constructor(private readonly registry: R) {}
 
   public serviceProvider(name: string) {
@@ -271,7 +230,7 @@ class ServiceProviderBuilder<R extends Registry<any>> {
   }
 }
 
-type RecursiveChainSupportFn<R extends Registry<any>> = (
+type RecursiveChainSupportFn<R extends Registry> = (
   chainId: number,
   support: ChainSupport
 ) => {
@@ -279,7 +238,7 @@ type RecursiveChainSupportFn<R extends Registry<any>> = (
   provider: ServiceProviderBuilder<R>["serviceProvider"];
 };
 
-class ChainSupportBuilder<R extends Registry<any>> {
+class ChainSupportBuilder<R extends Registry> {
   constructor(
     private readonly registry: R,
     private readonly serviceProviderBuilder: ServiceProviderBuilder<R>,

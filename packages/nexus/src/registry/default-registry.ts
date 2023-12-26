@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Registry } from "./registry";
 
 export const createDefaultRegistry = () => {
-  const defaultRegistry = Registry.init();
+  const defaultRegistry = new Registry();
 
   // TODO: cleanup the builder api. make it immutable.
 
@@ -117,34 +117,5 @@ export const createDefaultRegistry = () => {
     url: "http://localhost:8545",
   });
 
-  return defaultRegistry
-    .methodDescriptor({
-      name: "eth_getBlockByHash",
-      params: [
-        z.union([z.string(), z.number()]),
-        z.union([z.boolean(), z.number()]).optional(),
-      ],
-      result: z.string(),
-    })
-
-    .methodDescriptor({
-      name: "eth_getBlockByNumber",
-      params: [
-        z.union([z.string(), z.number()]),
-        z.union([z.boolean(), z.number()]).optional(),
-      ],
-      result: z.string(),
-    })
-
-    .methodDescriptor({
-      name: "eth_blockNumber",
-      params: [],
-      result: z.number(),
-    })
-
-    .methodDescriptor({
-      name: "eth_getBalance",
-      params: [z.string(), z.union([z.string(), z.number()])],
-      result: z.string(),
-    });
+  return defaultRegistry;
 };

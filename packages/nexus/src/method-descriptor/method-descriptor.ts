@@ -141,3 +141,30 @@ export type MethodDescriptorMapOf<T extends AnyMethodDescriptorTuple> = Omit<
   },
   "__ignore"
 >;
+
+export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
+  public readonly methodDescriptorMap: MethodDescriptorMapOf<T>;
+
+  constructor(public readonly methodDescriptorTuple: T) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the object can't be initialized as the final desired type.
+    this.methodDescriptorMap = this.methodDescriptorTuple.reduce((acc, cur) => {
+      return {
+        ...acc,
+        [cur.methodName]: cur,
+      };
+    }, {}) as any;
+  }
+
+  public methodDescriptor<
+    MN extends string,
+    P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
+    R extends AnyResultSchema,
+  >({ name, params, result }: { name: MN; params: P; result: R }) {
+    const newDescriptor = MethodDescriptor.init(name, params, result);
+
+    return new MethodDescriptorRegistry([
+      newDescriptor,
+      ...this.methodDescriptorTuple,
+    ]);
+  }
+}
