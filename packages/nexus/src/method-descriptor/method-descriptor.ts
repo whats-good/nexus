@@ -90,20 +90,19 @@ export class MethodDescriptor<
   }
 
   public static init = <
-    InitM extends string,
+    InitMN extends string,
     InitP extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [], // TODO: this means null-param methods need to be processed as empty array methods.
     InitR extends AnyResultSchema,
-  >(
-    method: InitM,
-    params: InitP,
-    result: InitR
-  ) => {
-    return new MethodDescriptor(
-      method,
-      z.literal(method),
-      z.tuple(params),
-      result
-    );
+  >({
+    name,
+    params,
+    result,
+  }: {
+    name: InitMN;
+    params: InitP;
+    result: InitR;
+  }) => {
+    return new MethodDescriptor(name, z.literal(name), z.tuple(params), result);
   };
 }
 
@@ -126,8 +125,6 @@ export type AnyMethodDescriptorTuple = [
   ...AnyMethodDescriptor[],
 ];
 
-export const descriptor = MethodDescriptor.init;
-
 type MethodNamesOfMethodDescriptorTuple<T extends AnyMethodDescriptorTuple> =
   T[number]["methodName"];
 
@@ -145,7 +142,7 @@ export type MethodDescriptorMapOf<T extends AnyMethodDescriptorTuple> = Omit<
 export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
   public readonly methodDescriptorMap: MethodDescriptorMapOf<T>;
 
-  constructor(public readonly methodDescriptorTuple: T) {
+  private constructor(public readonly methodDescriptorTuple: T) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the object can't be initialized as the final desired type.
     this.methodDescriptorMap = this.methodDescriptorTuple.reduce((acc, cur) => {
       return {
@@ -155,12 +152,22 @@ export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
     }, {}) as any;
   }
 
+  public static init() {
+    return new MethodDescriptorRegistry([
+      MethodDescriptor.init({
+        name: "__ignore",
+        params: [],
+        result: z.never(),
+      }),
+    ]);
+  }
+
   public methodDescriptor<
     MN extends string,
     P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
     R extends AnyResultSchema,
   >({ name, params, result }: { name: MN; params: P; result: R }) {
-    const newDescriptor = MethodDescriptor.init(name, params, result);
+    const newDescriptor = MethodDescriptor.init({ name, params, result });
 
     return new MethodDescriptorRegistry([
       newDescriptor,

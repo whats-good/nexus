@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { MethodDescriptorRegistry, descriptor } from "./method-descriptor";
+import { MethodDescriptorRegistry } from "./method-descriptor";
 
-const baseRegistry = new MethodDescriptorRegistry([
-  descriptor("__ignore", [z.never()], z.never()),
-]);
+const baseRegistry = MethodDescriptorRegistry.init();
 
 export const methodDescriptorRegistry = baseRegistry
   .methodDescriptor({
