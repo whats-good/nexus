@@ -7,21 +7,26 @@ export const createDefaultRegistry = () => {
 
   defaultRegistry
     .network("ethereum", ["eth"])
-    .chain(1, "mainnet")
-    .chain(4, "rinkeby")
-    .chain(5, "goerli")
-    .chain(11155111, "sepolia")
+    .chain({ chainId: 1, name: "mainnet", blockTime: 12 })
+    .chain({ chainId: 4, name: "rinkeby", blockTime: 15 })
+    .chain({ chainId: 5, name: "goerli", blockTime: 15 })
+    .chain({ chainId: 11155111, name: "sepolia", blockTime: 14 })
 
     .network("base")
-    .chain(8453, "mainnet")
-    .chain(84531, "goerli")
-    .chain(84532, "sepolia")
+    .chain({ chainId: 8453, name: "mainnet", blockTime: 2 })
+    .chain({ chainId: 84531, name: "goerli", blockTime: 2 })
+    .chain({ chainId: 84532, name: "sepolia", blockTime: 2 })
 
     .network("polygon")
-    .chain(80001, "mumbai")
+    .chain({ chainId: 80001, name: "mumbai", blockTime: 2 })
 
     .network("local", ["hardhat", "foundry"])
-    .chain(31337, "local");
+    .chain({ chainId: 31337, name: "local", blockTime: 0 });
+  // forge/foundry and hardhat can be both run in instant mode or block-time mode.
+  // if you want this configured, you should use your own registry.
+
+  // TODO: make block times dynamic by actually querying the network and seeing the
+  // average block time over the last 100 blocks or something.
 
   defaultRegistry
     .provider("alchemy")

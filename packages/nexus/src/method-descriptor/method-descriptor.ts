@@ -6,8 +6,8 @@ type AnyMethodSchema = MethodSchema<any>;
 type ParamsSchema<T> = z.ZodType<T, any>;
 type AnyParamsSchema = ParamsSchema<any>;
 
-type ResultSchema<T> = z.ZodType<T, any>;
-export type AnyResultSchema = ResultSchema<any>;
+type SuccessValueSchema<T> = z.ZodType<T, any>;
+export type AnySuccessValueSchema = SuccessValueSchema<any>;
 
 const RpcRequestIdSchema = z.union([z.number(), z.string()]);
 
@@ -37,12 +37,12 @@ const RpcResponseBase = z.object({
   jsonrpc: z.string(),
 });
 
-// const MinimalRpcErrorResponseSchema = RpcResponseBase.extend({
-//   error: z.object({
-//     code: z.number(),
-//     message: z.string(),
-//   }),
-// });
+const MinimalRpcErrorResponseSchema = RpcResponseBase.extend({
+  error: z.object({
+    code: z.number(),
+    message: z.string(),
+  }),
+});
 
 const MinimalRpcSuccessResponseSchema = RpcResponseBase.extend({
   result: z.unknown(),
@@ -59,25 +59,37 @@ const MinimalRpcSuccessResponseSchema = RpcResponseBase.extend({
 //   typeof MinimalRpcSuccessResponseSchema
 // >;
 
-type RpcSuccessResponseSchema<Result extends ResultSchema<any>> = ReturnType<
-  typeof MinimalRpcSuccessResponseSchema.extend<{
-    result: Result;
-  }>
->;
+type RpcSuccessResponseSchema<Result extends SuccessValueSchema<any>> =
+  ReturnType<
+    typeof MinimalRpcSuccessResponseSchema.extend<{
+      result: Result;
+    }>
+  >;
 
 export class MethodDescriptor<
   M extends string,
   P extends AnyParamsSchema,
-  R extends AnyResultSchema,
+  S extends AnySuccessValueSchema,
 > {
+  // schema for the entire rpc request
   public readonly rpcRequestSchema: RpcRequestSchema<z.ZodLiteral<M>, P>;
-  public readonly rpcSuccessResponseSchema: RpcSuccessResponseSchema<R>;
+
+  // schema for the success response
+  public readonly rpcSuccessResponseSchema: RpcSuccessResponseSchema<S>;
+
+  // schema for the entire rpc response (success or error)
+  public readonly rpcResponseSchema: z.ZodUnion<
+    [
+      MethodDescriptor<M, P, S>["rpcSuccessResponseSchema"],
+      typeof MinimalRpcErrorResponseSchema,
+    ]
+  >;
 
   private constructor(
     public readonly methodName: M,
     public readonly methodSchema: z.ZodLiteral<M>,
     public readonly paramsSchema: P,
-    public readonly resultSchema: R
+    public readonly successValueSchema: S
   ) {
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
@@ -85,14 +97,19 @@ export class MethodDescriptor<
     });
 
     this.rpcSuccessResponseSchema = MinimalRpcSuccessResponseSchema.extend({
-      result: resultSchema,
+      result: successValueSchema,
     });
+
+    this.rpcResponseSchema = z.union([
+      this.rpcSuccessResponseSchema,
+      MinimalRpcErrorResponseSchema,
+    ]);
   }
 
   public static init = <
     InitMN extends string,
     InitP extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [], // TODO: this means null-param methods need to be processed as empty array methods.
-    InitR extends AnyResultSchema,
+    InitR extends AnySuccessValueSchema,
   >({
     name,
     params,
@@ -106,18 +123,24 @@ export class MethodDescriptor<
   };
 }
 
-type AnyMethodDescriptor = MethodDescriptor<
+export type AnyMethodDescriptor = MethodDescriptor<
   any,
   AnyParamsSchema,
-  AnyResultSchema
+  AnySuccessValueSchema
 >;
 
-// type ResultOf<MD extends AnyMethodDescriptor> = z.TypeOf<MD["resultSchema"]>;
-// type SuccessResponseOf<MD extends AnyMethodDescriptor> = z.TypeOf<
-//   MD["rpcSuccessResponseSchema"]
-// >;
-// type RpcRequestOf<MD extends AnyMethodDescriptor> = z.TypeOf<
-//   MD["rpcRequestSchema"]
+export type MethodNameOf<MD extends AnyMethodDescriptor> = MD["methodName"];
+export type SuccessResponseOf<MD extends AnyMethodDescriptor> = z.TypeOf<
+  MD["rpcSuccessResponseSchema"]
+>;
+export type ResponseOf<MD extends AnyMethodDescriptor> = z.TypeOf<
+  MD["rpcResponseSchema"]
+>;
+export type RequestOf<MD extends AnyMethodDescriptor> = z.TypeOf<
+  MD["rpcRequestSchema"]
+>;
+// export type RequestParamsOf<MD extends AnyMethodDescriptor> = z.TypeOf<
+//   MD["paramsSchema"]
 // >;
 
 export type AnyMethodDescriptorTuple = [
@@ -165,7 +188,7 @@ export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
   public methodDescriptor<
     MN extends string,
     P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
-    R extends AnyResultSchema,
+    R extends AnySuccessValueSchema,
   >({ name, params, result }: { name: MN; params: P; result: R }) {
     const newDescriptor = MethodDescriptor.init({ name, params, result });
 
@@ -174,4 +197,13 @@ export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
       ...this.methodDescriptorTuple,
     ]);
   }
+
+  public getMethodDescriptor<
+    MN extends MethodNamesOf<MethodDescriptorRegistry<T>>,
+  >(name: MN): this["methodDescriptorMap"][MN] {
+    return this.methodDescriptorMap[name];
+  }
 }
+
+export type MethodNamesOf<R extends MethodDescriptorRegistry<any>> =
+  keyof R["methodDescriptorMap"];
