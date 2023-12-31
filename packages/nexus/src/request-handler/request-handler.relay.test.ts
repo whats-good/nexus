@@ -280,7 +280,9 @@ describe("request handler - relay", () => {
     it("should successfully relay", async () => {
       const registry = new Registry();
 
-      registry.network("ethereum", ["eth"]).chain(1, "mainnet");
+      registry
+        .network("ethereum", ["eth"])
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry.provider("alchemy").support(1, {
         baseURL: "https://eth-mainnet.alchemyapi.io/v2",
         type: "url-append-key",

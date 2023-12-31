@@ -64,6 +64,7 @@ describe("registry", () => {
         chainId: 1,
         network: ethereum,
         name: "mainnet",
+        blockTime: 12,
       });
 
       expect(registry.getChainById(1)).toEqual(mainnet);
@@ -76,6 +77,7 @@ describe("registry", () => {
         chainId: 1,
         network: ethereum,
         name: "mainnet",
+        blockTime: 12,
       });
 
       expect(registry.getChainByNames("ethereum", "mainnet")).toEqual(mainnet);
@@ -88,6 +90,7 @@ describe("registry", () => {
         chainId: 1,
         network: ethereum,
         name: "mainnet",
+        blockTime: 12,
       });
 
       expect(registry.getChainByNames("ethereum", "mainnet")).toEqual(mainnet);
@@ -141,14 +144,18 @@ describe("registry", () => {
     it("should retrieve registered chains", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       expect(registry.getChainById(1)?.name).toEqual("mainnet");
     });
 
     it("should allow retrieving chains by network and name", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       expect(registry.getChainByNames("ethereum", "mainnet")?.name).toEqual(
         "mainnet"
       );
@@ -157,7 +164,9 @@ describe("registry", () => {
     it("should allow retrieving chains by network and name post update", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       expect(registry.getChainByNames("ethereum", "mainnet")?.name).toEqual(
         "mainnet"
       );
@@ -184,7 +193,9 @@ describe("registry", () => {
     it("should allow registering service providers to registered chains", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry.provider("alchemy").support(1, {
         type: "url-append-key",
         baseURL: "https://eth-mainnet.alchemyapi.io/v2/",
@@ -194,7 +205,9 @@ describe("registry", () => {
     it("should allow retrieving service providers by chain and name", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry
         .provider("alchemy")
         .support(1, {
@@ -227,7 +240,9 @@ describe("registry", () => {
     it("provider.support should be idempotent from registry perspective", () => {
       const registry = new Registry();
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry.provider("alchemy").support(1, {
         baseURL: "https://first-url.com",
         type: "url-append-key",
@@ -264,7 +279,9 @@ describe("registry", () => {
         ],
       });
 
-      registry.network("ethereum").chain(1, "mainnet");
+      registry
+        .network("ethereum")
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry.provider("alchemy").support(1, {
         baseURL: "https://first-url.com",
         type: "url-append-key",
