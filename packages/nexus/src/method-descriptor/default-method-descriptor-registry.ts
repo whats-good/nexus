@@ -11,6 +11,10 @@ export const methodDescriptorRegistry = baseRegistry
       z.union([z.boolean(), z.number()]).optional(),
     ],
     result: z.string(),
+    caching: {
+      enabled: true,
+      ttl: Number.POSITIVE_INFINITY,
+    },
   })
   .methodDescriptor({
     name: "eth_getBlockByNumber",
@@ -19,6 +23,9 @@ export const methodDescriptorRegistry = baseRegistry
       z.union([z.boolean(), z.number()]).optional(),
     ],
     result: z.string(),
+    caching: {
+      enabled: true,
+    },
   })
   .methodDescriptor({
     name: "eth_blockNumber",

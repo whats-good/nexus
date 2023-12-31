@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Chain } from "@src/chain";
+// import type { JsonRPCRequest } from "@src/rpc-endpoint/json-rpc-types";
 
 type MethodSchema<T extends string> = z.ZodType<T, any>;
 type AnyMethodSchema = MethodSchema<any>;
@@ -66,6 +68,14 @@ type RpcSuccessResponseSchema<Result extends SuccessValueSchema<any>> =
     }>
   >;
 
+type CacheConfigFn<T> = (params: { chain: Chain }) => T;
+type CacheConfigField<T> = T | CacheConfigFn<T>;
+
+interface CacheConfig {
+  enabled?: CacheConfigField<boolean>;
+  ttl?: CacheConfigField<number>;
+}
+
 export class MethodDescriptor<
   M extends string,
   P extends AnyParamsSchema,
@@ -89,7 +99,8 @@ export class MethodDescriptor<
     public readonly methodName: M,
     public readonly methodSchema: z.ZodLiteral<M>,
     public readonly paramsSchema: P,
-    public readonly successValueSchema: S
+    public readonly successValueSchema: S,
+    public readonly caching: CacheConfig
   ) {
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
@@ -114,12 +125,20 @@ export class MethodDescriptor<
     name,
     params,
     result,
+    caching,
   }: {
     name: InitMN;
     params: InitP;
     result: InitR;
+    caching?: CacheConfig;
   }) => {
-    return new MethodDescriptor(name, z.literal(name), z.tuple(params), result);
+    return new MethodDescriptor(
+      name,
+      z.literal(name),
+      z.tuple(params),
+      result,
+      caching ?? {}
+    );
   };
 }
 
@@ -189,8 +208,23 @@ export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
     MN extends string,
     P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
     R extends AnySuccessValueSchema,
-  >({ name, params, result }: { name: MN; params: P; result: R }) {
-    const newDescriptor = MethodDescriptor.init({ name, params, result });
+  >({
+    name,
+    params,
+    result,
+    caching,
+  }: {
+    name: MN;
+    params: P;
+    result: R;
+    caching?: Partial<CacheConfig>;
+  }) {
+    const newDescriptor = MethodDescriptor.init({
+      name,
+      params,
+      result,
+      caching,
+    });
 
     return new MethodDescriptorRegistry([
       newDescriptor,
@@ -198,7 +232,7 @@ export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
     ]);
   }
 
-  public getMethodDescriptor<
+  public getMethodDescriptorFromName<
     MN extends MethodNamesOf<MethodDescriptorRegistry<T>>,
   >(name: MN): this["methodDescriptorMap"][MN] {
     return this.methodDescriptorMap[name];
