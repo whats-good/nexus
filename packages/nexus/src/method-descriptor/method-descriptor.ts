@@ -68,12 +68,12 @@ type RpcSuccessResponseSchema<Result extends SuccessValueSchema<any>> =
     }>
   >;
 
-type CacheConfigFn<T> = (params: { chain: Chain }) => T;
-type CacheConfigField<T> = T | CacheConfigFn<T>;
+type CacheConfigFn<T, P> = (params: { chain: Chain; params: P }) => T;
+type CacheConfigField<T, P> = T | CacheConfigFn<T, P>;
 
-interface CacheConfig {
-  enabled?: CacheConfigField<boolean>;
-  ttl?: CacheConfigField<number>;
+interface CacheConfig<P> {
+  enabled: CacheConfigField<boolean, P>;
+  ttl: CacheConfigField<number, P>;
 }
 
 export class MethodDescriptor<
@@ -95,12 +95,13 @@ export class MethodDescriptor<
     ]
   >;
 
+  public cacheConfig?: CacheConfig<z.infer<P>>;
+
   private constructor(
     public readonly methodName: M,
     public readonly methodSchema: z.ZodLiteral<M>,
     public readonly paramsSchema: P,
-    public readonly successValueSchema: S,
-    public readonly caching: CacheConfig
+    public readonly successValueSchema: S
   ) {
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
@@ -117,6 +118,12 @@ export class MethodDescriptor<
     ]);
   }
 
+  public cache(config: CacheConfig<z.infer<P>>) {
+    this.cacheConfig = config;
+
+    return this;
+  }
+
   public static init = <
     InitMN extends string,
     InitP extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [], // TODO: this means null-param methods need to be processed as empty array methods.
@@ -125,20 +132,12 @@ export class MethodDescriptor<
     name,
     params,
     result,
-    caching,
   }: {
     name: InitMN;
     params: InitP;
     result: InitR;
-    caching?: CacheConfig;
   }) => {
-    return new MethodDescriptor(
-      name,
-      z.literal(name),
-      z.tuple(params),
-      result,
-      caching ?? {}
-    );
+    return new MethodDescriptor(name, z.literal(name), z.tuple(params), result);
   };
 }
 
