@@ -24,15 +24,13 @@ type MethodDescriptorMapOf<T extends MethodDescriptorTuple> = {
 type RpcRequestSchemasListOf<T extends MethodDescriptorTuple> = {
   [K in keyof T]: T[K]["rpcRequestSchema"];
 };
-type RpcRequestBodySchemaOf<T extends MethodDescriptorTuple> = z.ZodUnion<
+type RpcRequestSchemaOf<T extends MethodDescriptorTuple> = z.ZodUnion<
   RpcRequestSchemasListOf<T>
 >;
 
-type SomeRpcDescriptorInTuple<T extends MethodDescriptorTuple> = T[number];
-
 export class RpcDescriptorRegistry<T extends MethodDescriptorTuple> {
   public readonly descriptorMap: MethodDescriptorMapOf<T>;
-  private readonly rpcRequestSchema: RpcRequestBodySchemaOf<T>;
+  private readonly rpcRequestSchema: RpcRequestSchemaOf<T>;
 
   constructor(private readonly tuple: T) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the object can't be initialized as the final desired type.
