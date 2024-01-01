@@ -68,12 +68,16 @@ type RpcSuccessResponseSchema<Result extends SuccessValueSchema<any>> =
     }>
   >;
 
-type CacheConfigFn<T, P> = (params: { chain: Chain; params: P }) => T;
-type CacheConfigField<T, P> = T | CacheConfigFn<T, P>;
+type CacheConfigReadFn<T, P> = (params: { chain: Chain; params: P }) => T;
+// TODO: pass the largest known block number in here.
+// and use it to determine the ttl of some methods. for example,
+// eth_getBlockByNumber can be cached for infinity if the largest known block number is X blocks ahead of the requested block number.
+type CacheConfigReadField<T, P> = T | CacheConfigReadFn<T, P>;
 
 interface CacheConfig<P> {
-  enabled: CacheConfigField<boolean, P>;
-  ttl: CacheConfigField<number, P>;
+  enabled: CacheConfigReadField<boolean, P>;
+  ttl: CacheConfigReadField<number, P>;
+  paramsKeySuffix: CacheConfigReadField<string, P> | null;
 }
 
 export class MethodDescriptor<
