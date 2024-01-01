@@ -1,39 +1,37 @@
 import { z } from "zod";
-import { MethodDescriptorRegistry } from "./method-descriptor";
+import { MethodDescriptor } from "./method-descriptor";
+import { RpcDescriptorRegistry } from "./method-descriptor-registry";
 
-const baseRegistry = MethodDescriptorRegistry.init();
+const methodDescriptors = [
+  MethodDescriptor.init({
+    name: "eth_blockNumber",
+    params: [],
+    result: z.number(),
+  }),
+  MethodDescriptor.init({
+    name: "eth_getBalance",
 
-export const methodDescriptorRegistry = baseRegistry
-  .methodDescriptor({
-    name: "eth_getBlockByHash",
-    params: [
-      z.union([z.string(), z.number()]),
-      z.union([z.boolean(), z.number()]).optional(),
-    ],
+    params: [z.string(), z.union([z.string(), z.number()])],
     result: z.string(),
-    caching: {
-      enabled: true,
-      ttl: Number.POSITIVE_INFINITY,
-    },
-  })
-  .methodDescriptor({
+  }),
+  MethodDescriptor.init({
     name: "eth_getBlockByNumber",
     params: [
       z.union([z.string(), z.number()]),
       z.union([z.boolean(), z.number()]).optional(),
     ],
     result: z.string(),
-    caching: {
-      enabled: true,
-    },
-  })
-  .methodDescriptor({
-    name: "eth_blockNumber",
-    params: [],
-    result: z.number(),
-  })
-  .methodDescriptor({
-    name: "eth_getBalance",
-    params: [z.string(), z.union([z.string(), z.number()])],
+  }),
+  MethodDescriptor.init({
+    name: "eth_getBlockByHash",
+    params: [
+      z.union([z.string(), z.number()]),
+      z.union([z.boolean(), z.number()]).optional(),
+    ],
     result: z.string(),
-  });
+  }),
+] as const;
+
+export const methodDescriptorRegistry = new RpcDescriptorRegistry(
+  methodDescriptors
+);
