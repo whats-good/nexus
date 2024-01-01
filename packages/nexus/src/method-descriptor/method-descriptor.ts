@@ -76,8 +76,12 @@ type CacheConfigReadField<T, P> = T | CacheConfigReadFn<T, P>;
 
 interface CacheConfig<P> {
   enabled: CacheConfigReadField<boolean, P>;
-  ttl: CacheConfigReadField<number, P>;
   paramsKeySuffix: CacheConfigReadField<string, P> | null;
+
+  // TODO: ttl might actually benefit from the result object as well as the params object.
+  // i.e it we could create a CacheConfigWriteField<T, P, R> type that would allow us to
+  // write a ttl based on the params AND the result.
+  ttl: CacheConfigReadField<number, P>;
 }
 
 export class MethodDescriptor<

@@ -160,6 +160,7 @@ export class RpcProxyContext {
       return {
         status: 200, // TODO: should this be 200? or should it be adjusted based on the response?
         body: this.relayResult.result,
+        cached: this.relayResult.cached,
       };
     }
 

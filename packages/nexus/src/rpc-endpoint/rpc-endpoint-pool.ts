@@ -1,4 +1,5 @@
 import { Response } from "@whatwg-node/fetch";
+import type { RpcRequestCache } from "@src/cache";
 import type { Config, Logger } from "../config";
 import type { Chain } from "../chain/chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
@@ -18,17 +19,21 @@ export class RpcEndpointPool {
   private currentServiceProviderIndex = 0;
   private readonly logger: Logger;
 
+  private readonly rpcRequestCache: RpcRequestCache;
+
   constructor(params: {
     chain: Chain;
     eligibleServiceProviders: ServiceProvider[];
     configuredServiceProviders: ServiceProvider[];
     config: Config;
+    rpcRequestCache: RpcRequestCache;
   }) {
     this.chain = params.chain;
     this.eligibleServiceProviders = params.eligibleServiceProviders;
     this.configuredServiceProviders = params.configuredServiceProviders;
     this.config = params.config;
     this.logger = this.config.logger;
+    this.rpcRequestCache = params.rpcRequestCache;
   }
 
   // TODO: maybe we should allow recycling of endpoints? what if one comes back up?
@@ -81,6 +86,19 @@ export class RpcEndpointPool {
   }
 
   public async relay(request: JsonRPCRequest) {
+    const cachedResponse = await this.rpcRequestCache.get(this.chain, request);
+
+    if (cachedResponse) {
+      // TODO: should we do anything to indicate that this was
+      // the result of a cache hit?
+      return {
+        type: "success",
+        cached: true,
+        request,
+        result: cachedResponse,
+      };
+    }
+
     // TODO: what should we return if no endpoint is available?
     if (this.config.recoveryMode === "none") {
       return (
@@ -101,6 +119,13 @@ export class RpcEndpointPool {
       const response = await endpoint.relay(request);
 
       if (response.type === "success") {
+        try {
+          await this.rpcRequestCache.set(this.chain, request, response.result);
+        } catch (error) {
+          this.logger.error("failed to cache response");
+          this.logger.error(JSON.stringify(error, null, 2));
+        }
+
         return response;
       }
 
@@ -118,6 +143,7 @@ export class RpcEndpointPool {
 
     return {
       type: "all-failed",
+      request,
       errors,
     } as const;
   }

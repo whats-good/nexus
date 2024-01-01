@@ -11,6 +11,8 @@ const RpxRelayRecoveryModeSchema = z.enum(["none", "cycle"]);
 type RpcRelayRecoveryMode = z.infer<typeof RpxRelayRecoveryModeSchema>;
 // TODO: specify what kind of errors should trigger a recovery attempt
 
+// TODO: add a config field that can enable/disable caching altogether
+
 interface ProviderConfig {
   key?: string;
   enabled: boolean;

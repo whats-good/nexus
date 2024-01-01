@@ -4,6 +4,9 @@ import type { ProviderConfigParam } from "@src/config";
 import { Config } from "@src/config";
 import { handlers } from "@test/mock-server-handlers";
 import { retry } from "@test/utils";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { RpcRequestCache } from "@src/cache";
+import { PlacholderCache } from "@src/cache/placeholder-cache";
 import { Registry } from "../registry";
 import { RequestHandler } from "./request-handler";
 
@@ -50,7 +53,12 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler(config, request);
+  const cache = new RpcRequestCache(
+    config,
+    defaultMethodDescriptorRegistry,
+    new PlacholderCache()
+  );
+  const requestHandler = new RequestHandler(config, request, cache);
 
   return requestHandler.handle();
 };
@@ -210,9 +218,15 @@ describe("request handler - relay", () => {
           }),
         }
       );
+      const cache = new RpcRequestCache(
+        configWithCycleRecovery,
+        defaultMethodDescriptorRegistry,
+        new PlacholderCache()
+      );
       const requestHandler = new RequestHandler(
         configWithCycleRecovery,
-        request
+        request,
+        cache
       );
 
       const result = await requestHandler.handle();
@@ -246,7 +260,14 @@ describe("request handler - relay", () => {
           }),
         }
       );
-      const requestHandler = new RequestHandler(config, request);
+
+      const cache = new RpcRequestCache(
+        configWithCycleRecovery,
+        defaultMethodDescriptorRegistry,
+        new PlacholderCache()
+      );
+
+      const requestHandler = new RequestHandler(config, request, cache);
 
       const result = await requestHandler.handle();
 
@@ -313,7 +334,13 @@ describe("request handler - relay", () => {
         }
       );
 
-      const requestHandler = new RequestHandler(config, request);
+      const cache = new RpcRequestCache(
+        config,
+        defaultMethodDescriptorRegistry,
+        new PlacholderCache()
+      );
+
+      const requestHandler = new RequestHandler(config, request, cache);
 
       const result = await requestHandler.handle();
 

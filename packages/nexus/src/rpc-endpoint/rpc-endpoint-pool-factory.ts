@@ -1,10 +1,16 @@
+import type { RpcRequestCache } from "@src/cache";
 import type { Config } from "../config";
 import type { Chain } from "../chain/chain";
 import { shuffle } from "../utils";
 import { RpcEndpointPool } from "./rpc-endpoint-pool";
 
+// TODO: use dependency injection to handle singleton instances
+
 export class RpcEndpointPoolFactory {
-  constructor(private readonly config: Config) {}
+  constructor(
+    private readonly config: Config,
+    private readonly rpcRequestCache: RpcRequestCache
+  ) {}
 
   public fromChain(chain: Chain): RpcEndpointPool {
     const eligibleServiceProviders =
@@ -19,6 +25,7 @@ export class RpcEndpointPoolFactory {
       eligibleServiceProviders,
       configuredServiceProviders: shuffle(configuredServiceProviders),
       config: this.config,
+      rpcRequestCache: this.rpcRequestCache,
     });
   }
 }

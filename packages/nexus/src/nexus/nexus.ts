@@ -4,6 +4,9 @@ import type {
   ServerAdapterBaseObject,
 } from "@whatwg-node/server";
 import type { Response } from "@whatwg-node/fetch";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { RpcRequestCache } from "@src/cache";
+import { PlacholderCache } from "@src/cache/placeholder-cache";
 import { RequestHandler } from "../request-handler/request-handler";
 import { Config } from "../config";
 import type { ConfigConstructorParams } from "../config";
@@ -27,6 +30,8 @@ export class Nexus<TServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
   private readonly defaultRegistry = createDefaultRegistry();
+
+  private readonly baseCache: PlacholderCache = new PlacholderCache();
 
   private constructor(
     private readonly options: ServerContextConfigMap<TServerContext>
@@ -98,7 +103,15 @@ export class Nexus<TServerContext>
     };
 
     const config = new Config(configParams);
-    const requestHandler = new RequestHandler(config, request);
+    const requestHandler = new RequestHandler(
+      config,
+      request,
+      new RpcRequestCache(
+        config,
+        defaultMethodDescriptorRegistry,
+        this.baseCache
+      )
+    );
 
     return requestHandler.handle();
   };

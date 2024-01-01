@@ -1,6 +1,6 @@
 import { Chain } from "@src/chain";
 import { Network } from "@src/chain/network";
-import { methodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
 import type { ChainSupport } from "@src/service-provider";
 import { ServiceProvider } from "@src/service-provider";
 
@@ -70,7 +70,7 @@ export class Registry {
   private readonly networkBuilder = new NetworkBuilder(this);
   private readonly serviceProviderBuilder = new ServiceProviderBuilder(this);
 
-  public readonly methodDescriptorRegistry = methodDescriptorRegistry;
+  public readonly methodDescriptorRegistry = defaultMethodDescriptorRegistry;
 
   constructor(
     params: {
