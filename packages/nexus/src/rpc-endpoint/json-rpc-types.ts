@@ -12,7 +12,7 @@ export const JsonRPCRequestSchema = z.object({
   jsonrpc: z.literal("2.0"),
   id: z.number(),
   method: z.string(),
-  params: z.array(z.any()).optional(),
+  params: z.array(z.unknown()).optional(),
 });
 
 export type JsonRPCRequest = z.infer<typeof JsonRPCRequestSchema>;

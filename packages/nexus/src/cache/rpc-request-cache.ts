@@ -1,3 +1,4 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import type {
   JsonRPCRequest,
   JsonRPCResponse,
@@ -72,6 +73,7 @@ export class RpcRequestCache {
       paramsKeySuffix = cacheConfig.paramsKeySuffix({
         chain,
         params: parsedParams.data as unknown,
+        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       });
     }
 
@@ -99,6 +101,7 @@ export class RpcRequestCache {
       ttl = cacheConfig.ttl({
         chain,
         params: parsedParams.data as unknown,
+        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       });
     }
 
@@ -161,6 +164,7 @@ export class RpcRequestCache {
       paramsKeySuffix = cacheConfig.paramsKeySuffix({
         chain,
         params: parsedParams.data as unknown,
+        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       });
     }
 

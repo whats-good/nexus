@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
 // import type { JsonRPCRequest } from "@src/rpc-endpoint/json-rpc-types";
 
@@ -68,10 +69,11 @@ type RpcSuccessResponseSchema<Result extends SuccessValueSchema<any>> =
     }>
   >;
 
-type CacheConfigReadFn<T, P> = (params: { chain: Chain; params: P }) => T;
-// TODO: pass the largest known block number in here.
-// and use it to determine the ttl of some methods. for example,
-// eth_getBlockByNumber can be cached for infinity if the largest known block number is X blocks ahead of the requested block number.
+type CacheConfigReadFn<T, P> = (params: {
+  chain: Chain;
+  params: P;
+  highestKnownBlockNumber: BigNumber;
+}) => T;
 type CacheConfigReadField<T, P> = T | CacheConfigReadFn<T, P>;
 
 interface CacheConfig<P> {
@@ -103,13 +105,12 @@ export class MethodDescriptor<
     ]
   >;
 
-  public cacheConfig?: CacheConfig<z.infer<P>>;
-
   private constructor(
     public readonly methodName: M,
     public readonly methodSchema: z.ZodLiteral<M>,
     public readonly paramsSchema: P,
-    public readonly successValueSchema: S
+    public readonly successValueSchema: S,
+    public readonly cacheConfig?: CacheConfig<z.infer<P>>
   ) {
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
@@ -127,14 +128,18 @@ export class MethodDescriptor<
   }
 
   public cache(config: CacheConfig<z.infer<P>>) {
-    this.cacheConfig = config;
-
-    return this;
+    return new MethodDescriptor(
+      this.methodName,
+      this.methodSchema,
+      this.paramsSchema,
+      this.successValueSchema,
+      config
+    );
   }
 
   public static init = <
     InitMN extends string,
-    InitP extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [], // TODO: this means null-param methods need to be processed as empty array methods.
+    InitP extends AnyParamsSchema,
     InitR extends AnySuccessValueSchema,
   >({
     name,
@@ -145,7 +150,7 @@ export class MethodDescriptor<
     params: InitP;
     result: InitR;
   }) => {
-    return new MethodDescriptor(name, z.literal(name), z.tuple(params), result);
+    return new MethodDescriptor(name, z.literal(name), params, result);
   };
 }
 
