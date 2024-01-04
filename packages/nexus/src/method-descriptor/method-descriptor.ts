@@ -5,18 +5,16 @@ import type { Chain } from "@src/chain";
 interface CacheConfigOptionReadFnParams<P> {
   chain: any;
   params: P;
-  highestKnownBlockNumber: number;
+  highestKnownBlockNumber: BigNumber;
 }
 type CacheConfigOptionReadFn<T, P> = (
   params: CacheConfigOptionReadFnParams<P>
 ) => T;
 type CacheConfigOptionReadField<T, P> = T | CacheConfigOptionReadFn<T, P>;
 
-interface CacheConfigOptionWriteFnParams<P, R> {
-  chain: Chain;
-  params: P;
+interface CacheConfigOptionWriteFnParams<P, R>
+  extends CacheConfigOptionReadFnParams<P> {
   result: R;
-  highestKnownBlockNumber: BigNumber;
 }
 type CacheConfigOptionWriteFn<T, P, R> = (
   params: CacheConfigOptionWriteFnParams<P, R>
@@ -41,7 +39,7 @@ class CacheConfig<P, R> {
       return this.options.ttl(params);
     }
 
-    return this.options.ttl;
+    return this.options.ttl || 0;
   }
 
   public enabled(params: CacheConfigOptionReadFnParams<P>) {
@@ -49,7 +47,7 @@ class CacheConfig<P, R> {
       return this.options.enabled(params);
     }
 
-    return this.options.enabled;
+    return this.options.enabled || false;
   }
 
   public paramsKeySuffix(params: CacheConfigOptionReadFnParams<P>) {
@@ -57,7 +55,7 @@ class CacheConfig<P, R> {
       return this.options.paramsKeySuffix(params);
     }
 
-    return this.options.paramsKeySuffix;
+    return this.options.paramsKeySuffix || "";
   }
 }
 

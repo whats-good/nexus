@@ -65,17 +65,11 @@ export class RpcRequestCache {
       return;
     }
 
-    let paramsKeySuffix = "";
-
-    if (typeof cacheConfig.paramsKeySuffix === "string") {
-      paramsKeySuffix = cacheConfig.paramsKeySuffix;
-    } else if (typeof cacheConfig.paramsKeySuffix === "function") {
-      paramsKeySuffix = cacheConfig.paramsKeySuffix({
-        chain,
-        params: parsedParams.data as unknown,
-        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-      });
-    }
+    const paramsKeySuffix = cacheConfig.paramsKeySuffix({
+      chain,
+      params: parsedParams.data as unknown,
+      highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
+    });
 
     const cacheKey = `${chain.chainId}-${request.method}-${paramsKeySuffix}`;
 
@@ -93,17 +87,12 @@ export class RpcRequestCache {
       return undefined;
     }
 
-    let ttl = 0;
-
-    if (typeof cacheConfig.ttl === "number") {
-      ttl = cacheConfig.ttl;
-    } else if (typeof cacheConfig.ttl === "function") {
-      ttl = cacheConfig.ttl({
-        chain,
-        params: parsedParams.data as unknown,
-        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-      });
-    }
+    const ttl = cacheConfig.ttl({
+      chain,
+      params: parsedParams.data as unknown,
+      result: parsedResult.data as unknown,
+      highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
+    });
 
     await this.cache.set({
       key: cacheKey,
@@ -156,17 +145,11 @@ export class RpcRequestCache {
       return undefined;
     }
 
-    let paramsKeySuffix = "";
-
-    if (typeof cacheConfig.paramsKeySuffix === "string") {
-      paramsKeySuffix = cacheConfig.paramsKeySuffix;
-    } else if (typeof cacheConfig.paramsKeySuffix === "function") {
-      paramsKeySuffix = cacheConfig.paramsKeySuffix({
-        chain,
-        params: parsedParams.data as unknown,
-        highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-      });
-    }
+    const paramsKeySuffix = cacheConfig.paramsKeySuffix({
+      chain,
+      params: parsedParams.data as unknown,
+      highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
+    });
 
     const cacheKey = `${chain.chainId}-${request.method}-${paramsKeySuffix}`;
     const cachedResult = await this.cache.get(cacheKey);
