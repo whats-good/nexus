@@ -186,13 +186,10 @@ const eth_chainId = MethodDescriptor.init({
   name: "eth_chainId",
   params: NoParams,
   result: Quantity,
-}).cache({
-  // TODO: should this be cached?
-  // or should we just use the chain id from the config?
-  // maybe this should be another example of an override method
-  ttl: Number.POSITIVE_INFINITY,
-  paramsKeySuffix: null,
-  enabled: true,
+}).cannedResponse(({ chain }) => {
+  const chainIdBigNumber = BigNumber.from(chain.chainId);
+
+  return Quantity.parse(chainIdBigNumber.toHexString());
 });
 
 const eth_mining = MethodDescriptor.init({

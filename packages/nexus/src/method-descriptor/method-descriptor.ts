@@ -86,6 +86,8 @@ interface CacheConfig<P> {
   ttl: CacheConfigReadField<number, P>;
 }
 
+type CannedResponseFn<P, S> = (params: { chain: Chain; params: P }) => S;
+
 export class MethodDescriptor<
   M extends string,
   P extends AnyParamsSchema,
@@ -105,13 +107,38 @@ export class MethodDescriptor<
     ]
   >;
 
-  private constructor(
-    public readonly methodName: M,
-    public readonly methodSchema: z.ZodLiteral<M>,
-    public readonly paramsSchema: P,
-    public readonly successValueSchema: S,
-    public readonly cacheConfig?: CacheConfig<z.infer<P>>
-  ) {
+  public readonly methodName: M;
+  public readonly methodSchema: z.ZodLiteral<M>;
+  public readonly paramsSchema: P;
+  public readonly successValueSchema: S;
+  public readonly cacheConfig?: CacheConfig<z.infer<P>>;
+  public readonly cannedResponseConfig?: CannedResponseFn<
+    z.infer<P>,
+    z.infer<S>
+  >;
+
+  constructor({
+    methodName,
+    methodSchema,
+    paramsSchema,
+    successValueSchema,
+    cacheConfig,
+    cannedResponse,
+  }: {
+    methodName: M;
+    methodSchema: z.ZodLiteral<M>;
+    paramsSchema: P;
+    successValueSchema: S;
+    cacheConfig?: CacheConfig<z.infer<P>>;
+    cannedResponse?: CannedResponseFn<z.infer<P>, z.infer<S>>;
+  }) {
+    this.methodName = methodName;
+    this.methodSchema = methodSchema;
+    this.paramsSchema = paramsSchema;
+    this.successValueSchema = successValueSchema;
+    this.cacheConfig = cacheConfig;
+    this.cannedResponseConfig = cannedResponse;
+
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
       params: paramsSchema,
@@ -127,14 +154,32 @@ export class MethodDescriptor<
     ]);
   }
 
-  public cache(config: CacheConfig<z.infer<P>>) {
-    return new MethodDescriptor(
-      this.methodName,
-      this.methodSchema,
-      this.paramsSchema,
-      this.successValueSchema,
-      config
-    );
+  private getConstructorParams(): ConstructorParameters<
+    typeof MethodDescriptor<M, P, S>
+  >[0] {
+    return {
+      methodName: this.methodName,
+      methodSchema: this.methodSchema,
+      paramsSchema: this.paramsSchema,
+      successValueSchema: this.successValueSchema,
+      cacheConfig: this.cacheConfig,
+    };
+  }
+
+  public cache(config: MethodDescriptor<M, P, S>["cacheConfig"]) {
+    return new MethodDescriptor({
+      ...this.getConstructorParams(),
+      cacheConfig: config,
+    });
+  }
+
+  public cannedResponse(
+    cannedResponseConfig: MethodDescriptor<M, P, S>["cannedResponseConfig"]
+  ) {
+    return new MethodDescriptor({
+      ...this.getConstructorParams(),
+      cannedResponse: cannedResponseConfig,
+    });
   }
 
   public static init = <
@@ -150,7 +195,12 @@ export class MethodDescriptor<
     params: InitP;
     result: InitR;
   }) => {
-    return new MethodDescriptor(name, z.literal(name), params, result);
+    return new MethodDescriptor({
+      methodName: name,
+      methodSchema: z.literal(name),
+      paramsSchema: params,
+      successValueSchema: result,
+    });
   };
 }
 
