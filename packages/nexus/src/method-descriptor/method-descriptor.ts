@@ -2,135 +2,91 @@ import { z } from "zod";
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
 
-type MethodSchema<T extends string> = z.ZodType<T, any>;
-type AnyMethodSchema = MethodSchema<any>;
+interface CacheConfigOptionReadFnParams<P> {
+  chain: any;
+  params: P;
+  highestKnownBlockNumber: number;
+}
+type CacheConfigOptionReadFn<T, P> = (
+  params: CacheConfigOptionReadFnParams<P>
+) => T;
+type CacheConfigOptionReadField<T, P> = T | CacheConfigOptionReadFn<T, P>;
 
-type ParamsSchema<T> = z.ZodType<T, any>;
-type AnyParamsSchema = ParamsSchema<any>;
-
-type ResultSchema<T> = z.ZodType<T, any>;
-export type AnyResultSchema = ResultSchema<any>;
-
-const RpcRequestIdSchema = z.union([z.number(), z.string()]);
-
-const MinimalRpcRequestSchema = z.object({
-  id: RpcRequestIdSchema.nullish(),
-  jsonrpc: z.string(),
-  method: z.string(),
-  params: z.array(z.unknown()).nullish(),
-});
-
-type RequestSchema<
-  M extends AnyMethodSchema,
-  P extends AnyParamsSchema,
-> = ReturnType<
-  typeof MinimalRpcRequestSchema.extend<{
-    method: M;
-    params: P;
-  }>
->;
-
-const RpcResponseBaseSchema = z.object({
-  id: RpcRequestIdSchema.nullish(),
-  jsonrpc: z.string(),
-});
-
-const ErrorResponseSchema = RpcResponseBaseSchema.extend({
-  error: z.object({
-    code: z.number(),
-    message: z.string(),
-  }),
-});
-
-type ResultResponseSchema<R extends AnyResultSchema> = ReturnType<
-  typeof RpcResponseBaseSchema.extend<{ result: R }>
->;
-
-type ResponseSchema<R extends AnyResultSchema> = ReturnType<
-  typeof ErrorResponseSchema.or<ResultResponseSchema<R>>
->;
-
-type CacheConfigReadFn<T, P> = (params: {
+interface CacheConfigOptionWriteFnParams<P, R> {
   chain: Chain;
   params: P;
+  result: R;
   highestKnownBlockNumber: BigNumber;
-}) => T;
-type CacheConfigReadField<T, P> = T | CacheConfigReadFn<T, P>;
+}
+type CacheConfigOptionWriteFn<T, P, R> = (
+  params: CacheConfigOptionWriteFnParams<P, R>
+) => T;
+type CacheConfigOptionWriteField<T, P, R> =
+  | T
+  | CacheConfigOptionWriteFn<T, P, R>;
 
-interface CacheConfig<P> {
-  enabled: CacheConfigReadField<boolean, P>;
-  paramsKeySuffix: CacheConfigReadField<string, P> | null;
-
-  // TODO: ttl might actually benefit from the result object as well as the params object.
-  // i.e it we could create a CacheConfigWriteField<T, P, R> type that would allow us to
-  // write a ttl based on the params AND the result.
-  ttl: CacheConfigReadField<number, P>;
+interface CacheConfigOptions<P, R> {
+  ttl: CacheConfigOptionWriteField<number, P, R>;
+  enabled: CacheConfigOptionReadField<boolean, P>;
+  paramsKeySuffix: CacheConfigOptionReadField<string, P> | null;
 }
 
 type CannedResponseFn<P, R> = (params: { chain: Chain; params: P }) => R;
 
-export class MethodDescriptor<
-  M extends string,
-  P extends AnyParamsSchema,
-  R extends AnyResultSchema,
-> {
-  // schema for the entire rpc request
-  public readonly requestSchema: RequestSchema<z.ZodLiteral<M>, P>;
-  public readonly responseSchema: ResponseSchema<R>;
-  public readonly methodName: M;
+class CacheConfig<P, R> {
+  constructor(private readonly options: CacheConfigOptions<P, R>) {}
+
+  public ttl(params: CacheConfigOptionWriteFnParams<P, R>) {
+    if (typeof this.options.ttl === "function") {
+      return this.options.ttl(params);
+    }
+
+    return this.options.ttl;
+  }
+
+  public enabled(params: CacheConfigOptionReadFnParams<P>) {
+    if (typeof this.options.enabled === "function") {
+      return this.options.enabled(params);
+    }
+
+    return this.options.enabled;
+  }
+
+  public paramsKeySuffix(params: CacheConfigOptionReadFnParams<P>) {
+    if (typeof this.options.paramsKeySuffix === "function") {
+      return this.options.paramsKeySuffix(params);
+    }
+
+    return this.options.paramsKeySuffix;
+  }
+}
+
+export class MethodDescriptor<M extends string, P, R> {
+  public readonly method: M;
   public readonly methodSchema: z.ZodLiteral<M>;
-  public readonly paramsSchema: P;
-  public readonly resultSchema: R;
-  public cacheConfig?: CacheConfig<z.infer<P>>;
-  public cannedResponse?: CannedResponseFn<z.infer<P>, z.infer<R>>;
+  public readonly paramsSchema: z.ZodType<P, any, any>;
+  public readonly resultSchema: z.ZodType<R, any, any>;
+
+  public cacheConfig?: CacheConfig<P, R>;
+  public cannedResponse?: CannedResponseFn<P, R>;
 
   constructor({
-    methodName,
-    methodSchema,
-    paramsSchema,
-    resultSchema,
-    cacheConfig,
-    cannedResponse,
+    method,
+    params,
+    result,
   }: {
-    methodName: M;
-    methodSchema: z.ZodLiteral<M>;
-    paramsSchema: P;
-    resultSchema: R;
-    cacheConfig?: CacheConfig<z.infer<P>>;
-    cannedResponse?: CannedResponseFn<z.infer<P>, z.infer<R>>;
+    method: M;
+    params: z.ZodType<P, any, any>;
+    result: z.ZodType<R, any, any>;
   }) {
-    this.methodName = methodName;
-    this.methodSchema = methodSchema;
-    this.paramsSchema = paramsSchema;
-    this.resultSchema = resultSchema;
-    this.cacheConfig = cacheConfig;
-    this.cannedResponse = cannedResponse;
-
-    this.requestSchema = MinimalRpcRequestSchema.extend({
-      method: methodSchema,
-      params: paramsSchema,
-    });
-
-    this.responseSchema = ErrorResponseSchema.or(
-      RpcResponseBaseSchema.extend({
-        result: resultSchema,
-      })
-    );
+    this.method = method;
+    this.methodSchema = z.literal(method);
+    this.paramsSchema = params;
+    this.resultSchema = result;
   }
 
-  public clone() {
-    return new MethodDescriptor({
-      methodName: this.methodName,
-      methodSchema: this.methodSchema,
-      paramsSchema: this.paramsSchema,
-      resultSchema: this.resultSchema,
-      cacheConfig: this.cacheConfig,
-      cannedResponse: this.cannedResponse,
-    });
-  }
-
-  public setCacheConfig(config: MethodDescriptor<M, P, R>["cacheConfig"]) {
-    this.cacheConfig = config;
+  public setCacheConfig(options: CacheConfigOptions<P, R>) {
+    this.cacheConfig = new CacheConfig(options);
 
     return this;
   }
@@ -144,33 +100,6 @@ export class MethodDescriptor<
 
     return this;
   }
-
-  public static init = <
-    InitMN extends string,
-    InitP extends AnyParamsSchema,
-    InitR extends AnyResultSchema,
-  >({
-    name,
-    params,
-    result,
-  }: {
-    name: InitMN;
-    params: InitP;
-    result: InitR;
-  }) => {
-    return new MethodDescriptor({
-      methodName: name,
-      methodSchema: z.literal(name),
-      paramsSchema: params,
-      resultSchema: result,
-    });
-  };
 }
 
-export type AnyMethodDescriptor = MethodDescriptor<
-  any,
-  AnyParamsSchema,
-  AnyResultSchema
->;
-
-export type MethodNameOf<MD extends AnyMethodDescriptor> = MD["methodName"];
+export type AnyMethodDescriptor = MethodDescriptor<any, any, any>;
