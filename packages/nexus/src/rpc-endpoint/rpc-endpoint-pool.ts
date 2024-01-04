@@ -105,7 +105,7 @@ export class RpcEndpointPool {
     // this problem is due to how the setter for this config is named. (i.e .cannedResponse).
     // the same problem applies for the .cacheConfig property.
 
-    if (!methodDescriptor?.cannedResponseConfig) {
+    if (!methodDescriptor?.cannedResponse) {
       return undefined;
     }
 
@@ -121,12 +121,10 @@ export class RpcEndpointPool {
       return undefined;
     }
 
-    const cannedResponse: unknown = await methodDescriptor.cannedResponseConfig(
-      {
-        chain,
-        params: parsedParams.data as unknown,
-      }
-    );
+    const cannedResponse: unknown = await methodDescriptor.cannedResponse({
+      chain,
+      params: parsedParams.data as unknown,
+    });
 
     // TODO: extend the canned response mechanism to support "Method Not Allowed".
     // update the api to go beyond "success", and to cover "acceptable" error responses.

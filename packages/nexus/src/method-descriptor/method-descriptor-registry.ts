@@ -56,4 +56,13 @@ export class MethodDescriptorRegistry<T extends MethodDescriptorTuple> {
       (descriptor) => descriptor.methodName === methodName
     );
   }
+
+  public clone(): MethodDescriptorRegistry<T> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since .map() loses the tuple generic type inference.
+    const clonedTuple: T = this.tuple.map((descriptor) =>
+      descriptor.clone()
+    ) as any;
+
+    return new MethodDescriptorRegistry(clonedTuple);
+  }
 }

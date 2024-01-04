@@ -186,7 +186,7 @@ const eth_chainId = MethodDescriptor.init({
   name: "eth_chainId",
   params: NoParams,
   result: Quantity,
-}).cannedResponse(({ chain }) => {
+}).setCannedResponse(({ chain }) => {
   const chainIdBigNumber = BigNumber.from(chain.chainId);
 
   return Quantity.parse(chainIdBigNumber.toHexString());
@@ -212,7 +212,7 @@ const eth_gasPrice = MethodDescriptor.init({
   name: "eth_gasPrice",
   params: NoParams,
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain }) => chain.blockTime,
   paramsKeySuffix: null,
   enabled: true,
@@ -230,7 +230,7 @@ const eth_blockNumber = MethodDescriptor.init({
   name: "eth_blockNumber",
   params: NoParams,
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain }) => {
     return chain.blockTime * 1_000;
   },
@@ -242,7 +242,7 @@ const eth_getBalance = MethodDescriptor.init({
   name: "eth_getBalance",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [_address, blockNumber] = params;
 
@@ -264,7 +264,7 @@ const eth_getStorageAt = MethodDescriptor.init({
   name: "eth_getStorageAt",
   params: z.tuple([Address, Quantity, BlockNumberOrTag]),
   result: Bytes,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [_address, _position, blockNumber] = params;
 
@@ -286,7 +286,7 @@ const eth_getTransactionCount = MethodDescriptor.init({
   name: "eth_getTransactionCount",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [_address, blockNumber] = params;
 
@@ -308,7 +308,7 @@ const eth_getBlockTransactionCountByHash = MethodDescriptor.init({
   name: "eth_getBlockTransactionCountByHash",
   params: z.tuple([Bytes32]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -326,7 +326,7 @@ const eth_getBlockTransactionCountByNumber = MethodDescriptor.init({
   name: "eth_getBlockTransactionCountByNumber",
   params: z.tuple([BlockNumberOrTag]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [blockNumber] = params;
 
@@ -348,7 +348,7 @@ const eth_getUncleCountByBlockHash = MethodDescriptor.init({
   name: "eth_getUncleCountByBlockHash",
   params: z.tuple([Bytes32]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -366,7 +366,7 @@ const eth_getUncleCountByBlockNumber = MethodDescriptor.init({
   name: "eth_getUncleCountByBlockNumber",
   params: z.tuple([BlockNumberOrTag]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [blockNumber] = params;
 
@@ -388,7 +388,7 @@ const eth_getCode = MethodDescriptor.init({
   name: "eth_getCode",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Bytes,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [_address, blockNumber] = params;
 
@@ -481,7 +481,7 @@ const eth_call = MethodDescriptor.init({
     BlockNumberOrTag,
   ]),
   result: Bytes,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain, params, highestKnownBlockNumber }) => {
     const [_transactionCall, blockNumber] = params;
 
@@ -523,7 +523,7 @@ const eth_estimateGas = MethodDescriptor.init({
     }),
   ]),
   result: Quantity,
-}).cache({
+}).setCacheConfig({
   ttl: ({ chain }) => chain.blockTime * 1000,
   paramsKeySuffix: ({ params }) => {
     const [transactionCall] = params;
@@ -559,7 +559,7 @@ const eth_getBlockByHash = MethodDescriptor.init({
     z.tuple([Bytes32, z.boolean().nullish()]),
   ]),
   result: Block.nullish(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -580,7 +580,7 @@ const eth_getBlockByNumber = MethodDescriptor.init({
     z.tuple([Bytes32, z.boolean().nullish()]),
   ]),
   result: Block.nullish(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -598,7 +598,7 @@ const eth_getTransactionByHash = MethodDescriptor.init({
   name: "eth_getTransactionByHash",
   params: z.tuple([Bytes32]),
   result: MaybePendingTransaction.nullable(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -618,7 +618,7 @@ const eth_getTransactionByBlockHashAndIndex = MethodDescriptor.init({
   name: "eth_getTransactionByBlockHashAndIndex",
   params: z.tuple([Bytes32, Quantity]),
   result: MaybePendingTransaction.nullable(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -638,7 +638,7 @@ const eth_getTransactionByBlockNumberAndIndex = MethodDescriptor.init({
   name: "eth_getTransactionByBlockNumberAndIndex",
   params: z.tuple([BlockNumberOrTag, Quantity]),
   result: MaybePendingTransaction.nullable(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -676,7 +676,7 @@ const eth_getTransactionReceipt = MethodDescriptor.init({
       status: Quantity.nullish(),
     })
     .nullish(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -696,7 +696,7 @@ const eth_getUncleByBlockHashAndIndex = MethodDescriptor.init({
   name: "eth_getUncleByBlockHashAndIndex",
   params: z.tuple([Bytes32, Quantity]),
   result: Block.nullish(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should
@@ -714,7 +714,7 @@ const eth_getUncleByBlockNumberAndIndex = MethodDescriptor.init({
   name: "eth_getUncleByBlockNumberAndIndex",
   params: z.tuple([BlockNumberOrTag, Quantity]),
   result: Block.nullish(),
-}).cache({
+}).setCacheConfig({
   // TODO: TTL should actually have access to the result,
   // for example, if the result is null, we should cache
   // for maybe just a single block. otherwise, we should

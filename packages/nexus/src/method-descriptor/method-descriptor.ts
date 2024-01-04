@@ -111,11 +111,8 @@ export class MethodDescriptor<
   public readonly methodSchema: z.ZodLiteral<M>;
   public readonly paramsSchema: P;
   public readonly successValueSchema: S;
-  public readonly cacheConfig?: CacheConfig<z.infer<P>>;
-  public readonly cannedResponseConfig?: CannedResponseFn<
-    z.infer<P>,
-    z.infer<S>
-  >;
+  public cacheConfig?: CacheConfig<z.infer<P>>;
+  public cannedResponse?: CannedResponseFn<z.infer<P>, z.infer<S>>;
 
   constructor({
     methodName,
@@ -137,7 +134,7 @@ export class MethodDescriptor<
     this.paramsSchema = paramsSchema;
     this.successValueSchema = successValueSchema;
     this.cacheConfig = cacheConfig;
-    this.cannedResponseConfig = cannedResponse;
+    this.cannedResponse = cannedResponse;
 
     this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
       method: methodSchema,
@@ -154,32 +151,31 @@ export class MethodDescriptor<
     ]);
   }
 
-  private getConstructorParams(): ConstructorParameters<
-    typeof MethodDescriptor<M, P, S>
-  >[0] {
-    return {
+  public clone() {
+    return new MethodDescriptor({
       methodName: this.methodName,
       methodSchema: this.methodSchema,
       paramsSchema: this.paramsSchema,
       successValueSchema: this.successValueSchema,
       cacheConfig: this.cacheConfig,
-    };
-  }
-
-  public cache(config: MethodDescriptor<M, P, S>["cacheConfig"]) {
-    return new MethodDescriptor({
-      ...this.getConstructorParams(),
-      cacheConfig: config,
+      cannedResponse: this.cannedResponse,
     });
   }
 
-  public cannedResponse(
-    cannedResponseConfig: MethodDescriptor<M, P, S>["cannedResponseConfig"]
+  public setCacheConfig(config: MethodDescriptor<M, P, S>["cacheConfig"]) {
+    this.cacheConfig = config;
+
+    return this;
+  }
+
+  public setCannedResponse(
+    cannedResponse: MethodDescriptor<M, P, S>["cannedResponse"]
   ) {
-    return new MethodDescriptor({
-      ...this.getConstructorParams(),
-      cannedResponse: cannedResponseConfig,
-    });
+    this.cannedResponse = cannedResponse;
+
+    // TODO: is returning `this` confusing, since this is a mutating method?
+
+    return this;
   }
 
   public static init = <
