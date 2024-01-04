@@ -22,7 +22,7 @@ type MethodDescriptorMapOf<T extends MethodDescriptorTuple> = {
 };
 
 type RpcRequestSchemasListOf<T extends MethodDescriptorTuple> = {
-  [K in keyof T]: T[K]["rpcRequestSchema"];
+  [K in keyof T]: T[K]["requestSchema"];
 };
 type RpcRequestSchemaOf<T extends MethodDescriptorTuple> = z.ZodUnion<
   RpcRequestSchemasListOf<T>
@@ -45,7 +45,7 @@ export class MethodDescriptorRegistry<T extends MethodDescriptorTuple> {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since zod union type is too complex for internal inference
     this.rpcRequestSchema = z.union(
-      tuple.map((descriptor) => descriptor.rpcRequestSchema) as any
+      tuple.map((descriptor) => descriptor.requestSchema) as any
     );
   }
 

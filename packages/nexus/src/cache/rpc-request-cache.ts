@@ -79,7 +79,7 @@ export class RpcRequestCache {
 
     const cacheKey = `${chain.chainId}-${request.method}-${paramsKeySuffix}`;
 
-    const parsedResult = methodDescriptor.successValueSchema.safeParse(
+    const parsedResult = methodDescriptor.resultSchema.safeParse(
       response.result
     );
 
@@ -177,8 +177,7 @@ export class RpcRequestCache {
       return undefined;
     }
 
-    const parsedResult =
-      methodDescriptor.successValueSchema.safeParse(cachedResult);
+    const parsedResult = methodDescriptor.resultSchema.safeParse(cachedResult);
 
     if (!parsedResult.success) {
       this.logger.info(
