@@ -47,8 +47,10 @@ export class RpcRequestCache {
 
     const { cacheConfig } = methodDescriptor;
 
-    if (!cacheConfig?.readEnabled) {
-      this.logger.info(`Cache: Cache is disabled for method ${request.method}`);
+    if (!cacheConfig?.writeEnabled) {
+      this.logger.info(
+        `Cache: Cache write is disabled for method ${request.method}`
+      );
 
       return;
     }
@@ -136,7 +138,9 @@ export class RpcRequestCache {
     const { cacheConfig } = methodDescriptor;
 
     if (!cacheConfig?.readEnabled) {
-      this.logger.info(`Cache: Cache is disabled for method ${request.method}`);
+      this.logger.info(
+        `Cache: Cache read is disabled for method ${request.method}`
+      );
 
       return undefined;
     }

@@ -66,7 +66,21 @@ class CacheConfig<M extends string, P, R> {
       return this.options.readEnabled(params);
     }
 
-    return this.options.readEnabled || false;
+    return this.options.readEnabled !== false;
+  }
+
+  public writeEnabled(params: CacheConfigOptionWriteFnParams<M, P, R>) {
+    if (!this.readEnabled(params)) {
+      // does this make sense? we're not writing unless reading is enabled
+      // TODO: what if read and write enabled values are different?
+      return false;
+    }
+
+    if (typeof this.options.writeEnabled === "function") {
+      return this.options.writeEnabled(params);
+    }
+
+    return this.options.writeEnabled !== false;
   }
 
   public paramsKeySuffix(params: CacheConfigOptionReadFnParams<M, P, R>) {
