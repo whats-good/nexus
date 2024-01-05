@@ -217,7 +217,6 @@ const eth_gasPrice = new MethodDescriptor({
     return chain.blockTime;
   },
   paramsKeySuffix: "",
-  readEnabled: true,
 });
 
 const eth_accounts = new MethodDescriptor({
@@ -237,7 +236,6 @@ const eth_blockNumber = new MethodDescriptor({
     return chain.blockTime * 1_000;
   },
   paramsKeySuffix: "",
-  readEnabled: true,
 });
 
 const eth_getBalance = new MethodDescriptor({
@@ -259,7 +257,6 @@ const eth_getBalance = new MethodDescriptor({
 
     return `${address}-${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_getStorageAt = new MethodDescriptor({
@@ -281,7 +278,6 @@ const eth_getStorageAt = new MethodDescriptor({
 
     return `${address}-${position}-${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_getTransactionCount = new MethodDescriptor({
@@ -303,7 +299,6 @@ const eth_getTransactionCount = new MethodDescriptor({
 
     return `${address}-${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_getBlockTransactionCountByHash = new MethodDescriptor({
@@ -321,7 +316,6 @@ const eth_getBlockTransactionCountByHash = new MethodDescriptor({
 
     return `${blockHash}`;
   },
-  readEnabled: true,
 });
 
 const eth_getBlockTransactionCountByNumber = new MethodDescriptor({
@@ -343,7 +337,6 @@ const eth_getBlockTransactionCountByNumber = new MethodDescriptor({
 
     return `${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_getUncleCountByBlockHash = new MethodDescriptor({
@@ -361,7 +354,6 @@ const eth_getUncleCountByBlockHash = new MethodDescriptor({
 
     return `${blockHash}`;
   },
-  readEnabled: true,
 });
 
 const eth_getUncleCountByBlockNumber = new MethodDescriptor({
@@ -383,7 +375,6 @@ const eth_getUncleCountByBlockNumber = new MethodDescriptor({
 
     return `${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_getCode = new MethodDescriptor({
@@ -405,7 +396,6 @@ const eth_getCode = new MethodDescriptor({
 
     return `${address}-${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 // TODO: how should this be treated?
@@ -509,7 +499,6 @@ const eth_call = new MethodDescriptor({
 
     return `${preBlockNumber}-${blockNumber}`;
   },
-  readEnabled: true,
 });
 
 const eth_estimateGas = new MethodDescriptor({
@@ -543,7 +532,6 @@ const eth_estimateGas = new MethodDescriptor({
 
     return `${preBlockNumber}`;
   },
-  readEnabled: true,
 });
 
 // TODO: MARK AS UNSUPPORTED OR ACTUALLY IMPLEMENT!
@@ -572,7 +560,6 @@ const eth_getBlockByHash = new MethodDescriptor({
 
     return `${blockHash}-${includeTransactions}`;
   },
-  readEnabled: true,
 });
 
 const eth_getBlockByNumber = new MethodDescriptor({
@@ -593,7 +580,6 @@ const eth_getBlockByNumber = new MethodDescriptor({
 
     return `${blockNumber}-${includeTransactions}`;
   },
-  readEnabled: true,
 });
 
 const eth_getTransactionByHash = new MethodDescriptor({
@@ -613,7 +599,6 @@ const eth_getTransactionByHash = new MethodDescriptor({
 
     return `${transactionHash}`;
   },
-  readEnabled: true,
 });
 
 const eth_getTransactionByBlockHashAndIndex = new MethodDescriptor({
@@ -633,7 +618,6 @@ const eth_getTransactionByBlockHashAndIndex = new MethodDescriptor({
 
     return `${blockHash}-${transactionIndex}`;
   },
-  readEnabled: true,
 });
 
 const eth_getTransactionByBlockNumberAndIndex = new MethodDescriptor({
@@ -653,7 +637,6 @@ const eth_getTransactionByBlockNumberAndIndex = new MethodDescriptor({
 
     return `${blockNumber}-${transactionIndex}`;
   },
-  readEnabled: true,
 });
 
 const eth_getTransactionReceipt = new MethodDescriptor({
@@ -691,7 +674,6 @@ const eth_getTransactionReceipt = new MethodDescriptor({
 
     return `${transactionHash}`;
   },
-  readEnabled: true,
 });
 
 const eth_getUncleByBlockHashAndIndex = new MethodDescriptor({
@@ -709,7 +691,6 @@ const eth_getUncleByBlockHashAndIndex = new MethodDescriptor({
 
     return `${blockHash}-${uncleIndex}`;
   },
-  readEnabled: true,
 });
 
 const eth_getUncleByBlockNumberAndIndex = new MethodDescriptor({
@@ -727,7 +708,6 @@ const eth_getUncleByBlockNumberAndIndex = new MethodDescriptor({
 
     return `${blockNumber}-${uncleIndex}`;
   },
-  readEnabled: true,
 });
 
 // TODO: how should this be treated?
