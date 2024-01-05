@@ -213,8 +213,10 @@ const eth_gasPrice = new MethodDescriptor({
   params: NoParams,
   result: Quantity,
 }).setCacheConfig({
-  ttl: ({ chain }) => chain.blockTime,
-  paramsKeySuffix: null,
+  ttl: ({ chain }) => {
+    return chain.blockTime;
+  },
+  paramsKeySuffix: "",
   enabled: true,
 });
 
@@ -234,7 +236,7 @@ const eth_blockNumber = new MethodDescriptor({
   ttl: ({ chain }) => {
     return chain.blockTime * 1_000;
   },
-  paramsKeySuffix: null,
+  paramsKeySuffix: "",
   enabled: true,
 });
 

@@ -73,15 +73,15 @@ export class RpcRequestCache {
 
     const cacheKey = `${chain.chainId}-${request.method}-${paramsKeySuffix}`;
 
-    const parsedResult = methodDescriptor.resultSchema.safeParse(
-      response.result
-    );
+    const parsedResultResponse =
+      methodDescriptor.resultResponseSchema.safeParse(response);
 
-    if (!parsedResult.success) {
+    if (!parsedResultResponse.success) {
+      // TODO: handle error responses here too
       this.logger.info(
-        `Cache: Invalid result for method ${request.method}: ${
-          parsedResult.error.message
-        }. ${JSON.stringify(response.result, null, 2)}`
+        `Cache: Invalid response result for method ${request.method}: ${
+          parsedResultResponse.error.message
+        }. ${JSON.stringify(response, null, 2)}`
       );
 
       return undefined;
@@ -90,19 +90,19 @@ export class RpcRequestCache {
     const ttl = cacheConfig.ttl({
       chain,
       params: parsedParams.data as unknown,
-      result: parsedResult.data as unknown,
+      result: parsedResultResponse.data.result as unknown,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
     });
 
     await this.cache.set({
       key: cacheKey,
       ttl,
-      value: parsedResult.data as unknown,
+      value: parsedResultResponse.data.result as unknown,
     });
 
     this.logger.info(
       `Cache: Cached result for key ${cacheKey}: ${JSON.stringify(
-        parsedResult.data,
+        parsedResultResponse.data.result,
         null,
         2
       )}`
@@ -113,6 +113,9 @@ export class RpcRequestCache {
     chain: Chain,
     request: JsonRPCRequest
   ): Promise<JsonRPCResponse | undefined> {
+    // TODO: instead of returning | undefined, we should return a typed union
+    // object that explains why the cache was not used, e.g.: { reason: "no-cache" }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the generics are impossible to infer from within.
     const methodDescriptor: AnyMethodDescriptor | undefined =
       this.methodDescriptorRegistry.getDescriptorByName(request.method);

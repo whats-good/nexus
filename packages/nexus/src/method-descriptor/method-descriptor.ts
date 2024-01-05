@@ -1,9 +1,17 @@
 import { z } from "zod";
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
+import {
+  JsonRpcResponseSchemaOf,
+  JsonRpcResultResponseSchemaOf,
+} from "@src/rpc-endpoint/json-rpc-types";
+import type {
+  JsonRpcResponseSchemaTypeOf,
+  JsonRpcResultResponseSchemaTypeOf,
+} from "@src/rpc-endpoint/json-rpc-types";
 
 interface CacheConfigOptionReadFnParams<P> {
-  chain: any;
+  chain: Chain;
   params: P;
   highestKnownBlockNumber: BigNumber;
 }
@@ -64,6 +72,8 @@ export class MethodDescriptor<M extends string, P, R> {
   public readonly methodSchema: z.ZodLiteral<M>;
   public readonly paramsSchema: z.ZodType<P, any, any>;
   public readonly resultSchema: z.ZodType<R, any, any>;
+  public readonly responseSchema: JsonRpcResponseSchemaTypeOf<R>;
+  public readonly resultResponseSchema: JsonRpcResultResponseSchemaTypeOf<R>;
 
   public cacheConfig?: CacheConfig<P, R>;
   public cannedResponse?: CannedResponseFn<P, R>;
@@ -81,6 +91,8 @@ export class MethodDescriptor<M extends string, P, R> {
     this.methodSchema = z.literal(method);
     this.paramsSchema = params;
     this.resultSchema = result;
+    this.responseSchema = JsonRpcResponseSchemaOf(result);
+    this.resultResponseSchema = JsonRpcResultResponseSchemaOf(result);
   }
 
   public setCacheConfig(options: CacheConfigOptions<P, R>) {
