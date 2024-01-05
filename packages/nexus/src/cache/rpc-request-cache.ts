@@ -80,7 +80,9 @@ export class RpcRequestCache {
     // TODO: consider passing the request as a whole, instead of just the params.
     const ttl = cacheConfig.ttl({
       chain,
-      response,
+      rawResponse: response,
+      result: methodDescriptor.resultFromResponse(response),
+      error: methodDescriptor.errorFromResponse(response),
       params: parsedParams.data as unknown,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       methodDescriptor,

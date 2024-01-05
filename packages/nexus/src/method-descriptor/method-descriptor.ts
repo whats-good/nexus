@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
 import {
+  JsonRPCErrorResponseSchema,
   JsonRpcResponseSchemaOf,
   JsonRpcResultResponseSchemaOf,
 } from "@src/rpc-endpoint/json-rpc-types";
@@ -26,7 +27,9 @@ type CacheConfigOptionReadField<T, M extends string, P, R> =
 
 interface CacheConfigOptionWriteFnParams<M extends string, P, R>
   extends CacheConfigOptionReadFnParams<M, P, R> {
-  response: JsonRPCResponse;
+  rawResponse: JsonRPCResponse;
+  result: ReturnType<MethodDescriptor<M, P, R>["resultFromResponse"]>;
+  error: ReturnType<MethodDescriptor<M, P, R>["errorFromResponse"]>;
 }
 type CacheConfigOptionWriteFn<T, M extends string, P, R> = (
   params: CacheConfigOptionWriteFnParams<M, P, R>
@@ -117,6 +120,12 @@ export class MethodDescriptor<M extends string, P, R> {
 
     return this;
   }
+
+  public resultFromResponse = (response: unknown) =>
+    this.resultResponseSchema.safeParse(response);
+
+  public errorFromResponse = (response: unknown) =>
+    JsonRPCErrorResponseSchema.safeParse(response);
 }
 
 export type AnyMethodDescriptor = MethodDescriptor<any, any, any>;
