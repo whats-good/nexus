@@ -67,6 +67,7 @@ export class RpcRequestCache {
 
     const paramsKeySuffix = cacheConfig.paramsKeySuffix({
       chain,
+      methodDescriptor,
       params: parsedParams.data as unknown,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
     });
@@ -75,6 +76,15 @@ export class RpcRequestCache {
 
     const parsedResultResponse =
       methodDescriptor.resultResponseSchema.safeParse(response);
+
+    // TODO: consider passing the request as a whole, instead of just the params.
+    const ttl = cacheConfig.ttl({
+      chain,
+      response,
+      params: parsedParams.data as unknown,
+      highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
+      methodDescriptor,
+    });
 
     if (!parsedResultResponse.success) {
       // TODO: handle error responses here too
@@ -86,13 +96,6 @@ export class RpcRequestCache {
 
       return undefined;
     }
-
-    const ttl = cacheConfig.ttl({
-      chain,
-      params: parsedParams.data as unknown,
-      result: parsedResultResponse.data.result as unknown,
-      highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-    });
 
     await this.cache.set({
       key: cacheKey,
@@ -152,6 +155,7 @@ export class RpcRequestCache {
       chain,
       params: parsedParams.data as unknown,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
+      methodDescriptor,
     });
 
     const cacheKey = `${chain.chainId}-${request.method}-${paramsKeySuffix}`;

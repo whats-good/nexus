@@ -44,6 +44,9 @@ export const JsonRpcResultResponseSchemaOf = <R>(
     jsonrpc: z.literal("2.0"),
     result: resultSchema,
   });
+export type JsonRpcResultResponseOf<R> = z.infer<
+  ReturnType<typeof JsonRpcResultResponseSchemaOf<R>>
+>;
 
 export type JsonRpcResultResponseSchemaTypeOf<R> = ReturnType<
   typeof JsonRpcResultResponseSchemaOf<R>

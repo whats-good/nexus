@@ -6,43 +6,50 @@ import {
   JsonRpcResultResponseSchemaOf,
 } from "@src/rpc-endpoint/json-rpc-types";
 import type {
+  JsonRPCResponse,
   JsonRpcResponseSchemaTypeOf,
   JsonRpcResultResponseSchemaTypeOf,
 } from "@src/rpc-endpoint/json-rpc-types";
 
-interface CacheConfigOptionReadFnParams<P> {
+interface CacheConfigOptionReadFnParams<M extends string, P, R> {
   chain: Chain;
   params: P;
   highestKnownBlockNumber: BigNumber;
+  methodDescriptor: MethodDescriptor<M, P, R>;
 }
-type CacheConfigOptionReadFn<T, P> = (
-  params: CacheConfigOptionReadFnParams<P>
+type CacheConfigOptionReadFn<T, M extends string, P, R> = (
+  params: CacheConfigOptionReadFnParams<M, P, R>
 ) => T;
-type CacheConfigOptionReadField<T, P> = T | CacheConfigOptionReadFn<T, P>;
-
-interface CacheConfigOptionWriteFnParams<P, R>
-  extends CacheConfigOptionReadFnParams<P> {
-  result: R;
-}
-type CacheConfigOptionWriteFn<T, P, R> = (
-  params: CacheConfigOptionWriteFnParams<P, R>
-) => T;
-type CacheConfigOptionWriteField<T, P, R> =
+type CacheConfigOptionReadField<T, M extends string, P, R> =
   | T
-  | CacheConfigOptionWriteFn<T, P, R>;
+  | CacheConfigOptionReadFn<T, M, P, R>;
 
-interface CacheConfigOptions<P, R> {
-  ttl: CacheConfigOptionWriteField<number, P, R>;
-  enabled: CacheConfigOptionReadField<boolean, P>;
-  paramsKeySuffix: CacheConfigOptionReadField<string, P> | null;
+interface CacheConfigOptionWriteFnParams<M extends string, P, R>
+  extends CacheConfigOptionReadFnParams<M, P, R> {
+  response: JsonRPCResponse;
+}
+type CacheConfigOptionWriteFn<T, M extends string, P, R> = (
+  params: CacheConfigOptionWriteFnParams<M, P, R>
+) => T;
+type CacheConfigOptionWriteField<T, M extends string, P, R> =
+  | T
+  | CacheConfigOptionWriteFn<T, M, P, R>;
+
+interface CacheConfigOptions<M extends string, P, R> {
+  ttl: CacheConfigOptionWriteField<number, M, P, R>;
+  enabled: CacheConfigOptionReadField<boolean, M, P, R>;
+  paramsKeySuffix: CacheConfigOptionReadField<string, M, P, R> | null;
 }
 
 type CannedResponseFn<P, R> = (params: { chain: Chain; params: P }) => R;
 
-class CacheConfig<P, R> {
-  constructor(private readonly options: CacheConfigOptions<P, R>) {}
+class CacheConfig<M extends string, P, R> {
+  constructor(
+    private readonly options: CacheConfigOptions<M, P, R>,
+    private readonly methodDescriptor: MethodDescriptor<M, P, R>
+  ) {}
 
-  public ttl(params: CacheConfigOptionWriteFnParams<P, R>) {
+  public ttl(params: CacheConfigOptionWriteFnParams<M, P, R>) {
     if (typeof this.options.ttl === "function") {
       return this.options.ttl(params);
     }
@@ -50,7 +57,7 @@ class CacheConfig<P, R> {
     return this.options.ttl || 0;
   }
 
-  public enabled(params: CacheConfigOptionReadFnParams<P>) {
+  public enabled(params: CacheConfigOptionReadFnParams<M, P, R>) {
     if (typeof this.options.enabled === "function") {
       return this.options.enabled(params);
     }
@@ -58,7 +65,7 @@ class CacheConfig<P, R> {
     return this.options.enabled || false;
   }
 
-  public paramsKeySuffix(params: CacheConfigOptionReadFnParams<P>) {
+  public paramsKeySuffix(params: CacheConfigOptionReadFnParams<M, P, R>) {
     if (typeof this.options.paramsKeySuffix === "function") {
       return this.options.paramsKeySuffix(params);
     }
@@ -75,7 +82,7 @@ export class MethodDescriptor<M extends string, P, R> {
   public readonly responseSchema: JsonRpcResponseSchemaTypeOf<R>;
   public readonly resultResponseSchema: JsonRpcResultResponseSchemaTypeOf<R>;
 
-  public cacheConfig?: CacheConfig<P, R>;
+  public cacheConfig?: CacheConfig<M, P, R>;
   public cannedResponse?: CannedResponseFn<P, R>;
 
   constructor({
@@ -95,8 +102,8 @@ export class MethodDescriptor<M extends string, P, R> {
     this.resultResponseSchema = JsonRpcResultResponseSchemaOf(result);
   }
 
-  public setCacheConfig(options: CacheConfigOptions<P, R>) {
-    this.cacheConfig = new CacheConfig(options);
+  public setCacheConfig(options: CacheConfigOptions<M, P, R>) {
+    this.cacheConfig = new CacheConfig(options, this);
 
     return this;
   }
