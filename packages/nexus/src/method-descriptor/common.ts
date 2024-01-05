@@ -1,46 +1,64 @@
 import * as z from "zod";
 
-export const Address = z
+// We're using this _Address.or(_Address) hack to work around a bug in zod, where branded type inference is lost otherwise.
+
+const _Address = z
   .string()
   .refine((x) => /^0x[0-9a-fA-F]{40}$/.test(x))
   .brand("Address");
+
+export const Address = _Address.or(_Address);
+
 export type Address = z.infer<typeof Address>;
 
-export const Quantity = z
+const _Quantity = z
   .string()
   .refine((x) => /^0x(?:[1-9a-f]+[0-9a-f]*|0)$/i.test(x))
   .brand("Quantity");
+
+export const Quantity = _Quantity.or(_Quantity);
+
 export type Quantity = z.infer<typeof Quantity>;
 
-export const Bytes256 = z
+const _Bytes256 = z
   .string()
   .refine((x) => /^0x[0-9a-f]{512}$/.test(x))
   .brand("Bytes256");
+
+export const Bytes256 = _Bytes256.or(_Bytes256);
 export type Bytes256 = z.infer<typeof Bytes256>;
 
-export const Bytes32 = z
+const _Bytes32 = z
   .string()
   .refine((x) => /^0x[0-9a-f]{64}$/.test(x))
   .brand("Bytes32");
+
+export const Bytes32 = _Bytes32.or(_Bytes32);
 export type Bytes32 = z.infer<typeof Bytes32>;
 
-export const Bytes8 = z
+const _Bytes8 = z
   .string()
   .refine((x) => /^0x[0-9a-f]{16}$/.test(x))
   .brand("Bytes8");
+
+export const Bytes8 = _Bytes8.or(_Bytes8);
 export type Bytes8 = z.infer<typeof Bytes8>;
 
-export const Bytes60 = z
+const _Bytes60 = z
   .string()
   .refine((x) => /^0x[0-9a-f]{120}$/.test(x))
   .brand("Bytes60");
+
+export const Bytes60 = _Bytes60.or(_Bytes60);
 export type Bytes60 = z.infer<typeof Bytes60>;
 
-export const Bytes = z
+const _Bytes = z
   .string()
   .startsWith("0x")
   .refine((x) => x.length % 2 === 0)
   .brand("Bytes");
+
+export const Bytes = _Bytes.or(_Bytes);
 export type Bytes = z.infer<typeof Bytes>;
 
 export const BlockTag = z.union([
