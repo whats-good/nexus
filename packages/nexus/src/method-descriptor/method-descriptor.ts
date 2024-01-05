@@ -80,6 +80,13 @@ class CacheConfig<M extends string, P, R> {
       return this.options.writeEnabled(params);
     }
 
+    // by default, we don't write if the response is not a result response
+    // but this can be overridden by passing a writeEnabled function that
+    // determines under what conditions we should write to the cache.
+    if (!this.methodDescriptor.resultFromResponse(params.rawResponse).success) {
+      return false;
+    }
+
     return this.options.writeEnabled !== false;
   }
 
