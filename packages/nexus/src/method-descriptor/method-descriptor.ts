@@ -39,9 +39,8 @@ type CacheConfigOptionWriteField<T, M extends string, P, R> =
   | CacheConfigOptionWriteFn<T, M, P, R>;
 
 interface CacheConfigOptions<M extends string, P, R> {
-  readEnabled?: CacheConfigOptionReadField<boolean, M, P, R>;
-  writeEnabled?: CacheConfigOptionWriteField<boolean, M, P, R>;
   ttl: CacheConfigOptionWriteField<number, M, P, R>;
+  readEnabled: CacheConfigOptionReadField<boolean, M, P, R>;
   paramsKeySuffix: CacheConfigOptionReadField<string, M, P, R> | null;
 }
 
@@ -61,7 +60,7 @@ class CacheConfig<M extends string, P, R> {
     return this.options.ttl || 0;
   }
 
-  public readEnabled(params: CacheConfigOptionReadFnParams<M, P, R>) {
+  public enabled(params: CacheConfigOptionReadFnParams<M, P, R>) {
     if (typeof this.options.readEnabled === "function") {
       return this.options.readEnabled(params);
     }
