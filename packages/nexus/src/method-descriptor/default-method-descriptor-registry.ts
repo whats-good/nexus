@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
+import packageJson from "../../package.json";
 import { MethodDescriptor } from "./method-descriptor";
 import { MethodDescriptorRegistry } from "./method-descriptor-registry";
 import {
@@ -69,14 +70,9 @@ const web3_clientVersion = new MethodDescriptor({
   method: "web3_clientVersion",
   params: NoParams,
   result: z.string(),
+}).setCannedResponse(() => {
+  return `${packageJson.name}@${packageJson.version}`;
 });
-// .cache({
-//   ttl: Number.POSITIVE_INFINITY,
-//   paramsKeySuffix: null,
-//   enabled: true,
-// });
-// TODO: how should this behave? should it keep the cache forever and
-// just return a pre-defined value, e.g @whatsgood/nexus@0.0.1?
 
 const web3_sha3 = new MethodDescriptor({
   method: "web3_sha3",
@@ -91,13 +87,18 @@ const web3_sha3 = new MethodDescriptor({
 // would require us to run some form of hashing on the input, and at that point
 // we might as well just implement the method ourselves.
 
+// TODO: this is the network id. slightly different than chain id.
+// these could also come from the chain config. for now, we're just
+// infinitely caching them.
 const net_version = new MethodDescriptor({
   method: "net_version",
   params: NoParams,
   result: z.string(),
+}).setCacheConfig({
+  paramsKeySuffix: null,
+  ttl: Number.POSITIVE_INFINITY,
+  readEnabled: true,
 });
-// TODO: should we handle this via method overrides? since it just returns the
-// chain id, which we already have access to.
 
 const net_listening = new MethodDescriptor({
   method: "net_listening",
