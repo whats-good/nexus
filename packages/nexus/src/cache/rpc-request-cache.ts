@@ -31,6 +31,14 @@ export class RpcRequestCache {
     request: JsonRPCRequest,
     response: JsonRPCResponse
   ): Promise<void> {
+    if (!this.config.caching.enabled) {
+      this.logger.info(
+        `Cache: Caching is globally disabled. Not writing to cache.`
+      );
+
+      return;
+    }
+
     const { cacheConfig } = methodDescriptor;
 
     if (!cacheConfig?.writeEnabled) {
@@ -111,6 +119,13 @@ export class RpcRequestCache {
     methodDescriptor: AnyMethodDescriptor,
     request: JsonRPCRequest
   ): Promise<JsonRPCResponse | undefined> {
+    if (!this.config.caching.enabled) {
+      this.logger.info(
+        `Cache: Caching is globally disabled. Not reading from cache.`
+      );
+
+      return;
+    }
     // TODO: instead of returning | undefined, we should return a typed union
     // object that explains why the cache was not used, e.g.: { reason: "no-cache" }
 

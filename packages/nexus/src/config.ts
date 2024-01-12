@@ -46,6 +46,10 @@ type ChainConfigParam =
 
 export type ConfigConstructorParams = ConstructorParameters<typeof Config>[0];
 
+export interface CachingParams {
+  enabled: boolean;
+}
+
 export class Config {
   // TODO: what if i want to use different keys for the same provider?
   // should i allow my users to specify a key per chain?
@@ -68,6 +72,8 @@ export class Config {
 
   public readonly environment: string;
 
+  public readonly caching: CachingParams;
+
   constructor(params: {
     providers: [ProviderConfigParam, ...ProviderConfigParam[]];
     chains: [ChainConfigParam, ...ChainConfigParam[]];
@@ -76,6 +82,7 @@ export class Config {
     registry?: Registry;
     logger?: Logger;
     environment?: string;
+    caching?: CachingParams;
   }) {
     params.providers.forEach((provider) => {
       if (typeof provider === "string") {
@@ -108,6 +115,10 @@ export class Config {
     this.registry = params.registry || createDefaultRegistry();
 
     this.environment = params.environment || "development";
+
+    this.caching = params.caching || {
+      enabled: false,
+    };
 
     if (params.logger) {
       this.logger = params.logger;
