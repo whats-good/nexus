@@ -53,12 +53,13 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const cache = new RpcRequestCache(
+  const cache = new RpcRequestCache(config, new PlacholderCache());
+  const requestHandler = new RequestHandler(
     config,
     defaultMethodDescriptorRegistry,
-    new PlacholderCache()
+    request,
+    cache
   );
-  const requestHandler = new RequestHandler(config, request, cache);
 
   return requestHandler.handle();
 };
@@ -220,11 +221,11 @@ describe("request handler - relay", () => {
       );
       const cache = new RpcRequestCache(
         configWithCycleRecovery,
-        defaultMethodDescriptorRegistry,
         new PlacholderCache()
       );
       const requestHandler = new RequestHandler(
         configWithCycleRecovery,
+        defaultMethodDescriptorRegistry,
         request,
         cache
       );
@@ -263,11 +264,15 @@ describe("request handler - relay", () => {
 
       const cache = new RpcRequestCache(
         configWithCycleRecovery,
-        defaultMethodDescriptorRegistry,
         new PlacholderCache()
       );
 
-      const requestHandler = new RequestHandler(config, request, cache);
+      const requestHandler = new RequestHandler(
+        config,
+        defaultMethodDescriptorRegistry,
+        request,
+        cache
+      );
 
       const result = await requestHandler.handle();
 
@@ -334,13 +339,14 @@ describe("request handler - relay", () => {
         }
       );
 
-      const cache = new RpcRequestCache(
+      const cache = new RpcRequestCache(config, new PlacholderCache());
+
+      const requestHandler = new RequestHandler(
         config,
         defaultMethodDescriptorRegistry,
-        new PlacholderCache()
+        request,
+        cache
       );
-
-      const requestHandler = new RequestHandler(config, request, cache);
 
       const result = await requestHandler.handle();
 

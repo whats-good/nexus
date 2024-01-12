@@ -4,6 +4,10 @@ import { JsonRPCRequestSchema } from "@src/rpc-endpoint/json-rpc-types";
 import { RpcEndpointPoolFactory } from "@src/rpc-endpoint/rpc-endpoint-pool-factory";
 import type { Config, Logger } from "@src/config";
 import type { RpcRequestCache } from "@src/cache";
+import type {
+  AnyMethodDescriptor,
+  MethodDescriptorRegistry,
+} from "@src/method-descriptor";
 import { RpcProxyContext } from "./rpc-proxy-context";
 
 export interface NexusPreResponse {
@@ -17,6 +21,7 @@ export class RequestHandler {
 
   constructor(
     private readonly config: Config,
+    private readonly methodDescriptorRegistry: MethodDescriptorRegistry<any>,
     private readonly request: Request,
     private readonly rpcRequestCache: RpcRequestCache
   ) {
@@ -147,6 +152,14 @@ export class RequestHandler {
 
     const jsonRPCRequestParseResult = await this.parseJSONRpcRequest();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- disabling eslint here because this method always returns any
+    const methodDescriptor: AnyMethodDescriptor | undefined =
+      jsonRPCRequestParseResult.type === "success"
+        ? this.methodDescriptorRegistry.getDescriptorByName(
+            jsonRPCRequestParseResult.data.method
+          )
+        : undefined;
+
     return new RpcProxyContext({
       pool,
       chain,
@@ -156,6 +169,7 @@ export class RequestHandler {
         jsonRPCRequestParseResult.type === "success"
           ? jsonRPCRequestParseResult.data
           : undefined,
+      methodDescriptor,
     });
   }
 }

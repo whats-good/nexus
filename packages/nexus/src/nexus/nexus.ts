@@ -105,12 +105,9 @@ export class Nexus<TServerContext>
     const config = new Config(configParams);
     const requestHandler = new RequestHandler(
       config,
+      defaultMethodDescriptorRegistry,
       request,
-      new RpcRequestCache(
-        config,
-        defaultMethodDescriptorRegistry,
-        this.baseCache
-      )
+      new RpcRequestCache(config, this.baseCache)
     );
 
     return requestHandler.handle();

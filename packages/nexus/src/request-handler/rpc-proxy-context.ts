@@ -1,4 +1,5 @@
 import type { Config, Logger } from "@src/config";
+import type { AnyMethodDescriptor } from "@src/method-descriptor";
 import type { RpcEndpointPool } from "../rpc-endpoint/rpc-endpoint-pool";
 import type { Chain, ChainStatus } from "../chain/chain";
 import type { JsonRPCRequest } from "../rpc-endpoint/json-rpc-types";
@@ -31,6 +32,7 @@ export class RpcProxyContext {
   public readonly pool?: RpcEndpointPool;
   public readonly request: Request;
   public readonly jsonRPCRequest?: JsonRPCRequest;
+  public readonly methodDescriptor?: AnyMethodDescriptor;
   public relayResult?: Awaited<ReturnType<RpcEndpointPool["relay"]>>;
   public readonly path: string;
 
@@ -44,6 +46,7 @@ export class RpcProxyContext {
     config: Config;
     request: Request;
     jsonRPCRequest?: JsonRPCRequest;
+    methodDescriptor?: AnyMethodDescriptor;
   }) {
     this.chain = params.chain;
     this.config = params.config;
@@ -57,6 +60,7 @@ export class RpcProxyContext {
     this.clientAccessKey = requestUrl.searchParams.get("key") || undefined;
 
     this.logger = this.config.logger;
+    this.methodDescriptor = params.methodDescriptor;
   }
 
   private buildStatus(params: {
@@ -151,8 +155,31 @@ export class RpcProxyContext {
 
     const access = this.getAccess();
 
+    if (!this.methodDescriptor) {
+      // return a JSONRPC compliant error message,
+      // saying the method is not supported
+      // TODO: turn this into a proper JSONRPC error
+
+      // TODO: reconstruct the request<->response architecture.
+      // we have too much indirection here.
+
+      // we need a proper Context object that holds the request, the response,
+      // the methodDescriptor, the jsonRPCRequest, etc.
+
+      // and it should have minimal business logic.
+      return {
+        status: 400,
+        body: {
+          message: "Method not supported",
+        },
+      };
+    }
+
     if (access === "authorized") {
-      this.relayResult = await this.pool.relay(this.jsonRPCRequest);
+      this.relayResult = await this.pool.relay(
+        this.methodDescriptor,
+        this.jsonRPCRequest
+      );
     }
 
     if (this.relayResult?.type === "success") {

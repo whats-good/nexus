@@ -6,10 +6,7 @@ import {
 } from "@src/rpc-endpoint/json-rpc-types";
 import type { Chain } from "@src/chain";
 import type { Config, Logger } from "../config";
-import type {
-  AnyMethodDescriptor,
-  MethodDescriptorRegistry,
-} from "../method-descriptor";
+import type { AnyMethodDescriptor } from "../method-descriptor";
 
 export interface BaseCache {
   get: (key: string) => Promise<unknown>;
@@ -23,7 +20,6 @@ export class RpcRequestCache {
   private readonly logger: Logger;
   constructor(
     public readonly config: Config,
-    public readonly methodDescriptorRegistry: MethodDescriptorRegistry<any>,
     public readonly cache: BaseCache
   ) {
     this.logger = this.config.logger;
@@ -31,21 +27,10 @@ export class RpcRequestCache {
 
   public async set(
     chain: Chain,
+    methodDescriptor: AnyMethodDescriptor,
     request: JsonRPCRequest,
     response: JsonRPCResponse
   ): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the generics are impossible to infer from within.
-    const methodDescriptor: AnyMethodDescriptor | undefined =
-      this.methodDescriptorRegistry.getDescriptorByName(request.method);
-
-    if (!methodDescriptor) {
-      this.logger.info(
-        `Cache: No method descriptor found for method ${request.method}`
-      );
-
-      return;
-    }
-
     const { cacheConfig } = methodDescriptor;
 
     if (!cacheConfig?.writeEnabled) {
@@ -123,22 +108,11 @@ export class RpcRequestCache {
 
   public async get(
     chain: Chain,
+    methodDescriptor: AnyMethodDescriptor,
     request: JsonRPCRequest
   ): Promise<JsonRPCResponse | undefined> {
     // TODO: instead of returning | undefined, we should return a typed union
     // object that explains why the cache was not used, e.g.: { reason: "no-cache" }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the generics are impossible to infer from within.
-    const methodDescriptor: AnyMethodDescriptor | undefined =
-      this.methodDescriptorRegistry.getDescriptorByName(request.method);
-
-    if (!methodDescriptor) {
-      this.logger.info(
-        `Cache: No method descriptor found for method ${request.method}`
-      );
-
-      return undefined;
-    }
 
     const { cacheConfig } = methodDescriptor;
 

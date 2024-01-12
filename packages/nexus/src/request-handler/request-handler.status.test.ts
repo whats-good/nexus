@@ -11,12 +11,13 @@ export const requestHelper = async (endpoint: string, config: Config) => {
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const cache = new RpcRequestCache(
+  const cache = new RpcRequestCache(config, new PlacholderCache());
+  const requestHandler = new RequestHandler(
     config,
     defaultMethodDescriptorRegistry,
-    new PlacholderCache()
+    request,
+    cache
   );
-  const requestHandler = new RequestHandler(config, request, cache);
   const response = await requestHandler.handle();
   const data: unknown = await response.json();
 

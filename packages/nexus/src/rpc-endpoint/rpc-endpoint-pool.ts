@@ -132,7 +132,10 @@ export class RpcEndpointPool {
     return cannedResponse;
   }
 
-  public async relay(request: JsonRPCRequest) {
+  public async relay(
+    methodDescriptor: AnyMethodDescriptor,
+    request: JsonRPCRequest
+  ) {
     try {
       const cannedResponse = await this.getCannedResponse(this.chain, request);
 
@@ -153,6 +156,7 @@ export class RpcEndpointPool {
     try {
       const cachedResponse = await this.rpcRequestCache.get(
         this.chain,
+        methodDescriptor,
         request
       );
 
@@ -193,7 +197,12 @@ export class RpcEndpointPool {
 
       if (response.type === "success") {
         try {
-          await this.rpcRequestCache.set(this.chain, request, response.result);
+          await this.rpcRequestCache.set(
+            this.chain,
+            methodDescriptor,
+            request,
+            response.result
+          );
         } catch (error) {
           this.logger.error("failed to cache response");
           this.logger.error(JSON.stringify(error, null, 2));
