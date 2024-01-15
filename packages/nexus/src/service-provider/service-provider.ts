@@ -3,9 +3,9 @@ import type { ChainSupport } from "./chain-support";
 export class ServiceProvider {
   constructor(public readonly name: string) {}
 
-  private readonly supportedChains: ChainSupport[] = [];
+  public readonly supportedChains = new Map<number, ChainSupport>();
 
   public addChainSupport(support: ChainSupport) {
-    this.supportedChains.push(support);
+    this.supportedChains.set(support.chain.chainId, support);
   }
 }
