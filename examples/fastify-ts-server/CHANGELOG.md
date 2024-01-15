@@ -1,5 +1,12 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [135c567]
+  - @whatsgood/nexus@0.11.0
+
 ## 0.4.1
 
 ### Patch Changes
