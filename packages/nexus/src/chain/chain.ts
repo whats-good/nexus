@@ -1,7 +1,7 @@
 export class Chain {
   public readonly name: string;
   public readonly chainId: number;
-  public readonly blockTime: number;
+  public blockTime: number;
 
   constructor({
     name,
@@ -14,6 +14,10 @@ export class Chain {
   }) {
     this.name = name;
     this.chainId = chainId;
+    this.blockTime = blockTime;
+  }
+
+  public setBlockTime(blockTime: number) {
     this.blockTime = blockTime;
   }
 }
