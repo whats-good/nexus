@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.11.0
+
+### Minor Changes
+
+- 135c567: Introducing caching and method descriptors
+
 ## 0.10.0
 
 ### Minor Changes
