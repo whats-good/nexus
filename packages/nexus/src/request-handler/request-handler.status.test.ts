@@ -2,13 +2,22 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { setupServer } from "msw/node";
 import { Config } from "@src/config";
 import { handlers } from "@test/mock-server-handlers";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { RpcRequestCache } from "@src/cache";
+import { PlacholderCache } from "@src/cache/placeholder-cache";
 import { RequestHandler } from "./request-handler";
 
 export const requestHelper = async (endpoint: string, config: Config) => {
   const request = new Request(`https://my-test-rpc-provider.com${endpoint}`, {
     method: "GET",
   });
-  const requestHandler = new RequestHandler(config, request);
+  const cache = new RpcRequestCache(config, new PlacholderCache());
+  const requestHandler = new RequestHandler(
+    config,
+    defaultMethodDescriptorRegistry,
+    request,
+    cache
+  );
   const response = await requestHandler.handle();
   const data: unknown = await response.json();
 

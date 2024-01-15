@@ -1,34 +1,117 @@
-import { z } from "zod";
-import { MethodDescriptorRegistry, descriptor } from "./method-descriptor";
+/* eslint-disable camelcase -- Disabling the camelCase rule, because eth method names are snake_cased */
 
-const baseRegistry = new MethodDescriptorRegistry([
-  descriptor("__ignore", [z.never()], z.never()),
-]);
+import { MethodDescriptorRegistry } from "./method-descriptor-registry";
+import {
+  web3_clientVersion,
+  web3_sha3,
+  net_version,
+  net_listening,
+  net_peerCount,
+  eth_protocolVersion,
+  eth_syncing,
+  eth_coinbase,
+  eth_chainId,
+  eth_mining,
+  eth_hashrate,
+  eth_gasPrice,
+  eth_accounts,
+  eth_blockNumber,
+  eth_getBalance,
+  eth_getStorageAt,
+  eth_getTransactionCount,
+  eth_getBlockTransactionCountByHash,
+  eth_getBlockTransactionCountByNumber,
+  eth_getUncleCountByBlockHash,
+  eth_getUncleCountByBlockNumber,
+  eth_getCode,
+  eth_sign,
+  eth_signTransaction,
+  eth_sendTransaction,
+  eth_sendRawTransaction,
+  eth_call,
+  eth_estimateGas,
+  eth_feeHistory,
+  eth_getBlockByHash,
+  eth_getBlockByNumber,
+  eth_getTransactionByHash,
+  eth_getTransactionByBlockHashAndIndex,
+  eth_getTransactionByBlockNumberAndIndex,
+  eth_getTransactionReceipt,
+  eth_getUncleByBlockHashAndIndex,
+  eth_getUncleByBlockNumberAndIndex,
+  eth_newFilter,
+  eth_newBlockFilter,
+  eth_newPendingTransactionFilter,
+  eth_uninstallFilter,
+  eth_getFilterChanges,
+  eth_getFilterLogs,
+  eth_getLogs,
+  eth_getWork,
+  eth_submitWork,
+  eth_getCompilers,
+  eth_compileSolidity,
+  eth_compileLLL,
+  eth_compileSerpent,
+  eth_submitHashrate,
+} from "./method-descriptors";
 
-export const methodDescriptorRegistry = baseRegistry
-  .methodDescriptor({
-    name: "eth_getBlockByHash",
-    params: [
-      z.union([z.string(), z.number()]),
-      z.union([z.boolean(), z.number()]).optional(),
-    ],
-    result: z.string(),
-  })
-  .methodDescriptor({
-    name: "eth_getBlockByNumber",
-    params: [
-      z.union([z.string(), z.number()]),
-      z.union([z.boolean(), z.number()]).optional(),
-    ],
-    result: z.string(),
-  })
-  .methodDescriptor({
-    name: "eth_blockNumber",
-    params: [],
-    result: z.number(),
-  })
-  .methodDescriptor({
-    name: "eth_getBalance",
-    params: [z.string(), z.union([z.string(), z.number()])],
-    result: z.string(),
-  });
+const methodDescriptors = [
+  web3_clientVersion,
+  web3_sha3,
+  net_version,
+  net_listening,
+  net_peerCount,
+  eth_protocolVersion,
+  eth_syncing,
+  eth_coinbase,
+  eth_chainId,
+  eth_mining,
+  eth_hashrate,
+  eth_gasPrice,
+  eth_accounts,
+  eth_blockNumber,
+  eth_getBalance,
+  eth_getStorageAt,
+  eth_getTransactionCount,
+  eth_getBlockTransactionCountByHash,
+  eth_getBlockTransactionCountByNumber,
+  eth_getUncleCountByBlockHash,
+  eth_getUncleCountByBlockNumber,
+  eth_getCode,
+  eth_sign,
+  eth_signTransaction,
+  eth_sendTransaction,
+  eth_sendRawTransaction,
+  eth_call,
+  eth_estimateGas,
+  eth_feeHistory,
+  eth_getBlockByHash,
+  eth_getBlockByNumber,
+  eth_getTransactionByHash,
+  eth_getTransactionByBlockHashAndIndex,
+  eth_getTransactionByBlockNumberAndIndex,
+  eth_getTransactionReceipt,
+  eth_getUncleByBlockHashAndIndex,
+  eth_getUncleByBlockNumberAndIndex,
+  eth_newFilter,
+  eth_newBlockFilter,
+  eth_newPendingTransactionFilter,
+  eth_uninstallFilter,
+  eth_getFilterChanges,
+  eth_getFilterLogs,
+  eth_getLogs,
+  eth_getWork,
+  eth_submitWork,
+  eth_getCompilers,
+  eth_compileSolidity,
+  eth_compileLLL,
+  eth_compileSerpent,
+  eth_submitHashrate,
+  eth_compileLLL,
+] as const;
+
+export const defaultMethodDescriptorRegistry = new MethodDescriptorRegistry(
+  methodDescriptors
+);
+
+// TODO: read other JSON-RPC specs and see if there are any other methods

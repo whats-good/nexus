@@ -117,6 +117,7 @@ export class RpcEndpoint {
     return {
       type: "success",
       request,
+      cached: false,
       result: parsedResult.data,
     } as const;
   }

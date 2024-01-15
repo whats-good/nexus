@@ -3,6 +3,11 @@ import { matchPath } from "@src/routes";
 import { JsonRPCRequestSchema } from "@src/rpc-endpoint/json-rpc-types";
 import { RpcEndpointPoolFactory } from "@src/rpc-endpoint/rpc-endpoint-pool-factory";
 import type { Config, Logger } from "@src/config";
+import type { RpcRequestCache } from "@src/cache";
+import type {
+  UnknownMethodDescriptor,
+  MethodDescriptorRegistry,
+} from "@src/method-descriptor";
 import { RpcProxyContext } from "./rpc-proxy-context";
 
 export interface NexusPreResponse {
@@ -12,11 +17,14 @@ export interface NexusPreResponse {
 }
 
 export class RequestHandler {
-  private readonly config: Config;
   private readonly logger: Logger;
-  private readonly request: Request;
 
-  constructor(config: Config, request: Request) {
+  constructor(
+    private readonly config: Config,
+    private readonly methodDescriptorRegistry: MethodDescriptorRegistry<any>,
+    private readonly request: Request,
+    private readonly rpcRequestCache: RpcRequestCache
+  ) {
     this.config = config;
     this.logger = config.logger;
     this.request = request;
@@ -55,6 +63,10 @@ export class RequestHandler {
       });
     } else if (context.request.method === "POST") {
       const result = await context.relay();
+
+      if (result.cached) {
+        this.logger.info("returning result from cache");
+      }
 
       this.logger.info("result: ");
       const statusFirstDigit = Math.floor(result.status / 100);
@@ -129,13 +141,24 @@ export class RequestHandler {
     const requestUrl = new URL(this.request.url);
 
     const route = matchPath(requestUrl.pathname);
-    const rpcEndpointPoolFactory = new RpcEndpointPoolFactory(this.config);
+    const rpcEndpointPoolFactory = new RpcEndpointPoolFactory(
+      this.config,
+      this.rpcRequestCache
+    );
     const chain = route
       ? this.config.registry.getChainByOptionalParams(route.params)
       : undefined;
     const pool = chain ? rpcEndpointPoolFactory.fromChain(chain) : undefined;
 
     const jsonRPCRequestParseResult = await this.parseJSONRpcRequest();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- disabling eslint here because this method always returns any
+    const methodDescriptor: UnknownMethodDescriptor | undefined =
+      jsonRPCRequestParseResult.type === "success"
+        ? this.methodDescriptorRegistry.getDescriptorByName(
+            jsonRPCRequestParseResult.data.method
+          )
+        : undefined;
 
     return new RpcProxyContext({
       pool,
@@ -146,6 +169,7 @@ export class RequestHandler {
         jsonRPCRequestParseResult.type === "success"
           ? jsonRPCRequestParseResult.data
           : undefined,
+      methodDescriptor,
     });
   }
 }

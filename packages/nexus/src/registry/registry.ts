@@ -1,13 +1,14 @@
 import { Chain } from "@src/chain";
 import { Network } from "@src/chain/network";
-import { methodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
 import type { ChainSupport } from "@src/service-provider";
 import { ServiceProvider } from "@src/service-provider";
 
-type RecursiveChainFn = (
-  chainId: number,
-  name: string
-) => {
+type RecursiveChainFn = (params: {
+  chainId: number;
+  name: string;
+  blockTime: number;
+}) => {
   chain: RecursiveChainFn;
   network: NetworkBuilder["network"];
 };
@@ -38,11 +39,20 @@ class ChainBuilder {
     private readonly network: Network
   ) {}
 
-  public init(chainId: number, name: string): ReturnType<RecursiveChainFn> {
+  public init({
+    chainId,
+    name,
+    blockTime,
+  }: {
+    chainId: number;
+    name: string;
+    blockTime: number;
+  }): ReturnType<RecursiveChainFn> {
     Chain.init(this.registry, {
       chainId,
       name,
       network: this.network,
+      blockTime,
     });
 
     return {
@@ -60,7 +70,7 @@ export class Registry {
   private readonly networkBuilder = new NetworkBuilder(this);
   private readonly serviceProviderBuilder = new ServiceProviderBuilder(this);
 
-  public readonly methodDescriptorRegistry = methodDescriptorRegistry;
+  public readonly methodDescriptorRegistry = defaultMethodDescriptorRegistry;
 
   constructor(
     params: {

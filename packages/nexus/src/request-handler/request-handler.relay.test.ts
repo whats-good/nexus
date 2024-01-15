@@ -4,6 +4,9 @@ import type { ProviderConfigParam } from "@src/config";
 import { Config } from "@src/config";
 import { handlers } from "@test/mock-server-handlers";
 import { retry } from "@test/utils";
+import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
+import { RpcRequestCache } from "@src/cache";
+import { PlacholderCache } from "@src/cache/placeholder-cache";
 import { Registry } from "../registry";
 import { RequestHandler } from "./request-handler";
 
@@ -50,7 +53,13 @@ const blockNumberRequestHelper = (config: Config) => {
       }),
     }
   );
-  const requestHandler = new RequestHandler(config, request);
+  const cache = new RpcRequestCache(config, new PlacholderCache());
+  const requestHandler = new RequestHandler(
+    config,
+    defaultMethodDescriptorRegistry,
+    request,
+    cache
+  );
 
   return requestHandler.handle();
 };
@@ -210,9 +219,15 @@ describe("request handler - relay", () => {
           }),
         }
       );
+      const cache = new RpcRequestCache(
+        configWithCycleRecovery,
+        new PlacholderCache()
+      );
       const requestHandler = new RequestHandler(
         configWithCycleRecovery,
-        request
+        defaultMethodDescriptorRegistry,
+        request,
+        cache
       );
 
       const result = await requestHandler.handle();
@@ -246,7 +261,18 @@ describe("request handler - relay", () => {
           }),
         }
       );
-      const requestHandler = new RequestHandler(config, request);
+
+      const cache = new RpcRequestCache(
+        configWithCycleRecovery,
+        new PlacholderCache()
+      );
+
+      const requestHandler = new RequestHandler(
+        config,
+        defaultMethodDescriptorRegistry,
+        request,
+        cache
+      );
 
       const result = await requestHandler.handle();
 
@@ -280,7 +306,9 @@ describe("request handler - relay", () => {
     it("should successfully relay", async () => {
       const registry = new Registry();
 
-      registry.network("ethereum", ["eth"]).chain(1, "mainnet");
+      registry
+        .network("ethereum", ["eth"])
+        .chain({ chainId: 1, name: "mainnet", blockTime: 12 });
       registry.provider("alchemy").support(1, {
         baseURL: "https://eth-mainnet.alchemyapi.io/v2",
         type: "url-append-key",
@@ -311,7 +339,14 @@ describe("request handler - relay", () => {
         }
       );
 
-      const requestHandler = new RequestHandler(config, request);
+      const cache = new RpcRequestCache(config, new PlacholderCache());
+
+      const requestHandler = new RequestHandler(
+        config,
+        defaultMethodDescriptorRegistry,
+        request,
+        cache
+      );
 
       const result = await requestHandler.handle();
 

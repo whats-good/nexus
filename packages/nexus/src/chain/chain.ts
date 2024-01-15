@@ -8,6 +8,7 @@ export interface ChainStatus {
   networkName: string;
   isEnabled: boolean;
   // TODO: add isDeprecated
+  // TODO: average block time over the last 100 blocks?
   // isDeprecated: boolean;
 }
 
@@ -15,7 +16,8 @@ export class Chain {
   private constructor(
     public readonly chainId: number,
     public readonly network: Network,
-    public readonly name: string
+    public readonly name: string,
+    public readonly blockTime: number
   ) {}
 
   public getStatus(config: Config): ChainStatus {
@@ -34,9 +36,15 @@ export class Chain {
       chainId: number;
       network: Network;
       name: string;
+      blockTime: number;
     }
   ): Chain {
-    const chain = new Chain(params.chainId, params.network, params.name);
+    const chain = new Chain(
+      params.chainId,
+      params.network,
+      params.name,
+      params.blockTime
+    );
 
     params.network.addChain(chain);
     registry.registerChain(chain);

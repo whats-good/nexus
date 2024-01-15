@@ -1,4 +1,5 @@
 import type { Config, Logger } from "@src/config";
+import type { UnknownMethodDescriptor } from "@src/method-descriptor";
 import type { RpcEndpointPool } from "../rpc-endpoint/rpc-endpoint-pool";
 import type { Chain, ChainStatus } from "../chain/chain";
 import type { JsonRPCRequest } from "../rpc-endpoint/json-rpc-types";
@@ -31,6 +32,7 @@ export class RpcProxyContext {
   public readonly pool?: RpcEndpointPool;
   public readonly request: Request;
   public readonly jsonRPCRequest?: JsonRPCRequest;
+  public readonly methodDescriptor?: UnknownMethodDescriptor;
   public relayResult?: Awaited<ReturnType<RpcEndpointPool["relay"]>>;
   public readonly path: string;
 
@@ -44,6 +46,7 @@ export class RpcProxyContext {
     config: Config;
     request: Request;
     jsonRPCRequest?: JsonRPCRequest;
+    methodDescriptor?: UnknownMethodDescriptor;
   }) {
     this.chain = params.chain;
     this.config = params.config;
@@ -57,6 +60,7 @@ export class RpcProxyContext {
     this.clientAccessKey = requestUrl.searchParams.get("key") || undefined;
 
     this.logger = this.config.logger;
+    this.methodDescriptor = params.methodDescriptor;
   }
 
   private buildStatus(params: {
@@ -107,14 +111,17 @@ export class RpcProxyContext {
   }
 
   public async relay() {
+    // TODO: make all these error states return jsonrpc compliant results
     if (!this.jsonRPCRequest) {
       // TODO: test
-      // TODO: pass the actual parse result into the context, not the
-      // jsonRPCRequest
       return {
         status: 400,
         body: {
-          message: "Invalid Json RPC Request",
+          jsonrpc: "2.0",
+          error: {
+            code: -32600,
+            message: "Parse error",
+          },
         },
       };
     }
@@ -151,8 +158,37 @@ export class RpcProxyContext {
 
     const access = this.getAccess();
 
+    if (!this.methodDescriptor) {
+      // return a JSONRPC compliant error message,
+      // saying the method is not supported
+      // TODO: turn this into a proper JSONRPC error
+
+      // TODO: reconstruct the request<->response architecture.
+      // we have too much indirection here.
+
+      // we need a proper Context object that holds the request, the response,
+      // the methodDescriptor, the jsonRPCRequest, etc.
+
+      // and it should have minimal business logic.
+
+      return {
+        status: 400,
+        body: {
+          id: this.jsonRPCRequest.id,
+          jsonrpc: "2.0",
+          error: {
+            code: -32601,
+            message: "Method not found",
+          },
+        },
+      };
+    }
+
     if (access === "authorized") {
-      this.relayResult = await this.pool.relay(this.jsonRPCRequest);
+      this.relayResult = await this.pool.relay(
+        this.methodDescriptor,
+        this.jsonRPCRequest
+      );
     }
 
     if (this.relayResult?.type === "success") {
@@ -160,12 +196,43 @@ export class RpcProxyContext {
       return {
         status: 200, // TODO: should this be 200? or should it be adjusted based on the response?
         body: this.relayResult.result,
+        cached: this.relayResult.cached,
       };
     }
 
-    // TODO: should respond with a jsonrpc-compliant error
+    if (this.relayResult?.type === "method-not-allowed") {
+      return {
+        status: 405,
+        body: {
+          id: this.jsonRPCRequest.id,
+          jsonrpc: "2.0",
+          error: {
+            code: -32004,
+            message: "Method not supported",
+          },
+        },
+      };
+    }
+
+    if (this.relayResult?.type === "invalid-params") {
+      return {
+        status: 400,
+        body: {
+          id: this.jsonRPCRequest.id,
+          jsonrpc: "2.0",
+          error: {
+            code: -32602,
+            message: "Invalid params",
+          },
+        },
+      };
+    }
 
     const status = await this.getStatus();
+
+    // TODO: relay should not return a status.
+    // It should not return our internal status type.
+    // in fact, we should get rid of this internal status type completely.
 
     // TODO: status should always fail here, given the response is not ok.
     return {

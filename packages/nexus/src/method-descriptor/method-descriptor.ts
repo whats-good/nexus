@@ -1,170 +1,165 @@
 import { z } from "zod";
+import type { BigNumber } from "@ethersproject/bignumber";
+import type { Chain } from "@src/chain";
+import {
+  JsonRPCErrorResponseSchema,
+  JsonRpcResponseSchemaOf,
+  JsonRpcResultResponseSchemaOf,
+} from "@src/rpc-endpoint/json-rpc-types";
+import type {
+  JsonRPCResponse,
+  JsonRpcResponseSchemaTypeOf,
+  JsonRpcResultResponseSchemaTypeOf,
+} from "@src/rpc-endpoint/json-rpc-types";
 
-type MethodSchema<T extends string> = z.ZodType<T, any>;
-type AnyMethodSchema = MethodSchema<any>;
+interface CacheConfigOptionReadFnParams<M extends string, P, R> {
+  chain: Chain;
+  params: P;
+  highestKnownBlockNumber: BigNumber;
+  methodDescriptor: MethodDescriptor<M, P, R>;
+}
+type CacheConfigOptionReadFn<T, M extends string, P, R> = (
+  params: CacheConfigOptionReadFnParams<M, P, R>
+) => T;
+type CacheConfigOptionReadField<T, M extends string, P, R> =
+  | T
+  | CacheConfigOptionReadFn<T, M, P, R>;
 
-type ParamsSchema<T> = z.ZodType<T, any>;
-type AnyParamsSchema = ParamsSchema<any>;
+interface CacheConfigOptionWriteFnParams<M extends string, P, R>
+  extends CacheConfigOptionReadFnParams<M, P, R> {
+  rawResponse: JsonRPCResponse;
+  result: ReturnType<MethodDescriptor<M, P, R>["resultFromResponse"]>;
+  error: ReturnType<MethodDescriptor<M, P, R>["errorFromResponse"]>;
+}
+type CacheConfigOptionWriteFn<T, M extends string, P, R> = (
+  params: CacheConfigOptionWriteFnParams<M, P, R>
+) => T;
+type CacheConfigOptionWriteField<T, M extends string, P, R> =
+  | T
+  | CacheConfigOptionWriteFn<T, M, P, R>;
 
-type ResultSchema<T> = z.ZodType<T, any>;
-export type AnyResultSchema = ResultSchema<any>;
+interface CacheConfigOptions<M extends string, P, R> {
+  readEnabled?: CacheConfigOptionReadField<boolean, M, P, R>;
+  writeEnabled?: CacheConfigOptionWriteField<boolean, M, P, R>;
+  ttl: CacheConfigOptionWriteField<number, M, P, R>;
+  paramsKeySuffix: CacheConfigOptionReadField<string, M, P, R> | null;
+}
 
-const RpcRequestIdSchema = z.union([z.number(), z.string()]);
+type CannedResponseFn<P, R> = (params: { chain: Chain; params: P }) => R;
 
-// type RequestId = z.ZodType<typeof RpcRequestIdSchema>;
+type RequestFilterFn<P> = (params: { params: P }) => boolean;
 
-const BaseRpcRequestParams = z.array(z.unknown()).nullish();
+class CacheConfig<M extends string, P, R> {
+  constructor(
+    private readonly options: CacheConfigOptions<M, P, R>,
+    private readonly methodDescriptor: MethodDescriptor<M, P, R>
+  ) {}
 
-const MinimalRpcRequestSchema = z.object({
-  id: RpcRequestIdSchema.nullish().default(null),
-  jsonrpc: z.string(),
-  method: z.string(),
-  params: BaseRpcRequestParams,
-});
+  public ttl(params: CacheConfigOptionWriteFnParams<M, P, R>) {
+    if (typeof this.options.ttl === "function") {
+      return this.options.ttl(params);
+    }
 
-type RpcRequestSchema<
-  M extends AnyMethodSchema,
-  P extends AnyParamsSchema,
-> = ReturnType<
-  typeof MinimalRpcRequestSchema.extend<{
+    return this.options.ttl || 0;
+  }
+
+  public readEnabled(params: CacheConfigOptionReadFnParams<M, P, R>) {
+    if (typeof this.options.readEnabled === "function") {
+      return this.options.readEnabled(params);
+    }
+
+    return this.options.readEnabled !== false;
+  }
+
+  public writeEnabled(params: CacheConfigOptionWriteFnParams<M, P, R>) {
+    if (!this.readEnabled(params)) {
+      // does this make sense? we're not writing unless reading is enabled
+      // TODO: what if read and write enabled values are different?
+      return false;
+    }
+
+    if (typeof this.options.writeEnabled === "function") {
+      return this.options.writeEnabled(params);
+    }
+
+    // by default, we don't write if the response is not a result response
+    // but this can be overridden by passing a writeEnabled function that
+    // determines under what conditions we should write to the cache.
+    if (!this.methodDescriptor.resultFromResponse(params.rawResponse).success) {
+      return false;
+    }
+
+    return this.options.writeEnabled !== false;
+  }
+
+  public paramsKeySuffix(params: CacheConfigOptionReadFnParams<M, P, R>) {
+    if (typeof this.options.paramsKeySuffix === "function") {
+      return this.options.paramsKeySuffix(params);
+    }
+
+    return this.options.paramsKeySuffix || "";
+  }
+}
+
+export class MethodDescriptor<M extends string, P, R> {
+  public readonly method: M;
+  public readonly methodSchema: z.ZodLiteral<M>;
+  public readonly paramsSchema: z.ZodType<P, any, any>;
+  public readonly resultSchema: z.ZodType<R, any, any>;
+  public readonly responseSchema: JsonRpcResponseSchemaTypeOf<R>;
+  public readonly resultResponseSchema: JsonRpcResultResponseSchemaTypeOf<R>;
+
+  public cacheConfig?: CacheConfig<M, P, R>;
+  public cannedResponse?: CannedResponseFn<P, R>;
+  public requestFilter: RequestFilterFn<P>;
+
+  constructor({
+    method,
+    params,
+    result,
+  }: {
     method: M;
-    params: P;
-  }>
->;
+    params: z.ZodType<P, any, any>;
+    result: z.ZodType<R, any, any>;
+  }) {
+    this.method = method;
+    this.methodSchema = z.literal(method);
+    this.paramsSchema = params;
+    this.resultSchema = result;
+    this.responseSchema = JsonRpcResponseSchemaOf(result);
+    this.resultResponseSchema = JsonRpcResultResponseSchemaOf(result);
+    this.requestFilter = () => true;
+  }
 
-const RpcResponseBase = z.object({
-  id: RpcRequestIdSchema,
-  jsonrpc: z.string(),
-});
+  public setCacheConfig(options: CacheConfigOptions<M, P, R>) {
+    this.cacheConfig = new CacheConfig(options, this);
 
-// const MinimalRpcErrorResponseSchema = RpcResponseBase.extend({
-//   error: z.object({
-//     code: z.number(),
-//     message: z.string(),
-//   }),
-// });
+    return this;
+  }
 
-const MinimalRpcSuccessResponseSchema = RpcResponseBase.extend({
-  result: z.unknown(),
-});
-
-// const MinimalRpcResponseSchema = z.union([
-//   MinimalRpcErrorResponseSchema,
-//   MinimalRpcSuccessResponseSchema,
-// ]);
-
-// type MinimalRpcResponse = z.infer<typeof MinimalRpcResponseSchema>;
-// type MinimalRpcErrorResponse = z.infer<typeof MinimalRpcErrorResponseSchema>;
-// type MinimalRpcSuccessResponse = z.infer<
-//   typeof MinimalRpcSuccessResponseSchema
-// >;
-
-type RpcSuccessResponseSchema<Result extends ResultSchema<any>> = ReturnType<
-  typeof MinimalRpcSuccessResponseSchema.extend<{
-    result: Result;
-  }>
->;
-
-export class MethodDescriptor<
-  M extends string,
-  P extends AnyParamsSchema,
-  R extends AnyResultSchema,
-> {
-  public readonly rpcRequestSchema: RpcRequestSchema<z.ZodLiteral<M>, P>;
-  public readonly rpcSuccessResponseSchema: RpcSuccessResponseSchema<R>;
-
-  private constructor(
-    public readonly methodName: M,
-    public readonly methodSchema: z.ZodLiteral<M>,
-    public readonly paramsSchema: P,
-    public readonly resultSchema: R
+  public setCannedResponse(
+    cannedResponse: MethodDescriptor<M, P, R>["cannedResponse"]
   ) {
-    this.rpcRequestSchema = MinimalRpcRequestSchema.extend({
-      method: methodSchema,
-      params: paramsSchema,
-    });
+    this.cannedResponse = cannedResponse;
 
-    this.rpcSuccessResponseSchema = MinimalRpcSuccessResponseSchema.extend({
-      result: resultSchema,
-    });
+    // TODO: is returning `this` confusing, since this is a mutating method?
+
+    return this;
   }
 
-  public static init = <
-    InitM extends string,
-    InitP extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [], // TODO: this means null-param methods need to be processed as empty array methods.
-    InitR extends AnyResultSchema,
-  >(
-    method: InitM,
-    params: InitP,
-    result: InitR
-  ) => {
-    return new MethodDescriptor(
-      method,
-      z.literal(method),
-      z.tuple(params),
-      result
-    );
+  public resultFromResponse = (response: unknown) =>
+    this.resultResponseSchema.safeParse(response);
+
+  public setRequestFilter = (requestFilter: RequestFilterFn<P>) => {
+    this.requestFilter = requestFilter;
+    // TODO: is returning `this` confusing, since this is a mutating method?
+
+    return this;
   };
+
+  public errorFromResponse = (response: unknown) =>
+    JsonRPCErrorResponseSchema.safeParse(response);
 }
 
-type AnyMethodDescriptor = MethodDescriptor<
-  any,
-  AnyParamsSchema,
-  AnyResultSchema
->;
-
-// type ResultOf<MD extends AnyMethodDescriptor> = z.TypeOf<MD["resultSchema"]>;
-// type SuccessResponseOf<MD extends AnyMethodDescriptor> = z.TypeOf<
-//   MD["rpcSuccessResponseSchema"]
-// >;
-// type RpcRequestOf<MD extends AnyMethodDescriptor> = z.TypeOf<
-//   MD["rpcRequestSchema"]
-// >;
-
-export type AnyMethodDescriptorTuple = [
-  AnyMethodDescriptor,
-  ...AnyMethodDescriptor[],
-];
-
-export const descriptor = MethodDescriptor.init;
-
-type MethodNamesOfMethodDescriptorTuple<T extends AnyMethodDescriptorTuple> =
-  T[number]["methodName"];
-
-export type MethodDescriptorMapOf<T extends AnyMethodDescriptorTuple> = Omit<
-  {
-    [MN in MethodNamesOfMethodDescriptorTuple<T>]: T extends readonly (infer MD)[]
-      ? MD extends MethodDescriptor<MN, infer P, infer R>
-        ? MethodDescriptor<MN, P, R>
-        : never
-      : never;
-  },
-  "__ignore"
->;
-
-export class MethodDescriptorRegistry<T extends AnyMethodDescriptorTuple> {
-  public readonly methodDescriptorMap: MethodDescriptorMapOf<T>;
-
-  constructor(public readonly methodDescriptorTuple: T) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the object can't be initialized as the final desired type.
-    this.methodDescriptorMap = this.methodDescriptorTuple.reduce((acc, cur) => {
-      return {
-        ...acc,
-        [cur.methodName]: cur,
-      };
-    }, {}) as any;
-  }
-
-  public methodDescriptor<
-    MN extends string,
-    P extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [],
-    R extends AnyResultSchema,
-  >({ name, params, result }: { name: MN; params: P; result: R }) {
-    const newDescriptor = MethodDescriptor.init(name, params, result);
-
-    return new MethodDescriptorRegistry([
-      newDescriptor,
-      ...this.methodDescriptorTuple,
-    ]);
-  }
-}
+export type AnyMethodDescriptor = MethodDescriptor<any, any, any>;
+export type UnknownMethodDescriptor = MethodDescriptor<any, unknown, unknown>;
