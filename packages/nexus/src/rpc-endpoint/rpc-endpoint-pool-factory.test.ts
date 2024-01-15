@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { defaultMethodDescriptorRegistry } from "@src/method-descriptor/default-method-descriptor-registry";
 import { RpcRequestCache } from "@src/cache";
 import { PlacholderCache } from "@src/cache/placeholder-cache";
 import { createDefaultRegistry } from "../registry/default-registry";
@@ -22,11 +21,7 @@ describe("provider factory", () => {
     ],
   });
 
-  const cache = new RpcRequestCache(
-    config,
-    defaultMethodDescriptorRegistry,
-    new PlacholderCache()
-  );
+  const cache = new RpcRequestCache(config, new PlacholderCache());
 
   const factory = new RpcEndpointPoolFactory(config, cache);
 

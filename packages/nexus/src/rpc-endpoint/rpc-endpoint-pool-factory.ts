@@ -21,6 +21,7 @@ export class RpcEndpointPoolFactory {
     );
 
     return new RpcEndpointPool({
+      methodDescriptorRegistry: this.config.registry.methodDescriptorRegistry,
       chain,
       eligibleServiceProviders,
       configuredServiceProviders: shuffle(configuredServiceProviders),
