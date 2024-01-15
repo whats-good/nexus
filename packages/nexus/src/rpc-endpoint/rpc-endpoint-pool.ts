@@ -1,8 +1,8 @@
 import { Response } from "@whatwg-node/fetch";
 import type { RpcRequestCache } from "@src/cache";
 import type {
-  AnyMethodDescriptor,
   MethodDescriptorRegistry,
+  UnknownMethodDescriptor,
 } from "@src/method-descriptor";
 import type { Config, Logger } from "../config";
 import type { Chain } from "../chain/chain";
@@ -94,11 +94,8 @@ export class RpcEndpointPool {
   }
 
   private async getCannedResponse(chain: Chain, request: JsonRPCRequest) {
-    // TODO: maybe we should find out the method descriptor at the context level and pass it down,
-    // instead of dependency injecting the method descriptor registry to the pool and the cache?
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the generics are impossible to infer from within.
-    const methodDescriptor: AnyMethodDescriptor | undefined =
+    const methodDescriptor: UnknownMethodDescriptor | undefined =
       this.methodDescriptorRegistry.getDescriptorByName(request.method);
 
     // TODO: change how this is named. instead of calling it `...config`, find a better name.
@@ -123,7 +120,7 @@ export class RpcEndpointPool {
 
     const cannedResponse: unknown = await methodDescriptor.cannedResponse({
       chain,
-      params: parsedParams.data as unknown,
+      params: parsedParams.data,
     });
 
     // TODO: extend the canned response mechanism to support "Method Not Allowed".
@@ -133,9 +130,43 @@ export class RpcEndpointPool {
   }
 
   public async relay(
-    methodDescriptor: AnyMethodDescriptor,
+    methodDescriptor: UnknownMethodDescriptor,
     request: JsonRPCRequest
   ) {
+    const parsedParams = methodDescriptor.paramsSchema.safeParse(
+      request.params
+    );
+
+    if (!parsedParams.success) {
+      // TODO: what if the parsing is wrong?
+      // TODO: is this where this parsing should happen?
+      // if we're exiting our early, maybe params should be parsed before this function is called?
+      this.logger.warn(
+        `Invalid params for method ${request.method}: ${parsedParams.error.message}`
+      );
+
+      return {
+        type: "invalid-params",
+        request,
+        error: parsedParams.error,
+      } as const;
+    }
+
+    if (!methodDescriptor.requestFilter({ params: parsedParams.data })) {
+      this.logger.info(
+        `Request filter denied: ${request.method} with params: ${JSON.stringify(
+          parsedParams.data,
+          null,
+          2
+        )}`
+      );
+
+      return {
+        type: "method-not-allowed",
+        request,
+      } as const;
+    }
+
     try {
       const cannedResponse = await this.getCannedResponse(this.chain, request);
 

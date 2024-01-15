@@ -47,6 +47,8 @@ interface CacheConfigOptions<M extends string, P, R> {
 
 type CannedResponseFn<P, R> = (params: { chain: Chain; params: P }) => R;
 
+type RequestFilterFn<P> = (params: { params: P }) => boolean;
+
 class CacheConfig<M extends string, P, R> {
   constructor(
     private readonly options: CacheConfigOptions<M, P, R>,
@@ -109,6 +111,7 @@ export class MethodDescriptor<M extends string, P, R> {
 
   public cacheConfig?: CacheConfig<M, P, R>;
   public cannedResponse?: CannedResponseFn<P, R>;
+  public requestFilter: RequestFilterFn<P>;
 
   constructor({
     method,
@@ -125,6 +128,7 @@ export class MethodDescriptor<M extends string, P, R> {
     this.resultSchema = result;
     this.responseSchema = JsonRpcResponseSchemaOf(result);
     this.resultResponseSchema = JsonRpcResultResponseSchemaOf(result);
+    this.requestFilter = () => true;
   }
 
   public setCacheConfig(options: CacheConfigOptions<M, P, R>) {
@@ -146,8 +150,16 @@ export class MethodDescriptor<M extends string, P, R> {
   public resultFromResponse = (response: unknown) =>
     this.resultResponseSchema.safeParse(response);
 
+  public setRequestFilter = (requestFilter: RequestFilterFn<P>) => {
+    this.requestFilter = requestFilter;
+    // TODO: is returning `this` confusing, since this is a mutating method?
+
+    return this;
+  };
+
   public errorFromResponse = (response: unknown) =>
     JsonRPCErrorResponseSchema.safeParse(response);
 }
 
 export type AnyMethodDescriptor = MethodDescriptor<any, any, any>;
+export type UnknownMethodDescriptor = MethodDescriptor<any, unknown, unknown>;

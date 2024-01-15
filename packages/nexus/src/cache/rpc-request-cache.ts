@@ -6,7 +6,7 @@ import {
 } from "@src/rpc-endpoint/json-rpc-types";
 import type { Chain } from "@src/chain";
 import type { Config, Logger } from "../config";
-import type { AnyMethodDescriptor } from "../method-descriptor";
+import type { UnknownMethodDescriptor } from "../method-descriptor";
 
 export interface BaseCache {
   get: (key: string) => Promise<unknown>;
@@ -27,7 +27,7 @@ export class RpcRequestCache {
 
   public async set(
     chain: Chain,
-    methodDescriptor: AnyMethodDescriptor,
+    methodDescriptor: UnknownMethodDescriptor,
     request: JsonRPCRequest,
     response: JsonRPCResponse
   ): Promise<void> {
@@ -64,7 +64,7 @@ export class RpcRequestCache {
     const paramsKeySuffix = cacheConfig.paramsKeySuffix({
       chain,
       methodDescriptor,
-      params: parsedParams.data as unknown,
+      params: parsedParams.data,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
     });
 
@@ -76,7 +76,7 @@ export class RpcRequestCache {
       rawResponse: response,
       result: methodDescriptor.resultFromResponse(response),
       error: methodDescriptor.errorFromResponse(response),
-      params: parsedParams.data as unknown,
+      params: parsedParams.data,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       methodDescriptor,
     });
@@ -116,7 +116,7 @@ export class RpcRequestCache {
 
   public async get(
     chain: Chain,
-    methodDescriptor: AnyMethodDescriptor,
+    methodDescriptor: UnknownMethodDescriptor,
     request: JsonRPCRequest
   ): Promise<JsonRPCResponse | undefined> {
     if (!this.config.caching.enabled) {
@@ -153,7 +153,7 @@ export class RpcRequestCache {
 
     const paramsKeySuffix = cacheConfig.paramsKeySuffix({
       chain,
-      params: parsedParams.data as unknown,
+      params: parsedParams.data,
       highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
       methodDescriptor,
     });

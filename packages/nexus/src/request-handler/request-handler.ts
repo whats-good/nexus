@@ -5,7 +5,7 @@ import { RpcEndpointPoolFactory } from "@src/rpc-endpoint/rpc-endpoint-pool-fact
 import type { Config, Logger } from "@src/config";
 import type { RpcRequestCache } from "@src/cache";
 import type {
-  AnyMethodDescriptor,
+  UnknownMethodDescriptor,
   MethodDescriptorRegistry,
 } from "@src/method-descriptor";
 import { RpcProxyContext } from "./rpc-proxy-context";
@@ -153,7 +153,7 @@ export class RequestHandler {
     const jsonRPCRequestParseResult = await this.parseJSONRpcRequest();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- disabling eslint here because this method always returns any
-    const methodDescriptor: AnyMethodDescriptor | undefined =
+    const methodDescriptor: UnknownMethodDescriptor | undefined =
       jsonRPCRequestParseResult.type === "success"
         ? this.methodDescriptorRegistry.getDescriptorByName(
             jsonRPCRequestParseResult.data.method
