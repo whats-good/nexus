@@ -29,6 +29,7 @@ import {
   eth_sendTransaction,
   eth_sendRawTransaction,
   eth_call,
+  eth_estimateGas,
   eth_feeHistory,
   eth_getBlockByHash,
   eth_getBlockByNumber,
