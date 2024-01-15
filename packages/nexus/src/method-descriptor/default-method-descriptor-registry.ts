@@ -66,7 +66,7 @@ const ttlFromBlockNumberOrTag = ({
 // including caching behavior.
 // look into https://www.quicknode.com/docs/ethereum/eth_accounts for inspiration.
 
-const web3_clientVersion = new MethodDescriptor({
+export const web3_clientVersion = new MethodDescriptor({
   method: "web3_clientVersion",
   params: NoParams,
   result: z.string(),
@@ -74,7 +74,7 @@ const web3_clientVersion = new MethodDescriptor({
   return `${packageJson.name}@${packageJson.version}`;
 });
 
-const web3_sha3 = new MethodDescriptor({
+export const web3_sha3 = new MethodDescriptor({
   method: "web3_sha3",
   params: z.tuple([Bytes]),
   result: z.string(),
@@ -90,7 +90,7 @@ const web3_sha3 = new MethodDescriptor({
 // TODO: this is the network id. slightly different than chain id.
 // these could also come from the chain config. for now, we're just
 // infinitely caching them.
-const net_version = new MethodDescriptor({
+export const net_version = new MethodDescriptor({
   method: "net_version",
   params: NoParams,
   result: z.string(),
@@ -100,7 +100,7 @@ const net_version = new MethodDescriptor({
   readEnabled: true,
 });
 
-const net_listening = new MethodDescriptor({
+export const net_listening = new MethodDescriptor({
   method: "net_listening",
   params: NoParams,
   result: z.boolean(),
@@ -109,7 +109,7 @@ const net_listening = new MethodDescriptor({
 // just a proxy and the meaning of this method will change as
 // soon as a different provider is hit behind the scenes?
 
-const net_peerCount = new MethodDescriptor({
+export const net_peerCount = new MethodDescriptor({
   method: "net_peerCount",
   params: NoParams,
   result: Quantity,
@@ -118,7 +118,7 @@ const net_peerCount = new MethodDescriptor({
 // a proxy and the meaning of this method will change as soon as
 // a different provider is hit behind the scenes?
 
-const eth_protocolVersion = new MethodDescriptor({
+export const eth_protocolVersion = new MethodDescriptor({
   method: "eth_protocolVersion",
   params: NoParams,
   result: z.string(),
@@ -126,7 +126,7 @@ const eth_protocolVersion = new MethodDescriptor({
 // TODO: how should we cache this? should we cache it at all?
 // should we just return a pre-defined value, e.g 0x40?
 
-const eth_syncing = new MethodDescriptor({
+export const eth_syncing = new MethodDescriptor({
   method: "eth_syncing",
   params: NoParams,
   result: z.union([
@@ -175,7 +175,7 @@ const eth_syncing = new MethodDescriptor({
 //   }
 // }
 
-const eth_coinbase = new MethodDescriptor({
+export const eth_coinbase = new MethodDescriptor({
   method: "eth_coinbase",
   params: NoParams,
   result: Address,
@@ -183,7 +183,7 @@ const eth_coinbase = new MethodDescriptor({
 // TODO: should we even support this method? We're not a node,
 // and nobody is mining anything
 
-const eth_chainId = new MethodDescriptor({
+export const eth_chainId = new MethodDescriptor({
   method: "eth_chainId",
   params: NoParams,
   result: Quantity,
@@ -193,7 +193,7 @@ const eth_chainId = new MethodDescriptor({
   return Quantity.parse(chainIdBigNumber.toHexString());
 });
 
-const eth_mining = new MethodDescriptor({
+export const eth_mining = new MethodDescriptor({
   method: "eth_mining",
   params: NoParams,
   result: z.boolean(),
@@ -201,7 +201,7 @@ const eth_mining = new MethodDescriptor({
 // TODO: should there be a method override for this, instead of caching
 // or actual forwarding?
 
-const eth_hashrate = new MethodDescriptor({
+export const eth_hashrate = new MethodDescriptor({
   method: "eth_hashrate",
   params: NoParams,
   result: Quantity,
@@ -209,7 +209,7 @@ const eth_hashrate = new MethodDescriptor({
 // TODO: should there be a method override for this, instead of caching
 // or actual forwarding?
 
-const eth_gasPrice = new MethodDescriptor({
+export const eth_gasPrice = new MethodDescriptor({
   method: "eth_gasPrice",
   params: NoParams,
   result: Quantity,
@@ -220,7 +220,7 @@ const eth_gasPrice = new MethodDescriptor({
   paramsKeySuffix: "",
 });
 
-const eth_accounts = new MethodDescriptor({
+export const eth_accounts = new MethodDescriptor({
   method: "eth_accounts",
   params: NoParams,
   result: z.array(Address),
@@ -228,7 +228,7 @@ const eth_accounts = new MethodDescriptor({
 // TODO: should there be a method override for this, instead of caching
 // or actual forwarding?
 
-const eth_blockNumber = new MethodDescriptor({
+export const eth_blockNumber = new MethodDescriptor({
   method: "eth_blockNumber",
   params: NoParams,
   result: Quantity,
@@ -239,7 +239,7 @@ const eth_blockNumber = new MethodDescriptor({
   paramsKeySuffix: "",
 });
 
-const eth_getBalance = new MethodDescriptor({
+export const eth_getBalance = new MethodDescriptor({
   method: "eth_getBalance",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Quantity,
@@ -260,7 +260,7 @@ const eth_getBalance = new MethodDescriptor({
   },
 });
 
-const eth_getStorageAt = new MethodDescriptor({
+export const eth_getStorageAt = new MethodDescriptor({
   method: "eth_getStorageAt",
   params: z.tuple([Address, Quantity, BlockNumberOrTag]),
   result: Bytes,
@@ -281,7 +281,7 @@ const eth_getStorageAt = new MethodDescriptor({
   },
 });
 
-const eth_getTransactionCount = new MethodDescriptor({
+export const eth_getTransactionCount = new MethodDescriptor({
   method: "eth_getTransactionCount",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Quantity,
@@ -302,7 +302,7 @@ const eth_getTransactionCount = new MethodDescriptor({
   },
 });
 
-const eth_getBlockTransactionCountByHash = new MethodDescriptor({
+export const eth_getBlockTransactionCountByHash = new MethodDescriptor({
   method: "eth_getBlockTransactionCountByHash",
   params: z.tuple([Bytes32]),
   result: Quantity,
@@ -319,7 +319,7 @@ const eth_getBlockTransactionCountByHash = new MethodDescriptor({
   },
 });
 
-const eth_getBlockTransactionCountByNumber = new MethodDescriptor({
+export const eth_getBlockTransactionCountByNumber = new MethodDescriptor({
   method: "eth_getBlockTransactionCountByNumber",
   params: z.tuple([BlockNumberOrTag]),
   result: Quantity,
@@ -340,7 +340,7 @@ const eth_getBlockTransactionCountByNumber = new MethodDescriptor({
   },
 });
 
-const eth_getUncleCountByBlockHash = new MethodDescriptor({
+export const eth_getUncleCountByBlockHash = new MethodDescriptor({
   method: "eth_getUncleCountByBlockHash",
   params: z.tuple([Bytes32]),
   result: Quantity,
@@ -357,7 +357,7 @@ const eth_getUncleCountByBlockHash = new MethodDescriptor({
   },
 });
 
-const eth_getUncleCountByBlockNumber = new MethodDescriptor({
+export const eth_getUncleCountByBlockNumber = new MethodDescriptor({
   method: "eth_getUncleCountByBlockNumber",
   params: z.tuple([BlockNumberOrTag]),
   result: Quantity,
@@ -378,7 +378,7 @@ const eth_getUncleCountByBlockNumber = new MethodDescriptor({
   },
 });
 
-const eth_getCode = new MethodDescriptor({
+export const eth_getCode = new MethodDescriptor({
   method: "eth_getCode",
   params: z.tuple([Address, BlockNumberOrTag]),
   result: Bytes,
@@ -404,7 +404,7 @@ const eth_getCode = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_sign = new MethodDescriptor({
+export const eth_sign = new MethodDescriptor({
   method: "eth_sign",
   params: z.tuple([Address, Bytes]),
   result: Bytes,
@@ -416,7 +416,7 @@ const eth_sign = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_signTransaction = new MethodDescriptor({
+export const eth_signTransaction = new MethodDescriptor({
   method: "eth_signTransaction",
   params: z.tuple([
     z.object({
@@ -437,7 +437,7 @@ const eth_signTransaction = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_sendTransaction = new MethodDescriptor({
+export const eth_sendTransaction = new MethodDescriptor({
   method: "eth_sendTransaction",
   params: z.tuple([
     z.object({
@@ -454,13 +454,13 @@ const eth_sendTransaction = new MethodDescriptor({
 });
 // TODO: should we support this method? it assumes the private key is held by the node
 
-const eth_sendRawTransaction = new MethodDescriptor({
+export const eth_sendRawTransaction = new MethodDescriptor({
   method: "eth_sendRawTransaction",
   params: z.tuple([Bytes]),
   result: Bytes32,
 });
 
-const eth_call = new MethodDescriptor({
+export const eth_call = new MethodDescriptor({
   method: "eth_call",
   params: z.tuple([
     z.object({
@@ -536,13 +536,13 @@ const eth_estimateGas = new MethodDescriptor({
 });
 
 // TODO: MARK AS UNSUPPORTED OR ACTUALLY IMPLEMENT!
-const eth_feeHistory = new MethodDescriptor({
+export const eth_feeHistory = new MethodDescriptor({
   method: "eth_feeHistory",
   params: z.unknown(),
   result: z.unknown(),
 });
 
-const eth_getBlockByHash = new MethodDescriptor({
+export const eth_getBlockByHash = new MethodDescriptor({
   method: "eth_getBlockByHash",
   // TODO: is the boolean field actually nullable?
   params: z.union([
@@ -563,7 +563,7 @@ const eth_getBlockByHash = new MethodDescriptor({
   },
 });
 
-const eth_getBlockByNumber = new MethodDescriptor({
+export const eth_getBlockByNumber = new MethodDescriptor({
   method: "eth_getBlockByNumber",
   params: z.union([
     z.tuple([BlockNumberOrTag]),
@@ -583,7 +583,7 @@ const eth_getBlockByNumber = new MethodDescriptor({
   },
 });
 
-const eth_getTransactionByHash = new MethodDescriptor({
+export const eth_getTransactionByHash = new MethodDescriptor({
   method: "eth_getTransactionByHash",
   params: z.tuple([Bytes32]),
   result: MaybePendingTransaction.nullable(),
@@ -602,7 +602,7 @@ const eth_getTransactionByHash = new MethodDescriptor({
   },
 });
 
-const eth_getTransactionByBlockHashAndIndex = new MethodDescriptor({
+export const eth_getTransactionByBlockHashAndIndex = new MethodDescriptor({
   method: "eth_getTransactionByBlockHashAndIndex",
   params: z.tuple([Bytes32, Quantity]),
   result: MaybePendingTransaction.nullable(),
@@ -621,7 +621,7 @@ const eth_getTransactionByBlockHashAndIndex = new MethodDescriptor({
   },
 });
 
-const eth_getTransactionByBlockNumberAndIndex = new MethodDescriptor({
+export const eth_getTransactionByBlockNumberAndIndex = new MethodDescriptor({
   method: "eth_getTransactionByBlockNumberAndIndex",
   params: z.tuple([BlockNumberOrTag, Quantity]),
   result: MaybePendingTransaction.nullable(),
@@ -640,7 +640,7 @@ const eth_getTransactionByBlockNumberAndIndex = new MethodDescriptor({
   },
 });
 
-const eth_getTransactionReceipt = new MethodDescriptor({
+export const eth_getTransactionReceipt = new MethodDescriptor({
   method: "eth_getTransactionReceipt",
   params: z.tuple([Bytes32]),
   result: z
@@ -677,7 +677,7 @@ const eth_getTransactionReceipt = new MethodDescriptor({
   },
 });
 
-const eth_getUncleByBlockHashAndIndex = new MethodDescriptor({
+export const eth_getUncleByBlockHashAndIndex = new MethodDescriptor({
   method: "eth_getUncleByBlockHashAndIndex",
   params: z.tuple([Bytes32, Quantity]),
   result: Block.nullish(),
@@ -694,7 +694,7 @@ const eth_getUncleByBlockHashAndIndex = new MethodDescriptor({
   },
 });
 
-const eth_getUncleByBlockNumberAndIndex = new MethodDescriptor({
+export const eth_getUncleByBlockNumberAndIndex = new MethodDescriptor({
   method: "eth_getUncleByBlockNumberAndIndex",
   params: z.tuple([BlockNumberOrTag, Quantity]),
   result: Block.nullish(),
@@ -716,7 +716,7 @@ const eth_getUncleByBlockNumberAndIndex = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_newFilter = new MethodDescriptor({
+export const eth_newFilter = new MethodDescriptor({
   method: "eth_newFilter",
   params: z.tuple([FilterInput]),
   result: Quantity,
@@ -727,7 +727,7 @@ const eth_newFilter = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_newBlockFilter = new MethodDescriptor({
+export const eth_newBlockFilter = new MethodDescriptor({
   method: "eth_newBlockFilter",
   params: NoParams,
   result: Quantity,
@@ -738,7 +738,7 @@ const eth_newBlockFilter = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_newPendingTransactionFilter = new MethodDescriptor({
+export const eth_newPendingTransactionFilter = new MethodDescriptor({
   method: "eth_newPendingTransactionFilter",
   params: NoParams,
   result: Quantity,
@@ -749,7 +749,7 @@ const eth_newPendingTransactionFilter = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_uninstallFilter = new MethodDescriptor({
+export const eth_uninstallFilter = new MethodDescriptor({
   method: "eth_uninstallFilter",
   params: z.tuple([Quantity]),
   result: z.boolean(),
@@ -760,7 +760,7 @@ const eth_uninstallFilter = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_getFilterChanges = new MethodDescriptor({
+export const eth_getFilterChanges = new MethodDescriptor({
   method: "eth_getFilterChanges",
   params: z.tuple([Quantity]),
   result: z.array(z.unknown()),
@@ -771,7 +771,7 @@ const eth_getFilterChanges = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_getFilterLogs = new MethodDescriptor({
+export const eth_getFilterLogs = new MethodDescriptor({
   method: "eth_getFilterLogs",
   params: z.tuple([Quantity]),
   result: z.array(z.unknown()),
@@ -782,7 +782,7 @@ const eth_getFilterLogs = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_getLogs = new MethodDescriptor({
+export const eth_getLogs = new MethodDescriptor({
   method: "eth_getLogs",
   params: z.tuple([FilterInput]),
   result: z.array(z.unknown()),
@@ -790,14 +790,14 @@ const eth_getLogs = new MethodDescriptor({
 // TODO: add proper caching logic
 
 // TODO: research method and see how it should be supported
-const eth_getWork = new MethodDescriptor({
+export const eth_getWork = new MethodDescriptor({
   method: "eth_getWork",
   params: NoParams,
   result: z.tuple([Bytes32, Bytes32, Bytes32]),
 });
 
 // TODO: research method and see how it should be supported
-const eth_submitWork = new MethodDescriptor({
+export const eth_submitWork = new MethodDescriptor({
   method: "eth_submitWork",
   params: z.tuple([Bytes8, Bytes32, Bytes32]),
   result: z.boolean(),
@@ -808,7 +808,7 @@ const eth_submitWork = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_getCompilers = new MethodDescriptor({
+export const eth_getCompilers = new MethodDescriptor({
   method: "eth_getCompilers",
   params: z.unknown(),
   result: z.unknown(),
@@ -819,7 +819,7 @@ const eth_getCompilers = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_compileSolidity = new MethodDescriptor({
+export const eth_compileSolidity = new MethodDescriptor({
   method: "eth_compileSolidity",
   params: z.unknown(),
   result: z.unknown(),
@@ -830,7 +830,7 @@ const eth_compileSolidity = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_compileLLL = new MethodDescriptor({
+export const eth_compileLLL = new MethodDescriptor({
   method: "eth_compileLLL",
   params: z.unknown(),
   result: z.unknown(),
@@ -841,14 +841,14 @@ const eth_compileLLL = new MethodDescriptor({
 // we should get back to these subscription methods later.
 // TODO: maybe this method should be NOT SUPPORTED?
 // TODO: or maybe the client should specify the provider?
-const eth_compileSerpent = new MethodDescriptor({
+export const eth_compileSerpent = new MethodDescriptor({
   method: "eth_compileSerpent",
   params: z.unknown(),
   result: z.unknown(),
 });
 
 // // TODO: research method and see how it should be supported
-const eth_submitHashrate = new MethodDescriptor({
+export const eth_submitHashrate = new MethodDescriptor({
   method: "eth_submitHashrate",
   params: z.unknown(),
   result: z.unknown(),
