@@ -6,7 +6,7 @@ export abstract class ChainSupport {
   public abstract url: string;
 }
 
-export class UrlAppendedKeyChainSupport extends ChainSupport {
+export class KeyAppendedUrlChainSupport extends ChainSupport {
   public readonly url: string;
   public readonly baseURL: string;
 
@@ -22,7 +22,7 @@ export class UrlAppendedKeyChainSupport extends ChainSupport {
   }
 }
 
-export class UrlChainSupport extends ChainSupport {
+export class PureUrlChainSupport extends ChainSupport {
   constructor(
     chain: Chain,
     public readonly url: string
