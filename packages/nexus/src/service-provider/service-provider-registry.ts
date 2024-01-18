@@ -1,10 +1,6 @@
 import type { Chain } from "../chain";
-import type { ChainSupport } from "./chain-support";
+import type { RpcEndpoint } from "./rpc-endpoint";
 import type { ServiceProvider } from "./service-provider";
-
-type ServiceProviderWithGuaranteedChainSupport = ServiceProvider & {
-  buildChainSupport: (chain: Chain, key?: string) => ChainSupport;
-};
 
 export class ServiceProviderRegistry {
   private readonly chainIdToProviders = new Map<number, ServiceProvider[]>();
@@ -27,21 +23,26 @@ export class ServiceProviderRegistry {
     }
   }
 
-  public getProvidersForChain(
-    chainId: number
-  ): ServiceProviderWithGuaranteedChainSupport[] {
-    const providers = this.chainIdToProviders.get(chainId);
+  public getRpcEndpointsForChain(
+    chain: Chain,
+    providerKeys: Map<string, string>
+  ): RpcEndpoint[] {
+    const providers = this.chainIdToProviders.get(chain.chainId);
 
     if (!providers) {
       return [];
     }
 
-    // we use this hack, even though a random service provider is not guaranteed to actually
-    // support an arbitrary chain, we know that by this point, this provider fully supports
-    // this chain, since it's coming from the chain support map. this hack helps us avoid
-    // having to do a type check on the return value of `buildChainSupport` in the caller
-    // of this function.
+    const rpcEndpoints = providers
+      .map((provider) => {
+        const key = providerKeys.get(provider.name);
 
-    return providers as ServiceProviderWithGuaranteedChainSupport[];
+        return provider.buildRpcEndpoint(chain, key);
+      })
+      .filter((rpcEndpoint): rpcEndpoint is RpcEndpoint => {
+        return rpcEndpoint !== undefined;
+      });
+
+    return rpcEndpoints;
   }
 }
