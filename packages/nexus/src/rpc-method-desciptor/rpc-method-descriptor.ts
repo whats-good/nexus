@@ -21,3 +21,9 @@ export class RpcMethodDescriptor<M extends string, P, R> {
     this.resultSchema = result;
   }
 }
+
+export type UnknownRpcMethodDescriptor = RpcMethodDescriptor<
+  string,
+  unknown,
+  unknown
+>;
