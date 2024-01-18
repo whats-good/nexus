@@ -25,7 +25,7 @@ export class ServiceProviderRegistry {
 
   public getRpcEndpointsForChain(
     chain: Chain,
-    providerKeys: Map<string, string>
+    providerKeys: Record<string, string | undefined>
   ): RpcEndpoint[] {
     const providers = this.chainIdToProviders.get(chain.chainId);
 
@@ -35,7 +35,7 @@ export class ServiceProviderRegistry {
 
     const rpcEndpoints = providers
       .map((provider) => {
-        const key = providerKeys.get(provider.name);
+        const key = providerKeys[provider.name];
 
         return provider.buildRpcEndpoint(chain, key);
       })
