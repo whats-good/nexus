@@ -4,7 +4,7 @@ import {
   KeyAppendedUrlChainSupport,
   PureUrlChainSupport,
 } from "./chain-support";
-import { RpcEndpoint } from "./rpc-endpoint";
+import { ServiceProviderEndpoint } from "./service-provider-endpoint";
 
 interface KeyAppendedUrlChainSupportInitArgs {
   kind: "key-appended-url";
@@ -69,13 +69,16 @@ export class ServiceProvider {
     }
   }
 
-  public buildRpcEndpoint(chain: Chain, key?: string): RpcEndpoint | undefined {
+  public buildRpcEndpoint(
+    chain: Chain,
+    key?: string
+  ): ServiceProviderEndpoint | undefined {
     const chainSupport = this.buildChainSupport(chain, key);
 
     if (!chainSupport) {
       return undefined;
     }
 
-    return new RpcEndpoint(this, chain, chainSupport.url);
+    return new ServiceProviderEndpoint(this, chain, chainSupport.url);
   }
 }

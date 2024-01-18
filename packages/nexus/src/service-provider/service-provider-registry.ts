@@ -1,5 +1,5 @@
 import type { Chain } from "../chain";
-import type { RpcEndpoint } from "./rpc-endpoint";
+import type { ServiceProviderEndpoint } from "./service-provider-endpoint";
 import type { ServiceProvider } from "./service-provider";
 
 export class ServiceProviderRegistry {
@@ -26,7 +26,7 @@ export class ServiceProviderRegistry {
   public getRpcEndpointsForChain(
     chain: Chain,
     providerKeys: Record<string, string | undefined>
-  ): RpcEndpoint[] {
+  ): ServiceProviderEndpoint[] {
     const providers = this.chainIdToProviders.get(chain.chainId);
 
     if (!providers) {
@@ -39,7 +39,7 @@ export class ServiceProviderRegistry {
 
         return provider.buildRpcEndpoint(chain, key);
       })
-      .filter((rpcEndpoint): rpcEndpoint is RpcEndpoint => {
+      .filter((rpcEndpoint): rpcEndpoint is ServiceProviderEndpoint => {
         return rpcEndpoint !== undefined;
       });
 
