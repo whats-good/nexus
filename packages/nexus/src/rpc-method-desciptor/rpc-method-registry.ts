@@ -39,7 +39,9 @@ export class RpcMethodRegistry<T extends RpcMethodDescriptorTuple> {
 
   public getDescriptorByName(
     methodName: string
-  ): SomeDescriptorInTuple<T> | undefined {
-    return this.tuple.find((descriptor) => descriptor.method === methodName);
+  ): SomeDescriptorInTuple<T> | null {
+    return (
+      this.tuple.find((descriptor) => descriptor.method === methodName) || null
+    );
   }
 }

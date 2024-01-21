@@ -40,7 +40,7 @@ export class ServiceProviderRegistry {
         return provider.buildRpcEndpoint(chain, key);
       })
       .filter((rpcEndpoint): rpcEndpoint is ServiceProviderEndpoint => {
-        return rpcEndpoint !== undefined;
+        return !!rpcEndpoint;
       });
 
     return rpcEndpoints;

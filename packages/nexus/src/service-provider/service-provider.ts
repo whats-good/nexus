@@ -43,14 +43,11 @@ export class ServiceProvider {
     return chains;
   }
 
-  private buildChainSupport(
-    chain: Chain,
-    key?: string
-  ): ChainSupport | undefined {
+  private buildChainSupport(chain: Chain, key?: string): ChainSupport | null {
     const chainSupport = this.chainSupportInitArgs.get(chain.chainId);
 
     if (!chainSupport) {
-      return undefined;
+      return null;
     }
 
     switch (chainSupport.kind) {
@@ -72,11 +69,11 @@ export class ServiceProvider {
   public buildRpcEndpoint(
     chain: Chain,
     key?: string
-  ): ServiceProviderEndpoint | undefined {
+  ): ServiceProviderEndpoint | null {
     const chainSupport = this.buildChainSupport(chain, key);
 
     if (!chainSupport) {
-      return undefined;
+      return null;
     }
 
     return new ServiceProviderEndpoint(this, chain, chainSupport.url);
