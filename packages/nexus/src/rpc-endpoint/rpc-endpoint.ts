@@ -15,7 +15,7 @@ import {
   UnexpectedResponse,
 } from "./relay-result";
 
-export class Endpoint {
+export class RpcEndpoint {
   constructor(
     public readonly serviceProvider: ServiceProvider,
     public readonly chain: Chain,

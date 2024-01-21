@@ -2,9 +2,14 @@ import type {
   ErrorResponsePayload,
   SuccessResponsePayload,
 } from "@src/rpc/schemas";
+import { safeJsonStringify } from "@src/utils";
 
 abstract class RelayReultBase {
   public abstract readonly kind: string;
+
+  public stringify(): string {
+    return safeJsonStringify(this, null, 2);
+  }
 }
 
 export class InternalFetchError extends RelayReultBase {

@@ -1,6 +1,7 @@
 import type { Logger } from "pino";
 import type { RpcRequestPayload } from "../rpc/schemas";
-import type { Endpoint } from "./endpoint";
+import type { RpcEndpoint } from "./rpc-endpoint";
+import type { RelayResult } from "./relay-result";
 
 // a config object that determines how to treat failed relay requests
 
@@ -15,13 +16,15 @@ export interface FailImmediately {
   kind: "fail-immediately";
 }
 
-export class EndpointPool {
+export class RpcEndpointPool {
   private numAllowedAttempts: number;
   private numAttempts = 0;
   private currentEndpointIndex = 0;
 
+  public readonly relayAttempts: RelayResult[] = [];
+
   constructor(
-    public readonly endpoints: Endpoint[],
+    public readonly endpoints: RpcEndpoint[],
     public readonly failureConfig: RelayFailureConfig,
     private readonly logger: Logger
   ) {
@@ -39,7 +42,7 @@ export class EndpointPool {
     return this.numAttempts < this.numAllowedAttempts;
   }
 
-  private getNextEndpoint(): Endpoint | null {
+  private getNextEndpoint(): RpcEndpoint | null {
     if (!this.hasNextEndpoint()) {
       return null;
     }
@@ -60,9 +63,19 @@ export class EndpointPool {
 
       const relayResult = await endpoint.relay(request);
 
+      this.relayAttempts.push(relayResult);
+
       if (relayResult.kind === "success-response") {
         return relayResult;
       }
+
+      this.logger.warn(
+        [
+          "Relay failed.",
+          `Provider: ${endpoint.serviceProvider.name}`,
+          `Relay result: ${relayResult.stringify()}`,
+        ].join("\n")
+      );
 
       // TODO: how do we handle unexpected errors, as well as expected errors? How do we determine when to retry, and when to return the error as-is?
     }

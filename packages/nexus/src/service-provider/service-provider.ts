@@ -1,5 +1,5 @@
 import type { Chain } from "../chain";
-import { Endpoint } from "../relay/endpoint";
+import { RpcEndpoint } from "../rpc-endpoint/rpc-endpoint";
 import type { ChainSupport } from "./chain-support";
 import {
   KeyAppendedUrlChainSupport,
@@ -66,13 +66,13 @@ export class ServiceProvider {
     }
   }
 
-  public getEndpoint(chain: Chain, key?: string): Endpoint | null {
+  public getEndpoint(chain: Chain, key?: string): RpcEndpoint | null {
     const chainSupport = this.buildChainSupport(chain, key);
 
     if (!chainSupport) {
       return null;
     }
 
-    return new Endpoint(this, chain, chainSupport.url);
+    return new RpcEndpoint(this, chain, chainSupport.url);
   }
 }
