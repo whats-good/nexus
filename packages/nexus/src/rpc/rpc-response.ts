@@ -1,19 +1,9 @@
-interface BaseResponsePayload {
-  id: string | number | null;
-  jsonrpc: "2.0";
-}
+import type { BaseResponsePayload, ErrorResponsePayload } from "./schemas";
 
 export abstract class RpcResponse<T extends BaseResponsePayload> {
   public abstract readonly httpStatusCode: number;
   public abstract readonly id: string | number | null;
   public abstract build(): T;
-}
-
-interface ErrorResponsePayload extends BaseResponsePayload {
-  error: {
-    code: number;
-    message: string;
-  };
 }
 
 abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
