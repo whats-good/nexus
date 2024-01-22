@@ -4,7 +4,7 @@ import type {
 } from "@src/rpc/schemas";
 import { safeJsonStringify } from "@src/utils";
 
-abstract class RelayReultBase {
+abstract class RelayResultBase {
   public abstract readonly kind: string;
 
   public stringify(): string {
@@ -12,7 +12,7 @@ abstract class RelayReultBase {
   }
 }
 
-export class InternalFetchError extends RelayReultBase {
+export class InternalFetchError extends RelayResultBase {
   public readonly kind = "internal-fetch-error";
 
   constructor(public readonly error: unknown) {
@@ -20,7 +20,7 @@ export class InternalFetchError extends RelayReultBase {
   }
 }
 
-export class Non200Response extends RelayReultBase {
+export class Non200Response extends RelayResultBase {
   public readonly kind = "non-200-response";
 
   constructor(public readonly response: Response) {
@@ -28,7 +28,7 @@ export class Non200Response extends RelayReultBase {
   }
 }
 
-export class NonJsonResponse extends RelayReultBase {
+export class NonJsonResponse extends RelayResultBase {
   public readonly kind = "non-json-response";
 
   constructor(public readonly response: Response) {
@@ -36,7 +36,7 @@ export class NonJsonResponse extends RelayReultBase {
   }
 }
 
-export class SuccessResponse extends RelayReultBase {
+export class SuccessResponse extends RelayResultBase {
   public readonly kind = "success-response";
 
   constructor(public readonly response: SuccessResponsePayload) {
@@ -44,7 +44,7 @@ export class SuccessResponse extends RelayReultBase {
   }
 }
 
-export class ErrorResponse extends RelayReultBase {
+export class ErrorResponse extends RelayResultBase {
   public readonly kind = "error-response";
 
   constructor(public readonly response: ErrorResponsePayload) {
@@ -52,7 +52,7 @@ export class ErrorResponse extends RelayReultBase {
   }
 }
 
-export class UnexpectedResponse extends RelayReultBase {
+export class UnexpectedResponse extends RelayResultBase {
   public readonly kind = "unexpected-response";
 
   constructor(public readonly response: unknown) {
