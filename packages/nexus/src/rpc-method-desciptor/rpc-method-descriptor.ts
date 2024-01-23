@@ -4,6 +4,10 @@ import type {
   CannedResponseExecutionResult,
   CannedResponseFn,
 } from "./canned-response";
+import type {
+  RequestFilterExecutionResult,
+  RequestFilterFn,
+} from "./request-filter";
 
 export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly method: M;
@@ -12,26 +16,30 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly resultSchema: z.ZodType<R, any, any>;
 
   private readonly cannedResponseFn?: CannedResponseFn<P, R>;
+  private readonly requestFilterFn?: RequestFilterFn<P>;
 
   constructor({
     method,
     params,
     result,
     cannedResponseFn,
+    requestFilterFn,
   }: {
     method: M;
     params: z.ZodType<P, any, any>;
     result: z.ZodType<R, any, any>;
     cannedResponseFn?: CannedResponseFn<P, R>;
+    requestFilterFn?: RequestFilterFn<P>;
   }) {
     this.method = method;
     this.methodSchema = z.literal(method);
     this.paramsSchema = params;
     this.resultSchema = result;
     this.cannedResponseFn = cannedResponseFn;
+    this.requestFilterFn = requestFilterFn;
   }
 
-  public cannedResponse(params: {
+  public cannedResponse(args: {
     chain: Chain;
     params: P;
   }): CannedResponseExecutionResult<R> {
@@ -39,10 +47,33 @@ export class RpcMethodDescriptor<M extends string, P, R> {
       return { kind: "no-canned-response" };
     }
 
-    return {
-      kind: "success",
-      result: this.cannedResponseFn(params),
-    };
+    try {
+      return {
+        kind: "success",
+        result: this.cannedResponseFn(args),
+      };
+    } catch (e) {
+      return { kind: "failure", error: e };
+    }
+  }
+
+  public requestFilter(args: {
+    params: P;
+    chain: Chain;
+  }): RequestFilterExecutionResult {
+    if (!this.requestFilterFn) {
+      return { kind: "allow" };
+    }
+
+    try {
+      if (this.requestFilterFn(args)) {
+        return { kind: "allow" };
+      }
+
+      return { kind: "deny" };
+    } catch (e) {
+      return { kind: "failure", error: e };
+    }
   }
 }
 

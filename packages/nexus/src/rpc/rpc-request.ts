@@ -3,6 +3,7 @@ import {
   InternalErrorResponse,
   InvalidParamsErrorResponse,
   InvalidRequestErrorResponse,
+  MethodDeniedCustomErrorResponse,
   MethodNotFoundErrorResponse,
   NonStandardErrorResponse,
   ParseErrorResponse,
@@ -46,6 +47,10 @@ export abstract class RpcRequestBase {
     message: string
   ): NonStandardErrorResponse {
     return new NonStandardErrorResponse(this.getResponseId(), code, message);
+  }
+
+  public toMethodDeniedCustomErrorResponse(): MethodDeniedCustomErrorResponse {
+    return new MethodDeniedCustomErrorResponse(this.getResponseId());
   }
 }
 

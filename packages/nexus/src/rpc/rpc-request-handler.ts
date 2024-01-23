@@ -11,8 +11,28 @@ export class RpcRequestHandler {
     context: NexusContext,
     request: RpcRequestWithValidPayload
   ): Promise<RpcResponse> {
-    const { rpcEndpointPool } = context;
+    const { rpcEndpointPool, chain } = context;
     const { methodDescriptor } = request;
+
+    const requestFilterResult = methodDescriptor.requestFilter({
+      chain,
+      params: request.parsedPayload.params,
+    });
+
+    if (requestFilterResult.kind === "deny") {
+      return request.toMethodDeniedCustomErrorResponse();
+    } else if (requestFilterResult.kind === "failure") {
+      // TODO: make this behavior configurable.
+      this.logger.error(
+        `Request filter for method ${
+          request.parsedPayload.method
+        } threw an error: ${safeJsonStringify(
+          requestFilterResult.error
+        )}. This should never happen, and it's a critical error. Denying access to method. Please report this, fix the bug, and restart the node.`
+      );
+
+      return request.toMethodDeniedCustomErrorResponse();
+    }
 
     const cannedResponse = methodDescriptor.cannedResponse({
       chain: context.chain,
@@ -27,6 +47,14 @@ export class RpcRequestHandler {
       return new RpcSuccessResponse(
         request.getResponseId(),
         cannedResponse.result
+      );
+    } else if (cannedResponse.kind === "failure") {
+      this.logger.error(
+        `Canned response for method ${
+          request.parsedPayload.method
+        } threw an error: ${safeJsonStringify(
+          cannedResponse.error
+        )}. This should not happen, but it's not fatal. Request will be relayed.`
       );
     }
 

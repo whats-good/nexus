@@ -8,5 +8,9 @@ export type CannedResponseExecutionResult<R> =
       result: R;
     }
   | {
+      kind: "failure";
+      error: unknown;
+    }
+  | {
       kind: "no-canned-response";
     };
