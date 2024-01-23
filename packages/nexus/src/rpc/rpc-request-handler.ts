@@ -12,6 +12,23 @@ export class RpcRequestHandler {
     request: RpcRequestWithValidPayload
   ): Promise<RpcResponse> {
     const { rpcEndpointPool } = context;
+    const { methodDescriptor } = request;
+
+    const cannedResponse = methodDescriptor.cannedResponse({
+      chain: context.chain,
+      params: request.parsedPayload.params,
+    });
+
+    if (cannedResponse.kind === "success") {
+      this.logger.info(
+        `Canned response for method ${request.parsedPayload.method} returned.`
+      );
+
+      return new RpcSuccessResponse(
+        request.getResponseId(),
+        cannedResponse.result
+      );
+    }
 
     try {
       const relaySuccess = await rpcEndpointPool.relay(request.parsedPayload);
