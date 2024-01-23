@@ -1,11 +1,11 @@
 import type { UnknownRpcMethodDescriptor } from "../rpc-method-desciptor";
 import {
-  InternalError,
-  InvalidParamsError,
-  InvalidRequestError,
-  MethodNotFoundError,
-  NonStandardError,
-  ParseError,
+  InternalErrorResponse,
+  InvalidParamsErrorResponse,
+  InvalidRequestErrorResponse,
+  MethodNotFoundErrorResponse,
+  NonStandardErrorResponse,
+  ParseErrorResponse,
 } from "./rpc-response";
 import type { RpcRequestPayload } from "./schemas";
 
@@ -21,28 +21,31 @@ export abstract class RpcRequestBase {
     return this.id ?? null;
   }
 
-  public toParseError(): ParseError {
-    return new ParseError();
+  public toParseErrorResponse(): ParseErrorResponse {
+    return new ParseErrorResponse();
   }
 
-  public toInvalidRequestError(): InvalidRequestError {
-    return new InvalidRequestError(this.getResponseId());
+  public toInvalidRequestErrorResponse(): InvalidRequestErrorResponse {
+    return new InvalidRequestErrorResponse(this.getResponseId());
   }
 
-  public toMethodNotFoundError(): MethodNotFoundError {
-    return new MethodNotFoundError(this.getResponseId());
+  public toMethodNotFoundErrorResponse(): MethodNotFoundErrorResponse {
+    return new MethodNotFoundErrorResponse(this.getResponseId());
   }
 
-  public toInvalidParamsError(): InvalidParamsError {
-    return new InvalidParamsError(this.getResponseId());
+  public toInvalidParamsErrorResponse(): InvalidParamsErrorResponse {
+    return new InvalidParamsErrorResponse(this.getResponseId());
   }
 
-  public toInternalError(): InternalError {
-    return new InternalError(this.getResponseId());
+  public toInternalErrorResponse(): InternalErrorResponse {
+    return new InternalErrorResponse(this.getResponseId());
   }
 
-  public toNonStandardError(code: number, message: string): NonStandardError {
-    return new NonStandardError(this.getResponseId(), code, message);
+  public toNonStandardErrorResponse(
+    code: number,
+    message: string
+  ): NonStandardErrorResponse {
+    return new NonStandardErrorResponse(this.getResponseId(), code, message);
   }
 }
 

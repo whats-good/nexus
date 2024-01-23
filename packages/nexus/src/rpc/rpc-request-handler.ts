@@ -10,13 +10,13 @@ export class RpcRequestHandler {
     const { request, rpcEndpointPool } = context;
 
     if (request.kind === "parse-error") {
-      return request.toParseError();
+      return request.toParseErrorResponse();
     } else if (request.kind === "invalid-request") {
-      return request.toInvalidRequestError();
+      return request.toInvalidRequestErrorResponse();
     } else if (request.kind === "method-not-found") {
-      return request.toMethodNotFoundError();
+      return request.toMethodNotFoundErrorResponse();
     } else if (request.kind === "invalid-params") {
-      return request.toInvalidParamsError();
+      return request.toInvalidParamsErrorResponse();
     }
 
     try {
@@ -35,13 +35,13 @@ export class RpcRequestHandler {
         return RpcResponse.fromRelayLegalErrorResponse(request, relayError);
       }
 
-      return request.toInternalError();
+      return request.toInternalErrorResponse();
     } catch (e) {
       const error = safeJsonStringify(e);
 
       this.logger.error(error);
 
-      return request.toInternalError();
+      return request.toInternalErrorResponse();
     }
   }
 }

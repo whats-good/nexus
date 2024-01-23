@@ -15,18 +15,18 @@ export abstract class RpcResponse<T> {
     const { error } = relayResult.response;
 
     if (error.code === -32601) {
-      return request.toMethodNotFoundError();
+      return request.toMethodNotFoundErrorResponse();
     } else if (error.code === -32602) {
-      return request.toInvalidParamsError();
+      return request.toInvalidParamsErrorResponse();
     } else if (error.code === -32603) {
-      return request.toInternalError();
+      return request.toInternalErrorResponse();
     } else if (error.code === -32700) {
-      return request.toParseError();
+      return request.toParseErrorResponse();
     } else if (error.code === -32600) {
-      return request.toInvalidRequestError();
+      return request.toInvalidRequestErrorResponse();
     }
 
-    return request.toNonStandardError(error.code, error.message);
+    return request.toNonStandardErrorResponse(error.code, error.message);
   }
 }
 
@@ -65,7 +65,7 @@ abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
   }
 }
 
-export class ParseError extends RpcErrorResponse {
+export class ParseErrorResponse extends RpcErrorResponse {
   public readonly kind = "parse-error";
   public readonly httpStatusCode = 500;
   public readonly code = -32700;
@@ -73,7 +73,7 @@ export class ParseError extends RpcErrorResponse {
   public readonly id = null;
 }
 
-export class InvalidRequestError extends RpcErrorResponse {
+export class InvalidRequestErrorResponse extends RpcErrorResponse {
   public readonly kind = "invalid-request";
   public readonly httpStatusCode = 400;
   public readonly code = -32600;
@@ -83,7 +83,7 @@ export class InvalidRequestError extends RpcErrorResponse {
   }
 }
 
-export class MethodNotFoundError extends RpcErrorResponse {
+export class MethodNotFoundErrorResponse extends RpcErrorResponse {
   public readonly kind = "method-not-found";
   public readonly httpStatusCode = 404;
   public readonly code = -32601;
@@ -93,7 +93,7 @@ export class MethodNotFoundError extends RpcErrorResponse {
   }
 }
 
-export class InvalidParamsError extends RpcErrorResponse {
+export class InvalidParamsErrorResponse extends RpcErrorResponse {
   public readonly kind = "invalid-params";
   public readonly httpStatusCode = 500;
   public readonly code = -32602;
@@ -103,7 +103,7 @@ export class InvalidParamsError extends RpcErrorResponse {
   }
 }
 
-export class InternalError extends RpcErrorResponse {
+export class InternalErrorResponse extends RpcErrorResponse {
   public readonly kind = "internal-error";
   public readonly httpStatusCode = 500;
   public readonly code = -32603;
@@ -113,7 +113,7 @@ export class InternalError extends RpcErrorResponse {
   }
 }
 
-export class NonStandardError extends RpcErrorResponse {
+export class NonStandardErrorResponse extends RpcErrorResponse {
   public readonly kind = "non-standard-error";
   public readonly httpStatusCode = 500;
   constructor(
