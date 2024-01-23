@@ -12,7 +12,7 @@ abstract class RelayResultBase {
   }
 }
 
-export class InternalFetchError extends RelayResultBase {
+export class RelayInternalFetchError extends RelayResultBase {
   public readonly kind = "internal-fetch-error";
 
   constructor(public readonly error: unknown) {
@@ -20,7 +20,7 @@ export class InternalFetchError extends RelayResultBase {
   }
 }
 
-export class Non200Response extends RelayResultBase {
+export class RelayNon200Response extends RelayResultBase {
   public readonly kind = "non-200-response";
 
   constructor(public readonly response: Response) {
@@ -28,7 +28,7 @@ export class Non200Response extends RelayResultBase {
   }
 }
 
-export class NonJsonResponse extends RelayResultBase {
+export class RelayNonJsonResponse extends RelayResultBase {
   public readonly kind = "non-json-response";
 
   constructor(public readonly response: Response) {
@@ -36,7 +36,7 @@ export class NonJsonResponse extends RelayResultBase {
   }
 }
 
-export class SuccessResponse extends RelayResultBase {
+export class RelaySuccessResponse extends RelayResultBase {
   public readonly kind = "success-response";
 
   constructor(public readonly response: SuccessResponsePayload) {
@@ -44,7 +44,7 @@ export class SuccessResponse extends RelayResultBase {
   }
 }
 
-export class ErrorResponse extends RelayResultBase {
+export class RelayLegalErrorResponse extends RelayResultBase {
   public readonly kind = "error-response";
 
   constructor(public readonly response: ErrorResponsePayload) {
@@ -52,7 +52,7 @@ export class ErrorResponse extends RelayResultBase {
   }
 }
 
-export class UnexpectedResponse extends RelayResultBase {
+export class RelayUnexpectedResponse extends RelayResultBase {
   public readonly kind = "unexpected-response";
 
   constructor(public readonly response: unknown) {
@@ -61,9 +61,9 @@ export class UnexpectedResponse extends RelayResultBase {
 }
 
 export type RelayResult =
-  | InternalFetchError
-  | Non200Response
-  | NonJsonResponse
-  | SuccessResponse
-  | ErrorResponse
-  | UnexpectedResponse;
+  | RelayInternalFetchError
+  | RelayNon200Response
+  | RelayNonJsonResponse
+  | RelaySuccessResponse
+  | RelayLegalErrorResponse
+  | RelayUnexpectedResponse;

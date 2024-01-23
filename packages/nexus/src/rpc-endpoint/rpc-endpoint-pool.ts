@@ -1,7 +1,11 @@
 import type { Logger } from "pino";
 import type { RpcRequestPayload } from "../rpc/schemas";
 import type { RpcEndpoint } from "./rpc-endpoint";
-import type { RelayResult } from "./relay-result";
+import type {
+  RelayLegalErrorResponse,
+  RelayResult,
+  RelaySuccessResponse,
+} from "./relay-result";
 
 // a config object that determines how to treat failed relay requests
 
@@ -54,7 +58,9 @@ export class RpcEndpointPool {
     return endpoint;
   }
 
-  public async relay(request: RpcRequestPayload) {
+  public async relay(
+    request: RpcRequestPayload
+  ): Promise<RelaySuccessResponse | null> {
     while (this.hasRemainingAttempts() && this.hasNextEndpoint()) {
       // we're using the ! operator here because we know that this.hasNextEndpoint() is true
       const endpoint = this.getNextEndpoint()!;
@@ -79,5 +85,19 @@ export class RpcEndpointPool {
 
       // TODO: how do we handle unexpected errors, as well as expected errors? How do we determine when to retry, and when to return the error as-is?
     }
+
+    return null;
+  }
+
+  public getLatestLegalRelayError(): RelayLegalErrorResponse | null {
+    for (let i = this.relayAttempts.length - 1; i >= 0; i--) {
+      const relayAttempt = this.relayAttempts[i];
+
+      if (relayAttempt.kind === "error-response") {
+        return relayAttempt;
+      }
+    }
+
+    return null;
   }
 }

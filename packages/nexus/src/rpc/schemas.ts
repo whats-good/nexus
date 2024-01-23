@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { requiredUnknown } from "@src/utils";
 
 const IntSchema = z.number().int();
 const IntStringSchema = z.string().regex(/^[0-9]+$/);
@@ -31,9 +32,11 @@ export const ErrorResponsePayloadSchema = BaseResponsePayloadSchema.extend({
 
 export type ErrorResponsePayload = z.infer<typeof ErrorResponsePayloadSchema>;
 
-export const SuccessResponsePayloadSchema = BaseResponsePayloadSchema.extend({
-  result: z.unknown(),
-});
+export const SuccessResponsePayloadSchema = BaseResponsePayloadSchema.and(
+  z.object({
+    result: requiredUnknown(),
+  })
+);
 
 export type SuccessResponsePayload = z.infer<
   typeof SuccessResponsePayloadSchema

@@ -6,13 +6,13 @@ import {
 import type { Chain } from "../chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
 import {
-  InternalFetchError,
-  Non200Response,
-  NonJsonResponse,
-  SuccessResponse,
+  RelayInternalFetchError,
+  RelayNon200Response,
+  RelayNonJsonResponse,
+  RelaySuccessResponse,
   type RelayResult,
-  ErrorResponse,
-  UnexpectedResponse,
+  RelayLegalErrorResponse,
+  RelayUnexpectedResponse,
 } from "./relay-result";
 
 export class RpcEndpoint {
@@ -36,11 +36,11 @@ export class RpcEndpoint {
     try {
       relayResponse = await fetch(cleanedRequest);
     } catch (error) {
-      return new InternalFetchError(error);
+      return new RelayInternalFetchError(error);
     }
 
     if (!relayResponse.ok) {
-      return new Non200Response(relayResponse);
+      return new RelayNon200Response(relayResponse);
     }
 
     let parsedJsonResponse: unknown;
@@ -48,23 +48,23 @@ export class RpcEndpoint {
     try {
       parsedJsonResponse = await relayResponse.json();
     } catch (error) {
-      return new NonJsonResponse(relayResponse);
+      return new RelayNonJsonResponse(relayResponse);
     }
 
     const parsedSuccessResponse =
       SuccessResponsePayloadSchema.safeParse(parsedJsonResponse);
 
     if (parsedSuccessResponse.success) {
-      return new SuccessResponse(parsedSuccessResponse.data);
+      return new RelaySuccessResponse(parsedSuccessResponse.data);
     }
 
     const parsedErrorResponse =
       ErrorResponsePayloadSchema.safeParse(parsedJsonResponse);
 
     if (parsedErrorResponse.success) {
-      return new ErrorResponse(parsedErrorResponse.data);
+      return new RelayLegalErrorResponse(parsedErrorResponse.data);
     }
 
-    return new UnexpectedResponse(parsedJsonResponse);
+    return new RelayUnexpectedResponse(parsedJsonResponse);
   }
 }

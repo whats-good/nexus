@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export function safeJsonStringify(
   value: any,
   replacer?: (number | string)[] | null,
@@ -9,3 +11,5 @@ export function safeJsonStringify(
     return `[Error: Could not stringify value]`;
   }
 }
+
+export const requiredUnknown = () => z.custom((x) => x !== undefined);
