@@ -2,22 +2,16 @@ import { safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
 import type { NexusContext } from "./nexus-context";
 import { RpcSuccessResponse, RpcResponse } from "./rpc-response";
+import type { RpcRequestWithValidPayload } from "./rpc-request";
 
 export class RpcRequestHandler {
   constructor(public readonly logger: Logger) {}
 
-  public async handle(context: NexusContext): Promise<RpcResponse<unknown>> {
-    const { request, rpcEndpointPool } = context;
-
-    if (request.kind === "parse-error") {
-      return request.toParseErrorResponse();
-    } else if (request.kind === "invalid-request") {
-      return request.toInvalidRequestErrorResponse();
-    } else if (request.kind === "method-not-found") {
-      return request.toMethodNotFoundErrorResponse();
-    } else if (request.kind === "invalid-params") {
-      return request.toInvalidParamsErrorResponse();
-    }
+  private async handleValidRequest(
+    context: NexusContext,
+    request: RpcRequestWithValidPayload
+  ): Promise<RpcResponse> {
+    const { rpcEndpointPool } = context;
 
     try {
       const relaySuccess = await rpcEndpointPool.relay(request.parsedPayload);
@@ -43,5 +37,21 @@ export class RpcRequestHandler {
 
       return request.toInternalErrorResponse();
     }
+  }
+
+  public async handle(context: NexusContext): Promise<RpcResponse> {
+    const { request } = context;
+
+    if (request.kind === "parse-error") {
+      return request.toParseErrorResponse();
+    } else if (request.kind === "invalid-request") {
+      return request.toInvalidRequestErrorResponse();
+    } else if (request.kind === "method-not-found") {
+      return request.toMethodNotFoundErrorResponse();
+    } else if (request.kind === "invalid-params") {
+      return request.toInvalidParamsErrorResponse();
+    }
+
+    return this.handleValidRequest(context, request);
   }
 }

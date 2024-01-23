@@ -2,7 +2,7 @@ import type { RelayLegalErrorResponse } from "@src/rpc-endpoint";
 import type { RpcRequest } from "./rpc-request";
 import type { ErrorResponsePayload, SuccessResponsePayload } from "./schemas";
 
-export abstract class RpcResponse<T> {
+export abstract class RpcResponse<T = unknown> {
   public abstract readonly kind: string;
   public abstract readonly httpStatusCode: number;
   public abstract readonly id: string | number | null;
