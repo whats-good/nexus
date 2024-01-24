@@ -1,5 +1,7 @@
 import { z } from "zod";
 import type { Chain } from "@src/chain";
+import type { StrictSuccessResponsePayloadSchema } from "@src/rpc/schemas";
+import { strictSuccessResponsePayloadSchemaOf } from "@src/rpc/schemas";
 import type {
   CannedResponseExecutionResult,
   CannedResponseFn,
@@ -14,6 +16,7 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly methodSchema: z.ZodLiteral<M>;
   public readonly paramsSchema: z.ZodType<P, any, any>;
   public readonly resultSchema: z.ZodType<R, any, any>;
+  public readonly successResponsePayloadSchema: StrictSuccessResponsePayloadSchema<R>;
 
   private readonly cannedResponseFn?: CannedResponseFn<P, R>;
   private readonly requestFilterFn?: RequestFilterFn<P>;
@@ -35,6 +38,9 @@ export class RpcMethodDescriptor<M extends string, P, R> {
     this.methodSchema = z.literal(method);
     this.paramsSchema = params;
     this.resultSchema = result;
+    this.successResponsePayloadSchema = strictSuccessResponsePayloadSchemaOf(
+      this.resultSchema
+    );
     this.cannedResponseFn = cannedResponseFn;
     this.requestFilterFn = requestFilterFn;
   }

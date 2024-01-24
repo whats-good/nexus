@@ -1,6 +1,9 @@
 import type { RelayLegalErrorResponse } from "@src/rpc-endpoint";
 import type { RpcRequest } from "./rpc-request";
-import type { ErrorResponsePayload, SuccessResponsePayload } from "./schemas";
+import type {
+  ErrorResponsePayload,
+  BaseSuccessResponsePayload,
+} from "./schemas";
 
 export abstract class RpcResponse<T = unknown> {
   public abstract readonly kind: string;
@@ -30,7 +33,7 @@ export abstract class RpcResponse<T = unknown> {
   }
 }
 
-export class RpcSuccessResponse extends RpcResponse<SuccessResponsePayload> {
+export class RpcSuccessResponse extends RpcResponse<BaseSuccessResponsePayload> {
   public readonly kind = "success-response";
   public readonly httpStatusCode = 200;
   constructor(
@@ -40,7 +43,7 @@ export class RpcSuccessResponse extends RpcResponse<SuccessResponsePayload> {
     super();
   }
 
-  public build(): SuccessResponsePayload {
+  public build(): BaseSuccessResponsePayload {
     return {
       id: this.id,
       jsonrpc: "2.0",

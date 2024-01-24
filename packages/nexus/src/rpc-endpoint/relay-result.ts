@@ -1,6 +1,6 @@
 import type {
   ErrorResponsePayload,
-  SuccessResponsePayload,
+  BaseSuccessResponsePayload,
 } from "@src/rpc/schemas";
 import { safeJsonStringify } from "@src/utils";
 
@@ -39,7 +39,7 @@ export class RelayNonJsonResponse extends RelayResultBase {
 export class RelaySuccessResponse extends RelayResultBase {
   public readonly kind = "success-response";
 
-  constructor(public readonly response: SuccessResponsePayload) {
+  constructor(public readonly response: BaseSuccessResponsePayload) {
     super();
   }
 }

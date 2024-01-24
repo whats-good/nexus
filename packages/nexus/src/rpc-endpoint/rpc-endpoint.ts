@@ -1,7 +1,7 @@
 import type { RpcRequestPayload } from "../rpc/schemas";
 import {
   ErrorResponsePayloadSchema,
-  SuccessResponsePayloadSchema,
+  BaseSuccessResponsePayloadSchema,
 } from "../rpc/schemas";
 import type { Chain } from "../chain";
 import type { ServiceProvider } from "../service-provider/service-provider";
@@ -52,7 +52,7 @@ export class RpcEndpoint {
     }
 
     const parsedSuccessResponse =
-      SuccessResponsePayloadSchema.safeParse(parsedJsonResponse);
+      BaseSuccessResponsePayloadSchema.safeParse(parsedJsonResponse);
 
     if (parsedSuccessResponse.success) {
       return new RelaySuccessResponse(parsedSuccessResponse.data);

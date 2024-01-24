@@ -32,12 +32,23 @@ export const ErrorResponsePayloadSchema = BaseResponsePayloadSchema.extend({
 
 export type ErrorResponsePayload = z.infer<typeof ErrorResponsePayloadSchema>;
 
-export const SuccessResponsePayloadSchema = BaseResponsePayloadSchema.and(
-  z.object({
+export const BaseSuccessResponsePayloadSchema =
+  BaseResponsePayloadSchema.extend({
     result: requiredUnknown(),
-  })
-);
+  });
 
-export type SuccessResponsePayload = z.infer<
-  typeof SuccessResponsePayloadSchema
+export type BaseSuccessResponsePayload = z.infer<
+  typeof BaseSuccessResponsePayloadSchema
+>;
+
+export const strictSuccessResponsePayloadSchemaOf = <R>(
+  resultSchema: z.ZodType<R, any, any>
+) => BaseSuccessResponsePayloadSchema.extend({ result: resultSchema });
+
+export type StrictSuccessResponsePayloadSchema<R> = ReturnType<
+  typeof strictSuccessResponsePayloadSchemaOf<R>
+>;
+
+export type StrictSuccessResponsePayload<R> = z.infer<
+  StrictSuccessResponsePayloadSchema<R>
 >;
