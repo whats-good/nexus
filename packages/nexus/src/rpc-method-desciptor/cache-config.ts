@@ -32,14 +32,17 @@ type CacheConfigOptionWriteField<T, M extends string, P, R> =
   | T
   | CacheConfigOptionWriteFn<T, M, P, R>;
 
+export interface AllowReadConfigResult {
+  kind: "allow";
+  paramsKeySuffix: string;
+}
+
+interface DenyReadConfigResult {
+  kind: "deny";
+}
 type FinalizedReadTimeConfigResult =
-  | {
-      kind: "allow";
-      paramsKeySuffix: string;
-    }
-  | {
-      kind: "deny";
-    };
+  | AllowReadConfigResult
+  | DenyReadConfigResult;
 
 type FinalizedWriteTimeConfigResult =
   | {

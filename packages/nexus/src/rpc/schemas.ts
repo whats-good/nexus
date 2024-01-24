@@ -23,11 +23,15 @@ export const BaseResponsePayloadSchema = z.object({
 
 export type BaseResponsePayload = z.infer<typeof BaseResponsePayloadSchema>;
 
+export const ErrorFieldSchema = z.object({
+  code: z.number(),
+  message: z.string(),
+});
+
+export type ErrorField = z.infer<typeof ErrorFieldSchema>;
+
 export const ErrorResponsePayloadSchema = BaseResponsePayloadSchema.extend({
-  error: z.object({
-    code: z.number(),
-    message: z.string(),
-  }),
+  error: ErrorFieldSchema,
 });
 
 export type ErrorResponsePayload = z.infer<typeof ErrorResponsePayloadSchema>;

@@ -1,11 +1,15 @@
 import { safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
+import type { CacheHandler } from "@src/cache/cache-handler";
 import type { NexusContext } from "./nexus-context";
 import { RpcSuccessResponse, RpcResponse } from "./rpc-response";
 import type { RpcRequestWithValidPayload } from "./rpc-request";
 
 export class RpcRequestHandler {
-  constructor(public readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly cacheHandler: CacheHandler
+  ) {}
 
   private async handleValidRequest(
     context: NexusContext,
@@ -58,6 +62,18 @@ export class RpcRequestHandler {
       );
     }
 
+    const cacheResult = await this.cacheHandler.handleRead(context, request);
+
+    if (cacheResult.kind === "success-result") {
+      return new RpcSuccessResponse(
+        request.getResponseId(),
+        cacheResult.result
+      );
+    }
+
+    // TODO: right now, only success results are returned.
+    // We should allow configurations to specify which errors can be cached and returned.
+
     try {
       const relaySuccess = await rpcEndpointPool.relay(request.parsedPayload);
 
@@ -86,6 +102,9 @@ export class RpcRequestHandler {
 
   public async handle(context: NexusContext): Promise<RpcResponse> {
     const { request } = context;
+
+    // TODO: add cache writes at the parent level.
+    // do this in an event handler.
 
     if (request.kind === "parse-error") {
       return request.toParseErrorResponse();
