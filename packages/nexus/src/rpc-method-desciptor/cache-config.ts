@@ -34,7 +34,7 @@ type CacheConfigOptionWriteField<T, M extends string, P, R> =
 
 export interface AllowReadConfigResult {
   kind: "allow";
-  paramsKeySuffix: string;
+  key: string;
 }
 
 interface DenyReadConfigResult {
@@ -48,7 +48,7 @@ type FinalizedWriteTimeConfigResult =
   | {
       kind: "allow";
       ttl: number;
-      paramsKeySuffix: string;
+      key: string;
     }
   | {
       kind: "deny";
@@ -96,6 +96,15 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.paramsKeySuffix;
   }
 
+  public getCacheKey(args: CacheConfigOptionReadFnArgs<M, P, R>) {
+    const { chain } = args;
+    const paramsKeySuffix = this.getParamsKeySuffix(args);
+
+    const cacheKey = `${chain.chainId}-${args.methodDescriptor.method}-${paramsKeySuffix}`;
+
+    return cacheKey;
+  }
+
   public getReadConfig(
     args: CacheConfigOptionReadFnArgs<M, P, R>
   ): FinalizedReadTimeConfigResult {
@@ -107,7 +116,7 @@ export class CacheConfig<M extends string, P, R> {
 
     return {
       kind: "allow",
-      paramsKeySuffix: this.getParamsKeySuffix(args),
+      key: this.getCacheKey(args),
     };
   }
 
@@ -123,7 +132,7 @@ export class CacheConfig<M extends string, P, R> {
     return {
       kind: "allow",
       ttl: this.getTtl(args),
-      paramsKeySuffix: this.getParamsKeySuffix(args),
+      key: this.getParamsKeySuffix(args),
     };
   }
 }

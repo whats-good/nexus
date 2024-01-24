@@ -11,7 +11,13 @@ type ReadResult =
       error: unknown;
     };
 
+export interface CacheWriteArgs {
+  key: string;
+  ttl: number;
+  value: unknown;
+}
+
 export interface BaseCache {
   get: (key: string) => Promise<ReadResult>;
-  set: (params: { key: string; ttl: number; value: any }) => Promise<void>;
+  set: (args: CacheWriteArgs) => Promise<void>;
 }

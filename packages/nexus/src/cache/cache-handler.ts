@@ -1,5 +1,4 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import type { AllowReadConfigResult } from "@src/rpc-method-desciptor/cache-config";
 import type { NexusContext } from "@src/rpc/nexus-context";
 import type { RpcRequestWithValidPayload } from "@src/rpc/rpc-request";
 import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
@@ -35,19 +34,6 @@ type CacheHandlerReadResult =
 export class CacheHandler {
   constructor(public readonly cache: BaseCache) {}
 
-  private getCacheKey(
-    context: NexusContext,
-    request: RpcRequestWithValidPayload,
-    readConfig: AllowReadConfigResult
-  ) {
-    const { chain } = context;
-    const { paramsKeySuffix } = readConfig;
-
-    const cacheKey = `${chain.chainId}-${request.parsedPayload.method}-${paramsKeySuffix}`;
-
-    return cacheKey;
-  }
-
   public async handleRead(
     context: NexusContext,
     request: RpcRequestWithValidPayload
@@ -71,9 +57,7 @@ export class CacheHandler {
         return { kind: "denied" };
       }
 
-      const cacheKey = this.getCacheKey(context, request, readConfig);
-
-      const baseCacheResponse = await this.cache.get(cacheKey);
+      const baseCacheResponse = await this.cache.get(readConfig.key);
 
       if (baseCacheResponse.kind === "not-found") {
         return { kind: "not-found" };
