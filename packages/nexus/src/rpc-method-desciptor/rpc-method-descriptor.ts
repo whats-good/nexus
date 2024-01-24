@@ -10,6 +10,7 @@ import type {
   RequestFilterExecutionResult,
   RequestFilterFn,
 } from "./request-filter";
+import type { CacheConfig } from "./cache-config";
 
 export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly method: M;
@@ -17,6 +18,9 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly paramsSchema: z.ZodType<P, any, any>;
   public readonly resultSchema: z.ZodType<R, any, any>;
   public readonly successResponsePayloadSchema: StrictSuccessResponsePayloadSchema<R>;
+
+  // TODO: should we pass a default value where cache config is always defined?
+  public readonly cacheConfig?: CacheConfig<M, P, R>;
 
   private readonly cannedResponseFn?: CannedResponseFn<P, R>;
   private readonly requestFilterFn?: RequestFilterFn<P>;
@@ -27,12 +31,14 @@ export class RpcMethodDescriptor<M extends string, P, R> {
     result,
     cannedResponseFn,
     requestFilterFn,
+    cacheConfig,
   }: {
     method: M;
     params: z.ZodType<P, any, any>;
     result: z.ZodType<R, any, any>;
     cannedResponseFn?: CannedResponseFn<P, R>;
     requestFilterFn?: RequestFilterFn<P>;
+    cacheConfig?: CacheConfig<M, P, R>;
   }) {
     this.method = method;
     this.methodSchema = z.literal(method);
@@ -43,6 +49,7 @@ export class RpcMethodDescriptor<M extends string, P, R> {
     );
     this.cannedResponseFn = cannedResponseFn;
     this.requestFilterFn = requestFilterFn;
+    this.cacheConfig = cacheConfig;
   }
 
   public cannedResponse(args: {
