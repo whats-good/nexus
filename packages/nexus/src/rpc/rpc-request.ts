@@ -1,109 +1,48 @@
-import type { UnknownRpcMethodDescriptor } from "../rpc-method-desciptor";
-import {
-  InternalErrorResponse,
-  InvalidParamsErrorResponse,
-  InvalidRequestErrorResponse,
-  MethodDeniedCustomErrorResponse,
-  MethodNotFoundErrorResponse,
-  NonStandardErrorResponse,
-  ParseErrorResponse,
-} from "./rpc-response";
+import { UnknownRpcMethodDescriptor } from "@src/rpc-method-desciptor";
 import type { RpcRequestPayload } from "./schemas";
 
-export abstract class RpcRequestBase {
-  public abstract readonly kind: string;
+export abstract class RpcRequestBase<T> {
+  constructor(public readonly payload: T) {}
 
-  constructor(
-    public readonly rawPayload: unknown,
-    public readonly id?: string | number | null
-  ) {}
+  public abstract getResponseId(): string | number | null;
+}
+
+export class RpcRequestWithParseError extends RpcRequestBase<null> {
+  public kind = "parse-error" as const;
 
   public getResponseId(): string | number | null {
-    return this.id ?? null;
+    return null;
   }
 
-  public toParseErrorResponse(): ParseErrorResponse {
-    return new ParseErrorResponse();
-  }
-
-  public toInvalidRequestErrorResponse(): InvalidRequestErrorResponse {
-    return new InvalidRequestErrorResponse(this.getResponseId());
-  }
-
-  public toMethodNotFoundErrorResponse(): MethodNotFoundErrorResponse {
-    return new MethodNotFoundErrorResponse(this.getResponseId());
-  }
-
-  public toInvalidParamsErrorResponse(): InvalidParamsErrorResponse {
-    return new InvalidParamsErrorResponse(this.getResponseId());
-  }
-
-  public toInternalErrorResponse(): InternalErrorResponse {
-    return new InternalErrorResponse(this.getResponseId());
-  }
-
-  public toNonStandardErrorResponse(
-    code: number,
-    message: string
-  ): NonStandardErrorResponse {
-    return new NonStandardErrorResponse(this.getResponseId(), code, message);
-  }
-
-  public toMethodDeniedCustomErrorResponse(): MethodDeniedCustomErrorResponse {
-    return new MethodDeniedCustomErrorResponse(this.getResponseId());
+  public constructor() {
+    super(null);
   }
 }
 
-export class RpcRequestWithParseError extends RpcRequestBase {
-  public readonly kind = "parse-error";
-  constructor(public readonly rawPayload: unknown) {
-    super(rawPayload);
+export class RpcRequestWithInvalidRequestError extends RpcRequestBase<unknown> {
+  public kind = "invalid-request" as const;
+
+  public getResponseId(): string | number | null {
+    return null;
   }
 }
 
-export class RpcRequestWithInvalidRequestError extends RpcRequestBase {
-  public readonly kind = "invalid-request";
-  constructor(public readonly rawPayload: unknown) {
-    super(rawPayload);
-  }
-}
+export class RpcRequestWithValidPayload extends RpcRequestBase<RpcRequestPayload> {
+  public kind = "valid-payload" as const;
 
-export class RpcRequestWithMethodNotFoundError extends RpcRequestBase {
-  public readonly kind = "method-not-found";
+  public getResponseId(): string | number | null {
+    return this.payload.id || null;
+  }
+
   constructor(
-    public readonly rawPayload: unknown,
-    public readonly id?: string | number | null
-  ) {
-    super(rawPayload, id);
-  }
-}
-
-export class RpcRequestWithInvalidParamsError extends RpcRequestBase {
-  public readonly kind = "invalid-params";
-  constructor(
-    public readonly rawPayload: unknown,
     public readonly methodDescriptor: UnknownRpcMethodDescriptor,
-    public readonly id?: string | number | null
+    public readonly payload: RpcRequestPayload
   ) {
-    super(rawPayload, id);
-  }
-}
-
-export class RpcRequestWithValidPayload extends RpcRequestBase {
-  public readonly kind = "valid-payload";
-  constructor(
-    public readonly rawPayload: unknown,
-    public readonly methodDescriptor: UnknownRpcMethodDescriptor,
-    public readonly parsedPayload: RpcRequestPayload,
-    public readonly id?: string | number | null
-  ) {
-    super(rawPayload, id);
+    super(payload);
   }
 }
 
 export type RpcRequest =
   | RpcRequestWithParseError
   | RpcRequestWithInvalidRequestError
-  | RpcRequestWithMethodNotFoundError
-  | RpcRequestWithInvalidParamsError
   | RpcRequestWithValidPayload;

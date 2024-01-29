@@ -93,7 +93,7 @@ export class CacheHandler {
 
       const readConfig = cacheConfig.getReadConfig({
         chain: context.chain,
-        params: request.parsedPayload.params,
+        params: request.payload.params,
         highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
         methodDescriptor: request.methodDescriptor,
       });
@@ -133,10 +133,10 @@ export class CacheHandler {
 
   public async handleWrite(
     context: NexusContext,
-    request: RpcRequestWithValidPayload,
     result: unknown
   ): Promise<CacheHandlerWriteResult> {
     try {
+      const { request } = context;
       const { methodDescriptor } = request;
       const { cacheConfig } = methodDescriptor;
 
@@ -149,7 +149,7 @@ export class CacheHandler {
       // TODO: we should only pass chain, highestKnownBlockNumber and methodDescriptor to the write config. same for the read config. the rest can be handled internally
       const writeConfig = cacheConfig.getWriteConfig({
         chain: context.chain,
-        params: request.parsedPayload.params,
+        params: request.payload.params,
         highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
         methodDescriptor: request.methodDescriptor,
         result,
