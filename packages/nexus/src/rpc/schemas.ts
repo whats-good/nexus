@@ -56,3 +56,20 @@ export type StrictSuccessResponsePayloadSchema<R> = ReturnType<
 export type StrictSuccessResponsePayload<R> = z.infer<
   StrictSuccessResponsePayloadSchema<R>
 >;
+
+export const strictRequestPayloadSchemaOf = <M extends string, P>(
+  method: M,
+  params: z.ZodType<P, any, any>
+) =>
+  RpcRequestPayloadSchema.extend({
+    method: z.literal(method),
+    params,
+  });
+
+export type StrictRequestPayloadSchema<M extends string, P> = ReturnType<
+  typeof strictRequestPayloadSchemaOf<M, P>
+>;
+
+export type StrictRequestPayload<M extends string, P> = z.infer<
+  StrictRequestPayloadSchema<M, P>
+>;

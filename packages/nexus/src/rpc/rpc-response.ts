@@ -1,14 +1,12 @@
+import { NexusJsonResponse } from "@src/nexus/nexus-response";
 import type {
   ErrorResponsePayload,
   BaseSuccessResponsePayload,
   ErrorField,
 } from "./schemas";
 
-export abstract class RpcResponse<T = unknown> {
-  public abstract readonly kind: string;
-  public abstract readonly httpStatusCode: number;
+export abstract class RpcResponse<T = unknown> extends NexusJsonResponse<T> {
   public abstract readonly id: string | number | null;
-  public abstract build(): T;
 
   public static fromErrorResponsePayload(
     error: ErrorField,
@@ -32,7 +30,6 @@ export abstract class RpcResponse<T = unknown> {
 }
 
 export class RpcSuccessResponse extends RpcResponse<BaseSuccessResponsePayload> {
-  public readonly kind = "success-response";
   public readonly httpStatusCode = 200;
   constructor(
     public readonly id: string | number | null,
@@ -41,7 +38,7 @@ export class RpcSuccessResponse extends RpcResponse<BaseSuccessResponsePayload> 
     super();
   }
 
-  public build(): BaseSuccessResponsePayload {
+  public body(): BaseSuccessResponsePayload {
     return {
       id: this.id,
       jsonrpc: "2.0",
@@ -55,7 +52,7 @@ abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
   public abstract readonly message: string;
   public abstract isStandardErrorResponse: boolean;
 
-  public build(): ErrorResponsePayload {
+  public body(): ErrorResponsePayload {
     return {
       id: this.id,
       jsonrpc: "2.0",
@@ -68,7 +65,6 @@ abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
 }
 
 export class ParseErrorResponse extends RpcErrorResponse {
-  public readonly kind = "parse-error";
   public readonly httpStatusCode = 500;
   public readonly errorCode = -32700;
   public readonly message = "Parse error";
@@ -77,7 +73,6 @@ export class ParseErrorResponse extends RpcErrorResponse {
 }
 
 export class InvalidRequestErrorResponse extends RpcErrorResponse {
-  public readonly kind = "invalid-request";
   public readonly httpStatusCode = 400;
   public readonly errorCode = -32600;
   public readonly message = "Invalid Request";
@@ -88,7 +83,6 @@ export class InvalidRequestErrorResponse extends RpcErrorResponse {
 }
 
 export class MethodNotFoundErrorResponse extends RpcErrorResponse {
-  public readonly kind = "method-not-found";
   public readonly httpStatusCode = 404;
   public readonly errorCode = -32601;
   public readonly message = "Method not found";
@@ -99,7 +93,6 @@ export class MethodNotFoundErrorResponse extends RpcErrorResponse {
 }
 
 export class InvalidParamsErrorResponse extends RpcErrorResponse {
-  public readonly kind = "invalid-params";
   public readonly httpStatusCode = 500;
   public readonly errorCode = -32602;
   public readonly message = "Invalid params";
@@ -110,7 +103,6 @@ export class InvalidParamsErrorResponse extends RpcErrorResponse {
 }
 
 export class InternalErrorResponse extends RpcErrorResponse {
-  public readonly kind = "internal-error";
   public readonly httpStatusCode = 500;
   public readonly errorCode = -32603;
   public readonly message = "Internal error";
@@ -121,7 +113,6 @@ export class InternalErrorResponse extends RpcErrorResponse {
 }
 
 export class NonStandardErrorResponse extends RpcErrorResponse {
-  public readonly kind = "non-standard-error";
   public readonly httpStatusCode = 500;
   public readonly isStandardErrorResponse = false;
   constructor(
@@ -139,7 +130,6 @@ abstract class NexusCustomErrorResponse extends RpcErrorResponse {
 }
 
 export class MethodDeniedCustomErrorResponse extends NexusCustomErrorResponse {
-  public readonly kind = "method-denied";
   public readonly httpStatusCode = 403;
   public readonly errorCode = -32020;
   public readonly message = "Method denied";
@@ -149,7 +139,6 @@ export class MethodDeniedCustomErrorResponse extends NexusCustomErrorResponse {
 }
 
 export class ChainDeniedCustomErrorResponse extends NexusCustomErrorResponse {
-  public readonly kind = "chain-denied";
   public readonly httpStatusCode = 403;
   public readonly errorCode = -32021;
   public readonly message = "Chain denied";
@@ -159,7 +148,6 @@ export class ChainDeniedCustomErrorResponse extends NexusCustomErrorResponse {
 }
 
 export class ProviderNotConfiguredCustomErrorResponse extends NexusCustomErrorResponse {
-  public readonly kind = "provider-not-configured";
   public readonly httpStatusCode = 500;
   public readonly errorCode = -32022;
   public readonly message = "Provider not configured";
@@ -169,7 +157,6 @@ export class ProviderNotConfiguredCustomErrorResponse extends NexusCustomErrorRe
 }
 
 export class BadUrlCustomErrorResponse extends NexusCustomErrorResponse {
-  public readonly kind = "bad-url";
   public readonly httpStatusCode = 400;
   public readonly errorCode = -32023;
   public readonly message = "Bad url";

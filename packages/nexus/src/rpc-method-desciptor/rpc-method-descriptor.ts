@@ -1,7 +1,13 @@
 import { z } from "zod";
 import type { Chain } from "@src/chain";
-import type { StrictSuccessResponsePayloadSchema } from "@src/rpc/schemas";
-import { strictSuccessResponsePayloadSchemaOf } from "@src/rpc/schemas";
+import type {
+  StrictSuccessResponsePayloadSchema,
+  StrictRequestPayloadSchema,
+} from "@src/rpc/schemas";
+import {
+  strictRequestPayloadSchemaOf,
+  strictSuccessResponsePayloadSchemaOf,
+} from "@src/rpc/schemas";
 import type {
   CannedResponseExecutionResult,
   CannedResponseFn,
@@ -17,6 +23,7 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly methodSchema: z.ZodLiteral<M>;
   public readonly paramsSchema: z.ZodType<P, any, any>;
   public readonly resultSchema: z.ZodType<R, any, any>;
+  public readonly requestPayloadSchema: StrictRequestPayloadSchema<M, P>;
   public readonly successResponsePayloadSchema: StrictSuccessResponsePayloadSchema<R>;
 
   // TODO: should we pass a default value where cache config is always defined?
@@ -46,6 +53,10 @@ export class RpcMethodDescriptor<M extends string, P, R> {
     this.resultSchema = result;
     this.successResponsePayloadSchema = strictSuccessResponsePayloadSchemaOf(
       this.resultSchema
+    );
+    this.requestPayloadSchema = strictRequestPayloadSchemaOf(
+      this.method,
+      params
     );
     this.cannedResponseFn = cannedResponseFn;
     this.requestFilterFn = requestFilterFn;

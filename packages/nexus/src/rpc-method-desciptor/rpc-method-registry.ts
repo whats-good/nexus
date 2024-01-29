@@ -3,7 +3,7 @@ import type {
   UnknownRpcMethodDescriptor,
 } from "./rpc-method-descriptor";
 
-type RpcMethodDescriptorTuple = readonly [
+export type RpcMethodDescriptorTuple = readonly [
   UnknownRpcMethodDescriptor,
   ...UnknownRpcMethodDescriptor[],
 ];
@@ -24,7 +24,9 @@ type RpcMethodDescriptorMapOf<T extends RpcMethodDescriptorTuple> = {
 
 type SomeDescriptorInTuple<T extends RpcMethodDescriptorTuple> = T[number];
 
-export class RpcMethodRegistry<T extends RpcMethodDescriptorTuple> {
+export class RpcMethodRegistry<
+  T extends RpcMethodDescriptorTuple = RpcMethodDescriptorTuple,
+> {
   public readonly descriptorMap: RpcMethodDescriptorMapOf<T>;
 
   constructor(private readonly tuple: T) {

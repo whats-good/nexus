@@ -1,5 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import type { NexusContext } from "@src/rpc/nexus-context";
+import type { RpcContext } from "@src/rpc/rpc-context";
 import type { RpcRequestWithValidPayload } from "@src/rpc/rpc-request";
 import {
   ErrorFieldSchema,
@@ -80,10 +80,10 @@ export class CacheHandler {
   constructor(public readonly cache: BaseCache) {}
 
   public async handleRead(
-    context: NexusContext,
-    request: RpcRequestWithValidPayload
+    context: RpcContext
   ): Promise<CacheHandlerReadResult> {
     try {
+      const { request } = context;
       const { methodDescriptor } = request;
       const { cacheConfig } = methodDescriptor;
 
@@ -132,7 +132,7 @@ export class CacheHandler {
   }
 
   public async handleWrite(
-    context: NexusContext,
+    context: RpcContext,
     result: unknown
   ): Promise<CacheHandlerWriteResult> {
     try {

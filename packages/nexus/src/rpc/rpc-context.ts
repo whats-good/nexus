@@ -1,10 +1,10 @@
 import type { RpcEndpointPool } from "@src/rpc-endpoint";
 import type { Chain } from "@src/chain";
-import type { RpcRequest } from "./rpc-request";
+import type { UnknownValidRpcRequest } from "./rpc-request";
 
-export class NexusContext {
+export class RpcContext {
   constructor(
-    public readonly request: RpcRequest,
+    public readonly request: UnknownValidRpcRequest,
     public readonly chain: Chain,
     public readonly rpcEndpointPool: RpcEndpointPool
   ) {}

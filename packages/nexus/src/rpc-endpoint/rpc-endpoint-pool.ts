@@ -1,4 +1,3 @@
-import type { Logger } from "pino";
 import type { RpcRequestPayload } from "../rpc/schemas";
 import type { RpcEndpoint } from "./rpc-endpoint";
 import type {
@@ -6,6 +5,7 @@ import type {
   RelayResult,
   RelaySuccessResponse,
 } from "./relay-result";
+import { Logger } from "@src/logger";
 
 // a config object that determines how to treat failed relay requests
 

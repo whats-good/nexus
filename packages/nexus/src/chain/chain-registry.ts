@@ -20,4 +20,8 @@ export class ChainRegistry {
 
     this.logger.info(`Added chain ${chain.name} with id ${chain.chainId}`);
   }
+
+  public getChain(chainId: number): Chain | null {
+    return this.chains.get(chainId) ?? null;
+  }
 }
