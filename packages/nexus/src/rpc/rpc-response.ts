@@ -1,8 +1,7 @@
-import type { RelayLegalErrorResponse } from "@src/rpc-endpoint";
-import type { RpcRequest } from "./rpc-request";
 import type {
   ErrorResponsePayload,
   BaseSuccessResponsePayload,
+  ErrorField,
 } from "./schemas";
 
 export abstract class RpcResponse<T = unknown> {
@@ -11,25 +10,24 @@ export abstract class RpcResponse<T = unknown> {
   public abstract readonly id: string | number | null;
   public abstract build(): T;
 
-  public static fromRelayLegalErrorResponse(
-    request: RpcRequest,
-    relayResult: RelayLegalErrorResponse
+  public static fromErrorResponsePayload(
+    error: ErrorField,
+    id: string | number | null
   ): RpcErrorResponse {
-    const { error } = relayResult.response;
-
-    if (error.code === -32601) {
-      return request.toMethodNotFoundErrorResponse();
-    } else if (error.code === -32602) {
-      return request.toInvalidParamsErrorResponse();
-    } else if (error.code === -32603) {
-      return request.toInternalErrorResponse();
-    } else if (error.code === -32700) {
-      return request.toParseErrorResponse();
-    } else if (error.code === -32600) {
-      return request.toInvalidRequestErrorResponse();
+    switch (error.code) {
+      case -32601:
+        return new MethodNotFoundErrorResponse(id);
+      case -32602:
+        return new InvalidParamsErrorResponse(id);
+      case -32603:
+        return new InternalErrorResponse(id);
+      case -32700:
+        return new ParseErrorResponse();
+      case -32600:
+        return new InvalidRequestErrorResponse(id);
+      default:
+        return new NonStandardErrorResponse(id, error.code, error.message);
     }
-
-    return request.toNonStandardErrorResponse(error.code, error.message);
   }
 }
 
@@ -53,7 +51,7 @@ export class RpcSuccessResponse extends RpcResponse<BaseSuccessResponsePayload> 
 }
 
 abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
-  public abstract readonly code: number;
+  public abstract readonly errorCode: number;
   public abstract readonly message: string;
   public abstract isStandardErrorResponse: boolean;
 
@@ -62,7 +60,7 @@ abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
       id: this.id,
       jsonrpc: "2.0",
       error: {
-        code: this.code,
+        code: this.errorCode,
         message: this.message,
       },
     };
@@ -72,7 +70,7 @@ abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
 export class ParseErrorResponse extends RpcErrorResponse {
   public readonly kind = "parse-error";
   public readonly httpStatusCode = 500;
-  public readonly code = -32700;
+  public readonly errorCode = -32700;
   public readonly message = "Parse error";
   public readonly id = null;
   public readonly isStandardErrorResponse = true;
@@ -81,7 +79,7 @@ export class ParseErrorResponse extends RpcErrorResponse {
 export class InvalidRequestErrorResponse extends RpcErrorResponse {
   public readonly kind = "invalid-request";
   public readonly httpStatusCode = 400;
-  public readonly code = -32600;
+  public readonly errorCode = -32600;
   public readonly message = "Invalid Request";
   public readonly isStandardErrorResponse = true;
   constructor(public readonly id: string | number | null) {
@@ -92,7 +90,7 @@ export class InvalidRequestErrorResponse extends RpcErrorResponse {
 export class MethodNotFoundErrorResponse extends RpcErrorResponse {
   public readonly kind = "method-not-found";
   public readonly httpStatusCode = 404;
-  public readonly code = -32601;
+  public readonly errorCode = -32601;
   public readonly message = "Method not found";
   public readonly isStandardErrorResponse = true;
   constructor(public readonly id: string | number | null) {
@@ -103,7 +101,7 @@ export class MethodNotFoundErrorResponse extends RpcErrorResponse {
 export class InvalidParamsErrorResponse extends RpcErrorResponse {
   public readonly kind = "invalid-params";
   public readonly httpStatusCode = 500;
-  public readonly code = -32602;
+  public readonly errorCode = -32602;
   public readonly message = "Invalid params";
   public readonly isStandardErrorResponse = true;
   constructor(public readonly id: string | number | null) {
@@ -114,7 +112,7 @@ export class InvalidParamsErrorResponse extends RpcErrorResponse {
 export class InternalErrorResponse extends RpcErrorResponse {
   public readonly kind = "internal-error";
   public readonly httpStatusCode = 500;
-  public readonly code = -32603;
+  public readonly errorCode = -32603;
   public readonly message = "Internal error";
   public readonly isStandardErrorResponse = true;
   constructor(public readonly id: string | number | null) {
@@ -128,14 +126,14 @@ export class NonStandardErrorResponse extends RpcErrorResponse {
   public readonly isStandardErrorResponse = false;
   constructor(
     public readonly id: string | number | null,
-    public readonly code: number,
+    public readonly errorCode: number,
     public readonly message: string
   ) {
     super();
   }
 }
 
-abstract class NexusCustomErrorResponse extends RpcResponse<ErrorResponsePayload> {
+abstract class NexusCustomErrorResponse extends RpcErrorResponse {
   public readonly isStandardErrorResponse = false;
   public readonly isCustomNexusErrorResponse = true;
 }
@@ -143,18 +141,39 @@ abstract class NexusCustomErrorResponse extends RpcResponse<ErrorResponsePayload
 export class MethodDeniedCustomErrorResponse extends NexusCustomErrorResponse {
   public readonly kind = "method-denied";
   public readonly httpStatusCode = 403;
+  public readonly errorCode = -32020;
+  public readonly message = "Method denied";
   constructor(public readonly id: string | number | null) {
     super();
   }
+}
 
-  public build(): ErrorResponsePayload {
-    return {
-      id: this.id,
-      jsonrpc: "2.0",
-      error: {
-        code: -32020,
-        message: "Method denied",
-      },
-    };
+export class ChainDeniedCustomErrorResponse extends NexusCustomErrorResponse {
+  public readonly kind = "chain-denied";
+  public readonly httpStatusCode = 403;
+  public readonly errorCode = -32021;
+  public readonly message = "Chain denied";
+  constructor(public readonly id: string | number | null) {
+    super();
+  }
+}
+
+export class ProviderNotConfiguredCustomErrorResponse extends NexusCustomErrorResponse {
+  public readonly kind = "provider-not-configured";
+  public readonly httpStatusCode = 500;
+  public readonly errorCode = -32022;
+  public readonly message = "Provider not configured";
+  constructor(public readonly id: string | number | null) {
+    super();
+  }
+}
+
+export class BadUrlCustomErrorResponse extends NexusCustomErrorResponse {
+  public readonly kind = "bad-url";
+  public readonly httpStatusCode = 400;
+  public readonly errorCode = -32023;
+  public readonly message = "Bad url";
+  constructor(public readonly id: string | number | null) {
+    super();
   }
 }

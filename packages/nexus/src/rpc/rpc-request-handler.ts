@@ -2,8 +2,12 @@ import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
 import type { CacheHandler } from "@src/cache/cache-handler";
 import type { NexusContext } from "./nexus-context";
-import { RpcSuccessResponse, RpcResponse } from "./rpc-response";
-import type { RpcRequestWithValidPayload } from "./rpc-request";
+import {
+  InternalErrorResponse,
+  MethodDeniedCustomErrorResponse,
+  RpcResponse,
+  RpcSuccessResponse,
+} from "./rpc-response";
 
 export class RpcRequestHandler {
   constructor(
@@ -13,13 +17,12 @@ export class RpcRequestHandler {
 
   private scheduleCacheWrite(
     context: NexusContext,
-    request: RpcRequestWithValidPayload,
     response: RpcSuccessResponse
   ): void {
     safeAsyncNextTick(
       async () => {
         await this.cacheHandler
-          .handleWrite(context, request, response.build())
+          .handleWrite(context, response.build())
           .then((writeResult) => {
             if (writeResult.kind === "success") {
               this.logger.info("successfully cached response.");
@@ -37,41 +40,38 @@ export class RpcRequestHandler {
     );
   }
 
-  private async handleValidRequest(
-    context: NexusContext,
-    request: RpcRequestWithValidPayload
-  ): Promise<RpcResponse> {
-    const { rpcEndpointPool, chain } = context;
+  public async handle(context: NexusContext): Promise<RpcResponse> {
+    const { rpcEndpointPool, chain, request } = context;
     const { methodDescriptor } = request;
 
     const requestFilterResult = methodDescriptor.requestFilter({
       chain,
-      params: request.parsedPayload.params,
+      params: request.payload.params,
     });
 
     if (requestFilterResult.kind === "deny") {
-      return request.toMethodDeniedCustomErrorResponse();
+      return new MethodDeniedCustomErrorResponse(request.getResponseId());
     } else if (requestFilterResult.kind === "failure") {
       // TODO: make this behavior configurable.
       this.logger.error(
         `Request filter for method ${
-          request.parsedPayload.method
+          request.payload.method
         } threw an error: ${safeJsonStringify(
           requestFilterResult.error
         )}. This should never happen, and it's a critical error. Denying access to method. Please report this, fix the bug, and restart the node.`
       );
 
-      return request.toMethodDeniedCustomErrorResponse();
+      return new MethodDeniedCustomErrorResponse(request.getResponseId());
     }
 
     const cannedResponse = methodDescriptor.cannedResponse({
       chain: context.chain,
-      params: request.parsedPayload.params,
+      params: request.payload.params,
     });
 
     if (cannedResponse.kind === "success") {
       this.logger.info(
-        `Canned response for method ${request.parsedPayload.method} returned.`
+        `Returning canned response for method ${request.payload.method}.`
       );
 
       return new RpcSuccessResponse(
@@ -81,7 +81,7 @@ export class RpcRequestHandler {
     } else if (cannedResponse.kind === "failure") {
       this.logger.error(
         `Canned response for method ${
-          request.parsedPayload.method
+          request.payload.method
         } threw an error: ${safeJsonStringify(
           cannedResponse.error
         )}. This should not happen, but it's not fatal. Request will be relayed.`
@@ -101,7 +101,7 @@ export class RpcRequestHandler {
     // We should allow configurations to specify which errors can be cached and returned.
 
     try {
-      const relaySuccess = await rpcEndpointPool.relay(request.parsedPayload);
+      const relaySuccess = await rpcEndpointPool.relay(request.payload);
 
       if (relaySuccess) {
         const response = new RpcSuccessResponse(
@@ -109,7 +109,7 @@ export class RpcRequestHandler {
           relaySuccess.response.result
         );
 
-        this.scheduleCacheWrite(context, request, response);
+        this.scheduleCacheWrite(context, response);
 
         return response;
       }
@@ -117,35 +117,38 @@ export class RpcRequestHandler {
       const relayError = rpcEndpointPool.getLatestLegalRelayError();
 
       if (relayError) {
-        return RpcResponse.fromRelayLegalErrorResponse(request, relayError);
+        return RpcResponse.fromErrorResponsePayload(
+          relayError.response.error,
+          request.getResponseId()
+        );
       }
 
-      return request.toInternalErrorResponse();
+      return new InternalErrorResponse(request.getResponseId());
     } catch (e) {
       const error = safeJsonStringify(e);
 
       this.logger.error(error);
 
-      return request.toInternalErrorResponse();
+      return new InternalErrorResponse(request.getResponseId());
     }
   }
 
-  public async handle(context: NexusContext): Promise<RpcResponse> {
-    const { request } = context;
+  // public async handle(context: NexusContext): Promise<RpcErrorResponse> {
+  //   const { request } = context;
 
-    // TODO: add cache writes at the parent level.
-    // do this in an event handler.
+  //   // TODO: add cache writes at the parent level.
+  //   // do this in an event handler.
 
-    if (request.kind === "parse-error") {
-      return request.toParseErrorResponse();
-    } else if (request.kind === "invalid-request") {
-      return request.toInvalidRequestErrorResponse();
-    } else if (request.kind === "method-not-found") {
-      return request.toMethodNotFoundErrorResponse();
-    } else if (request.kind === "invalid-params") {
-      return request.toInvalidParamsErrorResponse();
-    }
+  //   if (request.kind === "parse-error") {
+  //     return request.toParseErrorResponse();
+  //   } else if (request.kind === "invalid-request") {
+  //     return request.toInvalidRequestErrorResponse();
+  //   } else if (request.kind === "method-not-found") {
+  //     return request.toMethodNotFoundErrorResponse();
+  //   } else if (request.kind === "invalid-params") {
+  //     return request.toInvalidParamsErrorResponse();
+  //   }
 
-    return this.handleValidRequest(context, request);
-  }
+  //   return this.handleValidRequest(context, request);
+  // }
 }
