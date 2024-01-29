@@ -18,12 +18,7 @@ type CacheConfigOptionReadField<T, M extends string, P, R> =
 
 interface CacheConfigOptionWriteFnArgs<M extends string, P, R>
   extends CacheConfigOptionReadFnArgs<M, P, R> {
-  rawResponse: unknown;
-  methodDescriptor: RpcMethodDescriptor<M, P, R>;
-  successResponse: ReturnType<
-    RpcMethodDescriptor<any, P, R>["successResponsePayloadSchema"]["safeParse"]
-  >;
-  errorResponse: ReturnType<(typeof ErrorResponsePayloadSchema)["safeParse"]>;
+  result: R;
 }
 type CacheConfigOptionWriteFn<T, M extends string, P, R> = (
   params: CacheConfigOptionWriteFnArgs<M, P, R>

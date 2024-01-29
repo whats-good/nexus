@@ -1,4 +1,4 @@
-import { safeJsonStringify } from "@src/utils";
+import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
 import type { CacheHandler } from "@src/cache/cache-handler";
 import type { NexusContext } from "./nexus-context";
@@ -10,6 +10,32 @@ export class RpcRequestHandler {
     private readonly logger: Logger,
     private readonly cacheHandler: CacheHandler
   ) {}
+
+  private scheduleCacheWrite(
+    context: NexusContext,
+    request: RpcRequestWithValidPayload,
+    response: RpcSuccessResponse
+  ): void {
+    safeAsyncNextTick(
+      async () => {
+        await this.cacheHandler
+          .handleWrite(context, request, response.build())
+          .then((writeResult) => {
+            if (writeResult.kind === "success") {
+              this.logger.info("successfully cached response.");
+            } else {
+              this.logger.warn("failed to cache response.");
+            }
+          });
+      },
+      (error) => {
+        const errorMsg = `Error while caching response: ${safeJsonStringify(
+          error
+        )}`;
+        this.logger.error(errorMsg);
+      }
+    );
+  }
 
   private async handleValidRequest(
     context: NexusContext,
@@ -78,10 +104,14 @@ export class RpcRequestHandler {
       const relaySuccess = await rpcEndpointPool.relay(request.parsedPayload);
 
       if (relaySuccess) {
-        return new RpcSuccessResponse(
+        const response = new RpcSuccessResponse(
           request.getResponseId(),
           relaySuccess.response.result
         );
+
+        this.scheduleCacheWrite(context, request, response);
+
+        return response;
       }
 
       const relayError = rpcEndpointPool.getLatestLegalRelayError();

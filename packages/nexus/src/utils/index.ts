@@ -13,3 +13,23 @@ export function safeJsonStringify(
 }
 
 export const requiredUnknown = () => z.custom((x) => x !== undefined);
+
+/**
+ * Safely schedules an asynchronous function to be executed on the next tick of the Node.js event loop.
+ * If the function throws an error, the provided `onError` callback will be invoked with the error.
+ *
+ * @param fn - An asynchronous function returning a Promise.
+ * @param onError - A callback function that handles errors.
+ */
+export function safeAsyncNextTick(
+  fn: () => Promise<void>,
+  onError: (error: unknown) => void
+) {
+  process.nextTick(async () => {
+    try {
+      await fn();
+    } catch (error) {
+      onError(error);
+    }
+  });
+}
