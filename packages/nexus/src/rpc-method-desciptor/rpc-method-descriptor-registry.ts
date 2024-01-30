@@ -24,7 +24,7 @@ type RpcMethodDescriptorMapOf<T extends RpcMethodDescriptorTuple> = {
 
 type SomeDescriptorInTuple<T extends RpcMethodDescriptorTuple> = T[number];
 
-export class RpcMethodRegistry<
+export class RpcMethodDescriptorRegistry<
   T extends RpcMethodDescriptorTuple = RpcMethodDescriptorTuple,
 > {
   public readonly descriptorMap: RpcMethodDescriptorMapOf<T>;

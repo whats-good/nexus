@@ -30,7 +30,7 @@ import {
   RpcRequestWithValidPayload,
 } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
-import { RpcMethodRegistry } from "@src/rpc-method-desciptor";
+import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
 import { RpcEndpointPool } from "@src/rpc-endpoint";
 import { IntString } from "@src/controller";
 import { NexusController } from "@src/controller";
@@ -50,7 +50,7 @@ export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
     private readonly cacheHandler: CacheHandler,
     private readonly serviceProviderRegistry: ServiceProviderRegistry,
     private readonly chainRegistry: ChainRegistry,
-    private readonly rpcMethodRegistry: RpcMethodRegistry
+    private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry
   ) {
     super();
   }
