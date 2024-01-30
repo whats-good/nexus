@@ -1,5 +1,5 @@
 import type { Chain } from "@src/chain";
-import type { RpcEndpoint } from "@src/rpc-endpoint/rpc-endpoint";
+import type { RpcEndpoint } from "@src/rpc-endpoint";
 import type { ServiceProvider } from "./service-provider";
 
 export class ServiceProviderRegistry {

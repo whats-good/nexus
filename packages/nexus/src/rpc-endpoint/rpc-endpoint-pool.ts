@@ -1,4 +1,4 @@
-import type { RpcRequestPayload } from "@src/rpc/schemas";
+import type { RpcRequestPayload } from "@src/rpc";
 import type { RpcEndpoint } from "./rpc-endpoint";
 import type {
   RelayLegalErrorResponse,

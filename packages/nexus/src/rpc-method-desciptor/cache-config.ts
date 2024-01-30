@@ -1,6 +1,5 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
-import type { ErrorResponsePayloadSchema } from "@src/rpc/schemas";
 import type { RpcMethodDescriptor } from "./rpc-method-descriptor";
 
 interface CacheConfigOptionReadFnArgs<M extends string, P, R> {

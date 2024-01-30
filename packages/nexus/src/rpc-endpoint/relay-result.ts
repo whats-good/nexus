@@ -1,7 +1,7 @@
 import type {
   ErrorResponsePayload,
   BaseSuccessResponsePayload,
-} from "@src/rpc/schemas";
+} from "@src/rpc";
 import { safeJsonStringify } from "@src/utils";
 
 abstract class RelayResultBase {

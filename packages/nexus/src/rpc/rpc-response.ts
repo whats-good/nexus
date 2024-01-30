@@ -1,4 +1,4 @@
-import { NexusJsonResponse } from "@src/controller/nexus-response";
+import { NexusJsonResponse } from "@src/controller";
 import type {
   ErrorResponsePayload,
   BaseSuccessResponsePayload,

@@ -1,6 +1,6 @@
 import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
-import type { CacheHandler } from "@src/cache/cache-handler";
+import type { CacheHandler } from "@src/cache";
 import { RpcContext } from "./rpc-context";
 import {
   ChainDeniedCustomErrorResponse,
@@ -17,10 +17,10 @@ import {
   NexusNotFoundResponse,
   NexusResponse,
 } from "@src/controller/nexus-response";
-import { PathParamsOf, Route } from "@src/controller/route";
+import { PathParamsOf, Route } from "@src/controller";
 import { z } from "zod";
-import { ServiceProviderRegistry } from "@src/service-provider/service-provider-registry";
-import { ChainRegistry } from "@src/chain/chain-registry";
+import { ServiceProviderRegistry } from "@src/service-provider";
+import { ChainRegistry } from "@src/chain";
 import {
   RpcRequest,
   RpcRequestWithInvalidParamsError,
@@ -32,8 +32,8 @@ import {
 import { RpcRequestPayloadSchema } from "./schemas";
 import { RpcMethodRegistry } from "@src/rpc-method-desciptor";
 import { RpcEndpointPool } from "@src/rpc-endpoint";
-import { IntString } from "@src/controller/common";
-import { NexusController } from "@src/controller/nexus-controller";
+import { IntString } from "@src/controller";
+import { NexusController } from "@src/controller";
 
 const chainIdRoute = new Route(
   "/chains/:chainId",

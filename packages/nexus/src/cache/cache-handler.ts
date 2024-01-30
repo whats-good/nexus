@@ -1,14 +1,7 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import type { RpcContext } from "@src/rpc/rpc-context";
-import type { RpcRequestWithValidPayload } from "@src/rpc/rpc-request";
-import {
-  ErrorFieldSchema,
-  type ErrorField,
-  ErrorResponsePayloadSchema,
-  BaseResponsePayload,
-} from "@src/rpc/schemas";
+import type { RpcContext } from "@src/rpc";
+import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
 import type { BaseCache } from "./base-cache";
-import { RpcSuccessResponse } from "@src/rpc/rpc-response";
 
 type CacheHandlerReadResult =
   | {
