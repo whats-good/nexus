@@ -1,4 +1,4 @@
-import type { Chain } from "../chain";
+import type { Chain } from "@src/chain";
 
 export abstract class ChainSupport {
   constructor(public readonly chain: Chain) {}

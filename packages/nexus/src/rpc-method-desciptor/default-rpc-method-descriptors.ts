@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { BigNumber } from "@ethersproject/bignumber";
-import packageJson from "../../package.json";
+import packageJson from "@package.json";
 import {
   Address,
   BlockNumberOrTag,

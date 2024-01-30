@@ -1,5 +1,5 @@
-import type { Chain } from "../chain";
-import { RpcEndpoint } from "../rpc-endpoint/rpc-endpoint";
+import type { Chain } from "@src/chain";
+import { RpcEndpoint } from "@src/rpc-endpoint/rpc-endpoint";
 import type { ChainSupport } from "./chain-support";
 import {
   KeyAppendedUrlChainSupport,

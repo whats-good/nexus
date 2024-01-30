@@ -1,4 +1,4 @@
-import type { Logger } from "../logger";
+import type { Logger } from "@src/logger";
 import type { Chain } from "./chain";
 
 export class ChainRegistry {

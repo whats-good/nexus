@@ -1,10 +1,10 @@
-import type { RpcRequestPayload } from "../rpc/schemas";
+import type { RpcRequestPayload } from "@src/rpc/schemas";
 import {
   ErrorResponsePayloadSchema,
   BaseSuccessResponsePayloadSchema,
-} from "../rpc/schemas";
-import type { Chain } from "../chain";
-import type { ServiceProvider } from "../service-provider/service-provider";
+} from "@src/rpc/schemas";
+import type { Chain } from "@src/chain";
+import type { ServiceProvider } from "@src/service-provider/service-provider";
 import {
   RelayInternalFetchError,
   RelayNon200Response,

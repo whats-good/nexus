@@ -15,7 +15,8 @@
     "target": "ES2015",
     "paths": {
       "@src/*": ["./src/*"],
-      "@test/*": ["./test/*"]
+      "@test/*": ["./test/*"],
+      "@package.json": ["./package.json"]
     }
   }
 }
