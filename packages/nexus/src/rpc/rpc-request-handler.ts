@@ -1,28 +1,148 @@
 import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
 import type { CacheHandler } from "@src/cache/cache-handler";
-import type { NexusContext } from "./nexus-context";
+import { RpcContext } from "./rpc-context";
 import {
+  ChainDeniedCustomErrorResponse,
   InternalErrorResponse,
+  InvalidParamsErrorResponse,
+  InvalidRequestErrorResponse,
   MethodDeniedCustomErrorResponse,
+  ParseErrorResponse,
+  ProviderNotConfiguredCustomErrorResponse,
   RpcResponse,
   RpcSuccessResponse,
 } from "./rpc-response";
+import {
+  NexusNotFoundResponse,
+  NexusResponse,
+} from "@src/controller/nexus-response";
+import { PathParamsOf, Route } from "@src/controller/route";
+import { z } from "zod";
+import { ServiceProviderRegistry } from "@src/service-provider/service-provider-registry";
+import { ChainRegistry } from "@src/chain/chain-registry";
+import {
+  RpcRequest,
+  RpcRequestWithInvalidParamsError,
+  RpcRequestWithInvalidRequestError,
+  RpcRequestWithMethodNotFoundError,
+  RpcRequestWithParseError,
+  RpcRequestWithValidPayload,
+} from "./rpc-request";
+import { RpcRequestPayloadSchema } from "./schemas";
+import { RpcMethodRegistry } from "@src/rpc-method-desciptor";
+import { RpcEndpointPool } from "@src/rpc-endpoint";
+import { IntString } from "@src/controller/common";
+import { NexusController } from "@src/controller/nexus-controller";
 
-export class RpcRequestHandler {
+const chainIdRoute = new Route(
+  "/chains/:chainId",
+  z.object({
+    chainId: IntString,
+  })
+);
+
+export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
+  protected readonly route = chainIdRoute;
+
   constructor(
     private readonly logger: Logger,
-    private readonly cacheHandler: CacheHandler
-  ) {}
+    private readonly cacheHandler: CacheHandler,
+    private readonly serviceProviderRegistry: ServiceProviderRegistry,
+    private readonly chainRegistry: ChainRegistry,
+    private readonly rpcMethodRegistry: RpcMethodRegistry
+  ) {
+    super();
+  }
+
+  private async toRpcRequest(request: Request): Promise<RpcRequest> {
+    let jsonPayload: unknown;
+    try {
+      jsonPayload = await request.json();
+    } catch (e) {
+      return new RpcRequestWithParseError();
+    }
+
+    const parsedBasePayload = RpcRequestPayloadSchema.safeParse(jsonPayload);
+
+    if (!parsedBasePayload.success) {
+      return new RpcRequestWithInvalidRequestError(jsonPayload);
+    }
+
+    const methodDescriptor = this.rpcMethodRegistry.getDescriptorByName(
+      parsedBasePayload.data.method
+    );
+
+    if (!methodDescriptor) {
+      return new RpcRequestWithMethodNotFoundError(parsedBasePayload.data);
+    }
+
+    const parsedStrictPayload =
+      methodDescriptor.requestPayloadSchema.safeParse(jsonPayload);
+
+    if (!parsedStrictPayload.success) {
+      return new RpcRequestWithInvalidParamsError(
+        methodDescriptor,
+        parsedBasePayload.data
+      );
+    }
+
+    return new RpcRequestWithValidPayload(
+      methodDescriptor,
+      parsedBasePayload.data
+    );
+  }
+
+  // TODO: why is this Request object coming from MDN and not from @whatwg/fetch?
+  public async handle(
+    request: Request,
+    pathParams: PathParamsOf<typeof chainIdRoute>
+  ): Promise<NexusResponse> {
+    const rpcRequest = await this.toRpcRequest(request);
+    const responseId = rpcRequest.getResponseId();
+    if (rpcRequest instanceof RpcRequestWithParseError) {
+      return new ParseErrorResponse();
+    } else if (rpcRequest instanceof RpcRequestWithInvalidRequestError) {
+      return new InvalidRequestErrorResponse(responseId);
+    } else if (rpcRequest instanceof RpcRequestWithMethodNotFoundError) {
+      return new NexusNotFoundResponse();
+    } else if (rpcRequest instanceof RpcRequestWithInvalidParamsError) {
+      return new InvalidParamsErrorResponse(responseId);
+    }
+
+    const chain = this.chainRegistry.getChain(pathParams.chainId);
+    if (!chain) {
+      return new ChainDeniedCustomErrorResponse(responseId);
+    }
+    const endpoints = this.serviceProviderRegistry.getEndpointsForChain(
+      chain,
+      {} // TODO: pass the actual provider keys here!!!
+    );
+    if (endpoints.length === 0) {
+      return new ProviderNotConfiguredCustomErrorResponse(responseId);
+    }
+    const rpcEndpointPool = new RpcEndpointPool(
+      endpoints,
+      {
+        kind: "cycle-requests", // TODO: use the actual config here!!!
+        maxAttempts: 3,
+      },
+      this.logger
+    );
+
+    const rpcContext = new RpcContext(rpcRequest, chain, rpcEndpointPool);
+
+    return this.handleContext(rpcContext);
+  }
 
   private scheduleCacheWrite(
-    context: NexusContext,
+    context: RpcContext,
     response: RpcSuccessResponse
   ): void {
     safeAsyncNextTick(
       async () => {
         await this.cacheHandler
-          .handleWrite(context, response.build())
+          .handleWrite(context, response.body())
           .then((writeResult) => {
             if (writeResult.kind === "success") {
               this.logger.info("successfully cached response.");
@@ -40,7 +160,7 @@ export class RpcRequestHandler {
     );
   }
 
-  public async handle(context: NexusContext): Promise<RpcResponse> {
+  private async handleContext(context: RpcContext): Promise<RpcResponse> {
     const { rpcEndpointPool, chain, request } = context;
     const { methodDescriptor } = request;
 
@@ -88,7 +208,7 @@ export class RpcRequestHandler {
       );
     }
 
-    const cacheResult = await this.cacheHandler.handleRead(context, request);
+    const cacheResult = await this.cacheHandler.handleRead(context);
 
     if (cacheResult.kind === "success-result") {
       return new RpcSuccessResponse(
@@ -132,23 +252,4 @@ export class RpcRequestHandler {
       return new InternalErrorResponse(request.getResponseId());
     }
   }
-
-  // public async handle(context: NexusContext): Promise<RpcErrorResponse> {
-  //   const { request } = context;
-
-  //   // TODO: add cache writes at the parent level.
-  //   // do this in an event handler.
-
-  //   if (request.kind === "parse-error") {
-  //     return request.toParseErrorResponse();
-  //   } else if (request.kind === "invalid-request") {
-  //     return request.toInvalidRequestErrorResponse();
-  //   } else if (request.kind === "method-not-found") {
-  //     return request.toMethodNotFoundErrorResponse();
-  //   } else if (request.kind === "invalid-params") {
-  //     return request.toInvalidParamsErrorResponse();
-  //   }
-
-  //   return this.handleValidRequest(context, request);
-  // }
 }
