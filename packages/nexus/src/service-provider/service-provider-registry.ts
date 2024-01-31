@@ -1,8 +1,15 @@
 import type { Chain } from "@src/chain";
 import type { RpcEndpoint } from "@src/rpc-endpoint";
 import type { ServiceProvider } from "./service-provider";
+import { Logger } from "@src/logger";
 
 export class ServiceProviderRegistry {
+  private readonly logger: Logger;
+
+  public constructor(args: { logger: Logger }) {
+    this.logger = args.logger;
+  }
+
   private readonly chainIdToProviders = new Map<number, ServiceProvider[]>();
 
   public addServiceProvider(provider: ServiceProvider) {
@@ -12,15 +19,19 @@ export class ServiceProviderRegistry {
       const providers = this.chainIdToProviders.get(chain.chainId) ?? [];
 
       if (providers.includes(provider)) {
-        throw new Error(
-          `Provider ${provider.name} is already registered for chain ${chain.name} (${chain.chainId})`
+        this.logger.warn(
+          `Provider ${provider.name} is already registered for chain ${chain.name} (${chain.chainId}). Skipping.`
         );
+      } else {
+        providers.push(provider);
       }
-
-      providers.push(provider);
 
       this.chainIdToProviders.set(chain.chainId, providers);
     }
+  }
+
+  public addServiceProviders(providers: ServiceProvider[]) {
+    providers.forEach((provider) => this.addServiceProvider(provider));
   }
 
   public getEndpointsForChain(

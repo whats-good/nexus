@@ -1,3 +1,3 @@
 export * from "./chain";
-export * from "./default-chains";
+export * as CHAIN from "./chains";
 export * from "./chain-registry";

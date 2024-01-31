@@ -21,6 +21,10 @@ export class ChainRegistry {
     this.logger.info(`Added chain ${chain.name} with id ${chain.chainId}`);
   }
 
+  public addChains(chains: Chain[]) {
+    chains.forEach((chain) => this.addChain(chain));
+  }
+
   public getChain(chainId: number): Chain | null {
     return this.chains.get(chainId) ?? null;
   }
