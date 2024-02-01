@@ -14,7 +14,7 @@ type NexusServerInstance<TServerContext> = ServerAdapter<
 >;
 
 const chainIdRoute = new Route(
-  "/chains/:chainId",
+  "(.*)/:chainId",
   z.object({
     chainId: IntString,
   })

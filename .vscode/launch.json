@@ -4,11 +4,19 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug RPC Proxy",
-      "program": "${workspaceFolder}/packages/rpc-proxy/src/setup/provider.ts",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceFolder}/packages/rpc-proxy",
-      "resolveSourceMapLocations": ["!**/node_modules/**"]
+      "name": "Debug Nexus",
+      "runtimeExecutable": "ts-node",
+      "args": [
+        "-r",
+        "tsconfig-paths/register",
+        "${workspaceFolder}/packages/nexus/src/index.ts"
+      ],
+      "cwd": "${workspaceFolder}/packages/nexus",
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }
