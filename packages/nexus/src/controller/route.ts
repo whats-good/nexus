@@ -9,15 +9,7 @@ export class Route<P extends string, S> {
     public readonly schema: z.ZodType<S, any, any>
   ) {}
 
-  public safeMatch(path: string): S | null {
-    try {
-      return this.match(path);
-    } catch {
-      return null;
-    }
-  }
-
-  public match(path: string): S {
+  public match(path: string): S | null {
     const matcher = match(this.pattern, { decode: decodeURIComponent });
     const routePayload = matcher(path);
 
@@ -31,6 +23,6 @@ export class Route<P extends string, S> {
       }
     }
 
-    throw new Error("Route match failed");
+    return null;
   }
 }

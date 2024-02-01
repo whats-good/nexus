@@ -26,7 +26,7 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   public readonly requestPayloadSchema: StrictRequestPayloadSchema<M, P>;
   public readonly successResponsePayloadSchema: StrictSuccessResponsePayloadSchema<R>;
 
-  // TODO: should we pass a default value where cache config is always defined?
+  // // TODO: should we pass a default value where cache config is always defined?
   public readonly cacheConfig?: CacheConfig<M, P, R>;
 
   private readonly cannedResponseFn?: CannedResponseFn<P, R>;
@@ -106,3 +106,5 @@ export type UnknownRpcMethodDescriptor = RpcMethodDescriptor<
   unknown,
   unknown
 >;
+
+export type AnyRpcMethodDescriptor = RpcMethodDescriptor<string, any, any>;

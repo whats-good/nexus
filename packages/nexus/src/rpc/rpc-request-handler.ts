@@ -17,8 +17,6 @@ import {
   NexusNotFoundResponse,
   NexusResponse,
 } from "@src/controller/nexus-response";
-import { PathParamsOf, Route } from "@src/controller";
-import { z } from "zod";
 import { ServiceProviderRegistry } from "@src/service-provider";
 import { ChainRegistry } from "@src/chain";
 import {
@@ -31,28 +29,52 @@ import {
 } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
 import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
-import { RpcEndpointPool } from "@src/rpc-endpoint";
-import { IntString } from "@src/controller";
+import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
 import { NexusController } from "@src/controller";
+import { NexusConfig } from "@src/config";
 
-const chainIdRoute = new Route(
-  "/chains/:chainId",
-  z.object({
-    chainId: IntString,
-  })
-);
+export class RpcRequestHandler extends NexusController<{
+  chainId: number;
+}> {
+  private readonly logger: Logger;
+  private readonly cacheHandler?: CacheHandler;
+  private readonly serviceProviderRegistry: ServiceProviderRegistry;
+  private readonly chainRegistry: ChainRegistry;
+  private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
+  private readonly relayFailureConfig: RelayFailureConfig;
+  private readonly providerKeys: Record<string, string | undefined>;
 
-export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
-  protected readonly route = chainIdRoute;
-
-  constructor(
-    private readonly logger: Logger,
-    private readonly cacheHandler: CacheHandler,
-    private readonly serviceProviderRegistry: ServiceProviderRegistry,
-    private readonly chainRegistry: ChainRegistry,
-    private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry
-  ) {
+  constructor(args: {
+    logger: Logger;
+    cacheHandler?: CacheHandler;
+    serviceProviderRegistry: ServiceProviderRegistry;
+    chainRegistry: ChainRegistry;
+    rpcMethodRegistry: RpcMethodDescriptorRegistry;
+    relayFailureConfig: RelayFailureConfig;
+    providerKeys: Record<string, string | undefined>;
+  }) {
     super();
+    this.logger = args.logger;
+    this.cacheHandler = args.cacheHandler;
+    this.serviceProviderRegistry = args.serviceProviderRegistry;
+    this.chainRegistry = args.chainRegistry;
+    this.rpcMethodRegistry = args.rpcMethodRegistry;
+    this.relayFailureConfig = args.relayFailureConfig;
+    this.providerKeys = args.providerKeys;
+  }
+
+  public static fromConfig<TServerContext>(
+    config: NexusConfig<TServerContext>
+  ): RpcRequestHandler {
+    return new RpcRequestHandler({
+      logger: config.logger,
+      cacheHandler: config.cacheHandler,
+      serviceProviderRegistry: config.serviceProviderRegistry,
+      chainRegistry: config.chainRegistry,
+      rpcMethodRegistry: config.rpcMethodRegistry,
+      relayFailureConfig: config.relayFailureConfig,
+      providerKeys: config.providerKeys,
+    });
   }
 
   private async toRpcRequest(request: Request): Promise<RpcRequest> {
@@ -93,10 +115,9 @@ export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
     );
   }
 
-  // TODO: why is this Request object coming from MDN and not from @whatwg/fetch?
   public async handle(
     request: Request,
-    pathParams: PathParamsOf<typeof chainIdRoute>
+    pathParams: { chainId: number }
   ): Promise<NexusResponse> {
     const rpcRequest = await this.toRpcRequest(request);
     const responseId = rpcRequest.getResponseId();
@@ -116,17 +137,14 @@ export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
     }
     const endpoints = this.serviceProviderRegistry.getEndpointsForChain(
       chain,
-      {} // TODO: pass the actual provider keys here!!!
+      this.providerKeys
     );
     if (endpoints.length === 0) {
       return new ProviderNotConfiguredCustomErrorResponse(responseId);
     }
     const rpcEndpointPool = new RpcEndpointPool(
       endpoints,
-      {
-        kind: "cycle-requests", // TODO: use the actual config here!!!
-        maxAttempts: 3,
-      },
+      this.relayFailureConfig,
       this.logger
     );
 
@@ -139,9 +157,14 @@ export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
     context: RpcContext,
     response: RpcSuccessResponse
   ): void {
+    const { cacheHandler } = this;
+    if (!cacheHandler) {
+      return;
+    }
+
     safeAsyncNextTick(
       async () => {
-        await this.cacheHandler
+        await cacheHandler
           .handleWrite(context, response.body())
           .then((writeResult) => {
             if (writeResult.kind === "success") {
@@ -208,13 +231,15 @@ export class RpcRequestHandler extends NexusController<typeof chainIdRoute> {
       );
     }
 
-    const cacheResult = await this.cacheHandler.handleRead(context);
+    if (this.cacheHandler) {
+      const cacheResult = await this.cacheHandler.handleRead(context);
 
-    if (cacheResult.kind === "success-result") {
-      return new RpcSuccessResponse(
-        request.getResponseId(),
-        cacheResult.result
-      );
+      if (cacheResult.kind === "success-result") {
+        return new RpcSuccessResponse(
+          request.getResponseId(),
+          cacheResult.result
+        );
+      }
     }
 
     // TODO: right now, only success results are returned.

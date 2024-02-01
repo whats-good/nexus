@@ -86,9 +86,9 @@ export class CacheHandler {
 
       const readConfig = cacheConfig.getReadConfig({
         chain: context.chain,
-        params: request.payload.params,
         highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-        methodDescriptor: request.methodDescriptor,
+        params: request.payload.params,
+        method: request.payload.method,
       });
 
       if (readConfig.kind === "deny") {
@@ -144,7 +144,7 @@ export class CacheHandler {
         chain: context.chain,
         params: request.payload.params,
         highestKnownBlockNumber: BigNumber.from(0), // TODO: actually cache and return this.
-        methodDescriptor: request.methodDescriptor,
+        method: request.payload.method,
         result,
       });
 

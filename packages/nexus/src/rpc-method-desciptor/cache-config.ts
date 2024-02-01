@@ -1,30 +1,27 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
-import type { RpcMethodDescriptor } from "./rpc-method-descriptor";
 
-interface CacheConfigOptionReadFnArgs<M extends string, P, R> {
+interface CacheConfigOptionReadFnArgs<P, R> {
   chain: Chain;
   params: P;
   highestKnownBlockNumber: BigNumber;
-  methodDescriptor: RpcMethodDescriptor<M, P, R>;
+  method: string;
 }
-type CacheConfigOptionReadFn<T, M extends string, P, R> = (
-  params: CacheConfigOptionReadFnArgs<M, P, R>
+type CacheConfigOptionReadFn<T, P, R> = (
+  args: CacheConfigOptionReadFnArgs<P, R>
 ) => T;
-type CacheConfigOptionReadField<T, M extends string, P, R> =
-  | T
-  | CacheConfigOptionReadFn<T, M, P, R>;
+type CacheConfigOptionReadField<T, P, R> = T | CacheConfigOptionReadFn<T, P, R>;
 
-interface CacheConfigOptionWriteFnArgs<M extends string, P, R>
-  extends CacheConfigOptionReadFnArgs<M, P, R> {
+interface CacheConfigOptionWriteFnArgs<P, R>
+  extends CacheConfigOptionReadFnArgs<P, R> {
   result: R;
 }
-type CacheConfigOptionWriteFn<T, M extends string, P, R> = (
-  params: CacheConfigOptionWriteFnArgs<M, P, R>
+type CacheConfigOptionWriteFn<T, P, R> = (
+  params: CacheConfigOptionWriteFnArgs<P, R>
 ) => T;
-type CacheConfigOptionWriteField<T, M extends string, P, R> =
+type CacheConfigOptionWriteField<T, P, R> =
   | T
-  | CacheConfigOptionWriteFn<T, M, P, R>;
+  | CacheConfigOptionWriteFn<T, P, R>;
 
 export interface AllowReadConfigResult {
   kind: "allow";
@@ -48,17 +45,17 @@ type FinalizedWriteTimeConfigResult =
       kind: "deny";
     };
 
-export interface CacheConfigOptions<M extends string, P, R> {
-  paramsKeySuffix: CacheConfigOptionReadField<string, M, P, R>;
-  ttl: CacheConfigOptionWriteField<number, M, P, R>;
-  disableRead?: CacheConfigOptionReadField<boolean, M, P, R>;
-  disableWrite?: CacheConfigOptionWriteField<boolean, M, P, R>;
+export interface CacheConfigOptions<P, R> {
+  paramsKeySuffix: CacheConfigOptionReadField<string, P, R>;
+  ttl: CacheConfigOptionWriteField<number, P, R>;
+  disableRead?: CacheConfigOptionReadField<boolean, P, R>;
+  disableWrite?: CacheConfigOptionWriteField<boolean, P, R>;
 }
 
 export class CacheConfig<M extends string, P, R> {
-  constructor(private readonly options: CacheConfigOptions<M, P, R>) {}
+  constructor(private readonly options: CacheConfigOptions<P, R>) {}
 
-  private getDisableRead(args: CacheConfigOptionReadFnArgs<M, P, R>) {
+  private getDisableRead(args: CacheConfigOptionReadFnArgs<P, R>) {
     if (typeof this.options.disableRead === "function") {
       return this.options.disableRead(args);
     }
@@ -66,7 +63,7 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.disableRead === true;
   }
 
-  private getDisableWrite(args: CacheConfigOptionWriteFnArgs<M, P, R>) {
+  private getDisableWrite(args: CacheConfigOptionWriteFnArgs<P, R>) {
     if (typeof this.options.disableWrite === "function") {
       return this.options.disableWrite(args);
     }
@@ -74,7 +71,7 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.disableWrite === true;
   }
 
-  private getTtl(args: CacheConfigOptionWriteFnArgs<M, P, R>) {
+  private getTtl(args: CacheConfigOptionWriteFnArgs<P, R>) {
     if (typeof this.options.ttl === "function") {
       return this.options.ttl(args);
     }
@@ -82,7 +79,7 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.ttl;
   }
 
-  private getParamsKeySuffix(args: CacheConfigOptionReadFnArgs<M, P, R>) {
+  private getParamsKeySuffix(args: CacheConfigOptionReadFnArgs<P, R>) {
     if (typeof this.options.paramsKeySuffix === "function") {
       return this.options.paramsKeySuffix(args);
     }
@@ -90,17 +87,17 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.paramsKeySuffix;
   }
 
-  public getCacheKey(args: CacheConfigOptionReadFnArgs<M, P, R>) {
+  public getCacheKey(args: CacheConfigOptionReadFnArgs<P, R>) {
     const { chain } = args;
     const paramsKeySuffix = this.getParamsKeySuffix(args);
 
-    const cacheKey = `${chain.chainId}-${args.methodDescriptor.method}-${paramsKeySuffix}`;
+    const cacheKey = `${chain.chainId}-${args.method}-${paramsKeySuffix}`;
 
     return cacheKey;
   }
 
   public getReadConfig(
-    args: CacheConfigOptionReadFnArgs<M, P, R>
+    args: CacheConfigOptionReadFnArgs<P, R>
   ): FinalizedReadTimeConfigResult {
     if (this.getDisableRead(args)) {
       return {
@@ -115,7 +112,7 @@ export class CacheConfig<M extends string, P, R> {
   }
 
   public getWriteConfig(
-    args: CacheConfigOptionWriteFnArgs<M, P, R>
+    args: CacheConfigOptionWriteFnArgs<P, R>
   ): FinalizedWriteTimeConfigResult {
     if (this.getDisableWrite(args)) {
       return {
