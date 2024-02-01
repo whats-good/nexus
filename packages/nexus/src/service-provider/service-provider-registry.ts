@@ -34,10 +34,7 @@ export class ServiceProviderRegistry {
     providers.forEach((provider) => this.addServiceProvider(provider));
   }
 
-  public getEndpointsForChain(
-    chain: Chain,
-    providerKeys: Record<string, string | undefined>
-  ): RpcEndpoint[] {
+  public getEndpointsForChain(chain: Chain): RpcEndpoint[] {
     const providers = this.chainIdToProviders.get(chain.chainId);
 
     if (!providers) {
@@ -46,9 +43,7 @@ export class ServiceProviderRegistry {
 
     const rpcEndpoints = providers
       .map((provider) => {
-        const key = providerKeys[provider.name];
-
-        return provider.getEndpoint(chain, key);
+        return provider.getEndpointForChain(chain);
       })
       .filter((rpcEndpoint): rpcEndpoint is RpcEndpoint => {
         return !!rpcEndpoint;

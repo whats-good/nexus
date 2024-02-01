@@ -34,7 +34,6 @@ export type NexusConfigOptions<TServerContext> = {
   >;
   logger?: ConfigOptionField<TServerContext, Logger>;
   relayFailureConfig?: ConfigOptionField<TServerContext, RelayFailureConfig>;
-  providerKeys: Record<string, string | undefined>;
 };
 
 export class NexusConfig<TServerContext> {
@@ -45,7 +44,6 @@ export class NexusConfig<TServerContext> {
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
-  public readonly providerKeys: Record<string, string | undefined>;
 
   constructor(args: {
     cacheHandler?: CacheHandler;
@@ -55,7 +53,6 @@ export class NexusConfig<TServerContext> {
     relayFailureConfig: RelayFailureConfig;
     logger: Logger;
     serverContext: TServerContext;
-    providerKeys: Record<string, string | undefined>;
   }) {
     this.chainRegistry = args.chainRegistry;
     this.serviceProviderRegistry = args.serviceProviderRegistry;
@@ -64,7 +61,6 @@ export class NexusConfig<TServerContext> {
     this.logger = args.logger;
     this.serverContext = args.serverContext;
     this.cacheHandler = args.cacheHandler;
-    this.providerKeys = args.providerKeys || {};
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -120,11 +116,6 @@ export class NexusConfig<TServerContext> {
     const baseCache = NexusConfig.getValueOrExecute(options.cache, args);
     const cacheHandler = baseCache ? new CacheHandler(baseCache) : undefined;
 
-    const providerKeys = NexusConfig.getValueOrExecute(
-      options.providerKeys,
-      args
-    );
-
     return new NexusConfig({
       chainRegistry,
       serviceProviderRegistry,
@@ -133,7 +124,6 @@ export class NexusConfig<TServerContext> {
       logger,
       cacheHandler,
       serverContext: args.context,
-      providerKeys,
     });
   }
 }

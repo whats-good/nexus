@@ -42,7 +42,6 @@ export class RpcRequestHandler extends NexusController<{
   private readonly chainRegistry: ChainRegistry;
   private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
   private readonly relayFailureConfig: RelayFailureConfig;
-  private readonly providerKeys: Record<string, string | undefined>;
 
   constructor(args: {
     logger: Logger;
@@ -51,7 +50,6 @@ export class RpcRequestHandler extends NexusController<{
     chainRegistry: ChainRegistry;
     rpcMethodRegistry: RpcMethodDescriptorRegistry;
     relayFailureConfig: RelayFailureConfig;
-    providerKeys: Record<string, string | undefined>;
   }) {
     super();
     this.logger = args.logger;
@@ -60,7 +58,6 @@ export class RpcRequestHandler extends NexusController<{
     this.chainRegistry = args.chainRegistry;
     this.rpcMethodRegistry = args.rpcMethodRegistry;
     this.relayFailureConfig = args.relayFailureConfig;
-    this.providerKeys = args.providerKeys;
   }
 
   public static fromConfig<TServerContext>(
@@ -73,7 +70,6 @@ export class RpcRequestHandler extends NexusController<{
       chainRegistry: config.chainRegistry,
       rpcMethodRegistry: config.rpcMethodRegistry,
       relayFailureConfig: config.relayFailureConfig,
-      providerKeys: config.providerKeys,
     });
   }
 
@@ -135,10 +131,7 @@ export class RpcRequestHandler extends NexusController<{
     if (!chain) {
       return new ChainDeniedCustomErrorResponse(responseId);
     }
-    const endpoints = this.serviceProviderRegistry.getEndpointsForChain(
-      chain,
-      this.providerKeys
-    );
+    const endpoints = this.serviceProviderRegistry.getEndpointsForChain(chain);
     if (endpoints.length === 0) {
       return new ProviderNotConfiguredCustomErrorResponse(responseId);
     }
