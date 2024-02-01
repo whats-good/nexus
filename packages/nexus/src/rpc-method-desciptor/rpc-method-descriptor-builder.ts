@@ -11,7 +11,7 @@ export class RpcMethodDescriptorBuilder<M extends string, P, R> {
     result: z.ZodType<R, any, any>;
     cannedResponseFn?: CannedResponseFn<P, R>;
     requestFilterFn?: RequestFilterFn<P>;
-    cacheConfigOptions?: CacheConfigOptions<M, P, R>;
+    cacheConfigOptions?: CacheConfigOptions<P, R>;
   };
 
   constructor({
@@ -46,7 +46,7 @@ export class RpcMethodDescriptorBuilder<M extends string, P, R> {
     return this;
   }
 
-  public cacheConfig(cacheConfigOptions: CacheConfigOptions<M, P, R>) {
+  public cacheConfig(cacheConfigOptions: CacheConfigOptions<P, R>) {
     this.fields.cacheConfigOptions = cacheConfigOptions;
 
     return this;

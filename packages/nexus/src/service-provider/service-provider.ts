@@ -18,7 +18,7 @@ interface PureUrlChainSupportInitArgs {
   url: string;
 }
 
-type ChainSupportInitArgs =
+export type ChainSupportInitArgs =
   | KeyAppendedUrlChainSupportInitArgs
   | PureUrlChainSupportInitArgs;
 
