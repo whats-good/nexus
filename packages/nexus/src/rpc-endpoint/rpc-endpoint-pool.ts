@@ -78,7 +78,7 @@ export class RpcEndpointPool {
       this.logger.warn(
         [
           "Relay failed.",
-          `Provider: ${endpoint.serviceProvider.name}`,
+          `Provider: ${endpoint.nodeProvider.name}`,
           `Relay result: ${relayResult.stringify()}`,
         ].join("\n")
       );

@@ -17,7 +17,7 @@ import {
   NexusNotFoundResponse,
   NexusResponse,
 } from "@src/controller/nexus-response";
-import { ServiceProviderRegistry } from "@src/service-provider";
+import { NodeProviderRegistry } from "@src/node-provider";
 import { ChainRegistry } from "@src/chain";
 import {
   RpcRequest,
@@ -38,7 +38,7 @@ export class RpcRequestHandler extends NexusController<{
 }> {
   private readonly logger: Logger;
   private readonly cacheHandler?: CacheHandler;
-  private readonly serviceProviderRegistry: ServiceProviderRegistry;
+  private readonly nodeProviderRegistry: NodeProviderRegistry;
   private readonly chainRegistry: ChainRegistry;
   private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
   private readonly relayFailureConfig: RelayFailureConfig;
@@ -46,7 +46,7 @@ export class RpcRequestHandler extends NexusController<{
   constructor(args: {
     logger: Logger;
     cacheHandler?: CacheHandler;
-    serviceProviderRegistry: ServiceProviderRegistry;
+    nodeProviderRegistry: NodeProviderRegistry;
     chainRegistry: ChainRegistry;
     rpcMethodRegistry: RpcMethodDescriptorRegistry;
     relayFailureConfig: RelayFailureConfig;
@@ -54,7 +54,7 @@ export class RpcRequestHandler extends NexusController<{
     super();
     this.logger = args.logger;
     this.cacheHandler = args.cacheHandler;
-    this.serviceProviderRegistry = args.serviceProviderRegistry;
+    this.nodeProviderRegistry = args.nodeProviderRegistry;
     this.chainRegistry = args.chainRegistry;
     this.rpcMethodRegistry = args.rpcMethodRegistry;
     this.relayFailureConfig = args.relayFailureConfig;
@@ -66,7 +66,7 @@ export class RpcRequestHandler extends NexusController<{
     return new RpcRequestHandler({
       logger: config.logger,
       cacheHandler: config.cacheHandler,
-      serviceProviderRegistry: config.serviceProviderRegistry,
+      nodeProviderRegistry: config.nodeProviderRegistry,
       chainRegistry: config.chainRegistry,
       rpcMethodRegistry: config.rpcMethodRegistry,
       relayFailureConfig: config.relayFailureConfig,
@@ -131,7 +131,7 @@ export class RpcRequestHandler extends NexusController<{
     if (!chain) {
       return new ChainDeniedCustomErrorResponse(responseId);
     }
-    const endpoints = this.serviceProviderRegistry.getEndpointsForChain(chain);
+    const endpoints = this.nodeProviderRegistry.getEndpointsForChain(chain);
     if (endpoints.length === 0) {
       return new ProviderNotConfiguredCustomErrorResponse(responseId);
     }

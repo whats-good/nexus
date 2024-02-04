@@ -1,18 +1,18 @@
 import type { Chain } from "@src/chain";
 import type { RpcEndpoint } from "@src/rpc-endpoint";
-import type { ServiceProvider } from "./service-provider";
+import type { NodeProvider } from "./node-provider";
 import { Logger } from "@src/logger";
 
-export class ServiceProviderRegistry {
+export class NodeProviderRegistry {
   private readonly logger: Logger;
 
   public constructor(args: { logger: Logger }) {
     this.logger = args.logger;
   }
 
-  private readonly chainIdToProviders = new Map<number, ServiceProvider[]>();
+  private readonly chainIdToProviders = new Map<number, NodeProvider[]>();
 
-  public addServiceProvider(provider: ServiceProvider) {
+  public addNodeProvider(provider: NodeProvider) {
     const supportedChains = provider.getSupportedChains();
 
     for (const chain of supportedChains) {
@@ -30,8 +30,8 @@ export class ServiceProviderRegistry {
     }
   }
 
-  public addServiceProviders(providers: ServiceProvider[]) {
-    providers.forEach((provider) => this.addServiceProvider(provider));
+  public addNodeProviders(providers: NodeProvider[]) {
+    providers.forEach((provider) => this.addNodeProvider(provider));
   }
 
   public getEndpointsForChain(chain: Chain): RpcEndpoint[] {

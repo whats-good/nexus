@@ -4,7 +4,7 @@ import {
   BaseSuccessResponsePayloadSchema,
 } from "@src/rpc";
 import type { Chain } from "@src/chain";
-import type { ServiceProvider } from "@src/service-provider";
+import type { NodeProvider } from "@src/node-provider";
 import {
   RelayInternalFetchError,
   RelayNon200Response,
@@ -17,7 +17,7 @@ import {
 
 export class RpcEndpoint {
   constructor(
-    public readonly serviceProvider: ServiceProvider,
+    public readonly nodeProvider: NodeProvider,
     public readonly chain: Chain,
     public readonly url: string
   ) {}

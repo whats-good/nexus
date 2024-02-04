@@ -4,7 +4,7 @@ import {
   KeyAppendedUrlChainSupport,
   PureUrlChainSupport,
 } from "./chain-support";
-import { ServiceProvider } from "./service-provider";
+import { NodeProvider } from "./node-provider";
 
 interface KeyAppendedUrlChainSupportInitArgs {
   kind: "key-appended-url";
@@ -22,7 +22,7 @@ export type ChainSupportInitArgs =
   | KeyAppendedUrlChainSupportInitArgs
   | PureUrlChainSupportInitArgs;
 
-export class ServiceProviderBuilder {
+export class NodeProviderBuilder {
   constructor(public readonly name: string) {}
 
   private readonly chainSupportInitArgs: ChainSupportInitArgs[] = [];
@@ -53,13 +53,13 @@ export class ServiceProviderBuilder {
     }
   }
 
-  public build(key?: string): ServiceProvider {
-    const serviceProvider = new ServiceProvider(this.name);
+  public build(key?: string): NodeProvider {
+    const nodeProvider = new NodeProvider(this.name);
     this.chainSupportInitArgs.forEach((initArgs) => {
       const chainSupport = this.buildChainSupport(initArgs, key);
-      serviceProvider.addChainSupport(chainSupport);
+      nodeProvider.addChainSupport(chainSupport);
     });
 
-    return serviceProvider;
+    return nodeProvider;
   }
 }

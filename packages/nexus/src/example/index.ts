@@ -1,11 +1,11 @@
 import { CHAIN } from "@src/chain";
 import { Nexus } from "@src/nexus";
-import { SERVICE_PROVIDER } from "@src/service-provider";
+import { NODE_PROVIDER } from "@src/node-provider";
 
 import { createServer } from "node:http";
 
 const nexus = Nexus.create({
-  serviceProviders: [SERVICE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
+  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
 });
 

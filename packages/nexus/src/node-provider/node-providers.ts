@@ -1,7 +1,7 @@
 import { CHAIN } from "@src/chain";
-import { ServiceProviderBuilder } from "./service-provider-builder";
+import { NodeProviderBuilder } from "./node-provider-builder";
 
-export const alchemy = new ServiceProviderBuilder("alchemy")
+export const alchemy = new NodeProviderBuilder("alchemy")
   .addChainSupport({
     kind: "key-appended-url",
     chain: CHAIN.EthMainnet,
@@ -23,7 +23,7 @@ export const alchemy = new ServiceProviderBuilder("alchemy")
     baseURL: "https://base-sepolia.g.alchemy.com/v2",
   });
 
-export const base = new ServiceProviderBuilder("base")
+export const base = new NodeProviderBuilder("base")
   .addChainSupport({
     kind: "pure-url",
     chain: CHAIN.BaseMainnet,
@@ -35,7 +35,7 @@ export const base = new ServiceProviderBuilder("base")
     url: "https://sepolia.base.org",
   });
 
-export const infura = new ServiceProviderBuilder("infura")
+export const infura = new NodeProviderBuilder("infura")
   .addChainSupport({
     kind: "key-appended-url",
     chain: CHAIN.EthMainnet,
@@ -47,7 +47,7 @@ export const infura = new ServiceProviderBuilder("infura")
     baseURL: "https://sepolia.infura.io/v3",
   });
 
-export const ankr = new ServiceProviderBuilder("ankr")
+export const ankr = new NodeProviderBuilder("ankr")
   .addChainSupport({
     kind: "key-appended-url",
     chain: CHAIN.EthMainnet,
@@ -59,13 +59,13 @@ export const ankr = new ServiceProviderBuilder("ankr")
     baseURL: "https://rpc.ankr.com/eth_sepolia",
   });
 
-export const hardhat = new ServiceProviderBuilder("hardhat").addChainSupport({
+export const hardhat = new NodeProviderBuilder("hardhat").addChainSupport({
   kind: "pure-url",
   chain: CHAIN.LocalChain,
   url: "http://localhost:8545",
 });
 
-export const foundry = new ServiceProviderBuilder("foundry").addChainSupport({
+export const foundry = new NodeProviderBuilder("foundry").addChainSupport({
   kind: "pure-url",
   chain: CHAIN.LocalChain,
   url: "http://localhost:8545",

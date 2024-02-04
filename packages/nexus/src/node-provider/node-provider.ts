@@ -2,7 +2,7 @@ import type { Chain } from "@src/chain";
 import { RpcEndpoint } from "@src/rpc-endpoint";
 import type { ChainSupport } from "./chain-support";
 
-export class ServiceProvider {
+export class NodeProvider {
   private readonly endpoints: Map<Chain, RpcEndpoint>;
   constructor(public readonly name: string) {
     this.endpoints = new Map();

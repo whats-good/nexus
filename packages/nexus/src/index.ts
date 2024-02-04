@@ -6,10 +6,10 @@ export {
 } from "./rpc-method-desciptor";
 export { CHAIN, Chain } from "./chain";
 export {
-  SERVICE_PROVIDER,
-  ServiceProvider,
-  ServiceProviderBuilder,
-} from "./service-provider";
-export type { ChainSupportInitArgs } from "./service-provider";
+  NODE_PROVIDER,
+  NodeProvider,
+  NodeProviderBuilder,
+} from "./node-provider";
+export type { ChainSupportInitArgs } from "./node-provider";
 export type { BaseCache } from "./cache";
 export { Nexus } from "./nexus";
