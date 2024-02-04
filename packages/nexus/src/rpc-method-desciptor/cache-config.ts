@@ -1,19 +1,19 @@
 import type { BigNumber } from "@ethersproject/bignumber";
 import type { Chain } from "@src/chain";
 
-interface CacheConfigOptionReadFnArgs<P, R> {
+interface CacheConfigOptionReadFnArgs<P> {
   chain: Chain;
   params: P;
   highestKnownBlockNumber: BigNumber;
   method: string;
 }
 type CacheConfigOptionReadFn<T, P, R> = (
-  args: CacheConfigOptionReadFnArgs<P, R>
+  args: CacheConfigOptionReadFnArgs<P>
 ) => T;
 type CacheConfigOptionReadField<T, P, R> = T | CacheConfigOptionReadFn<T, P, R>;
 
 interface CacheConfigOptionWriteFnArgs<P, R>
-  extends CacheConfigOptionReadFnArgs<P, R> {
+  extends CacheConfigOptionReadFnArgs<P> {
   result: R;
 }
 type CacheConfigOptionWriteFn<T, P, R> = (
@@ -52,10 +52,10 @@ export interface CacheConfigOptions<P, R> {
   disableWrite?: CacheConfigOptionWriteField<boolean, P, R>;
 }
 
-export class CacheConfig<M extends string, P, R> {
+export class CacheConfig<P, R> {
   constructor(private readonly options: CacheConfigOptions<P, R>) {}
 
-  private getDisableRead(args: CacheConfigOptionReadFnArgs<P, R>) {
+  private getDisableRead(args: CacheConfigOptionReadFnArgs<P>) {
     if (typeof this.options.disableRead === "function") {
       return this.options.disableRead(args);
     }
@@ -79,7 +79,7 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.ttl;
   }
 
-  private getParamsKeySuffix(args: CacheConfigOptionReadFnArgs<P, R>) {
+  private getParamsKeySuffix(args: CacheConfigOptionReadFnArgs<P>) {
     if (typeof this.options.paramsKeySuffix === "function") {
       return this.options.paramsKeySuffix(args);
     }
@@ -87,7 +87,7 @@ export class CacheConfig<M extends string, P, R> {
     return this.options.paramsKeySuffix;
   }
 
-  public getCacheKey(args: CacheConfigOptionReadFnArgs<P, R>) {
+  public getCacheKey(args: CacheConfigOptionReadFnArgs<P>) {
     const { chain } = args;
     const paramsKeySuffix = this.getParamsKeySuffix(args);
 
@@ -97,7 +97,7 @@ export class CacheConfig<M extends string, P, R> {
   }
 
   public getReadConfig(
-    args: CacheConfigOptionReadFnArgs<P, R>
+    args: CacheConfigOptionReadFnArgs<P>
   ): FinalizedReadTimeConfigResult {
     if (this.getDisableRead(args)) {
       return {
