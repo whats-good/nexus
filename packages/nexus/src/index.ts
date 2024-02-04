@@ -5,7 +5,11 @@ export {
   RPC_METHOD_DESCRIPTOR,
 } from "./rpc-method-desciptor";
 export { CHAIN, Chain } from "./chain";
-export { SERVICE_PROVIDER, ServiceProvider } from "./service-provider";
+export {
+  SERVICE_PROVIDER,
+  ServiceProvider,
+  ServiceProviderBuilder,
+} from "./service-provider";
 export type { ChainSupportInitArgs } from "./service-provider";
 export type { BaseCache } from "./cache";
 export { Nexus } from "./nexus";

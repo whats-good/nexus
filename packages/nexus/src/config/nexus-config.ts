@@ -93,6 +93,10 @@ export class NexusConfig<TServerContext> {
       options.serviceProviders,
       args
     );
+
+    if (serviceProviders.length === 0) {
+      throw new Error("At least one node provider is required");
+    }
     const serviceProviderRegistry = new ServiceProviderRegistry({
       logger,
     });

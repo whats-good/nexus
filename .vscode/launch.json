@@ -16,7 +16,8 @@
         "${workspaceFolder}/**",
         "!**/node_modules/**"
       ],
-      "internalConsoleOptions": "openOnSessionStart"
+      "internalConsoleOptions": "openOnSessionStart",
+      "outputCapture": "std"
     }
   ]
 }
