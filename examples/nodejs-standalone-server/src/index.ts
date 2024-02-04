@@ -1,24 +1,9 @@
-import { Nexus } from "@whatsgood/nexus";
+import { Nexus, CHAIN, SERVICE_PROVIDER } from "@whatsgood/nexus";
 import { createServer } from "node:http";
 
 const nexus = Nexus.create({
-  providers: [
-    {
-      name: "alchemy",
-      key: process.env.ALCHEMY_KEY,
-    },
-    {
-      name: "infura",
-      key: process.env.INFURA_KEY,
-    },
-    {
-      name: "ankr",
-      key: process.env.ANKR_KEY,
-    },
-  ],
-  chains: [1],
-  globalAccessKey: process.env.NEXUS_GLOBAL_ACCESS_KEY,
-  environment: process.env.NODE_ENV,
+  serviceProviders: [SERVICE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
+  chains: [CHAIN.EthMainnet],
 });
 
 createServer(nexus).listen(4005, () => {

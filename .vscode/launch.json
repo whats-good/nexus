@@ -4,18 +4,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Nexus",
-      "runtimeExecutable": "ts-node",
-      "args": [
-        "-r",
-        "tsconfig-paths/register",
-        "${workspaceFolder}/packages/nexus/src/index.ts"
-      ],
+      "name": "Debug Nexus with direnv",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["./scripts/start-debug.sh"],
       "cwd": "${workspaceFolder}/packages/nexus",
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
+      "resolveSourceMapLocations": ["${cwd}/**", "!**/node_modules/**"],
       "internalConsoleOptions": "openOnSessionStart",
       "outputCapture": "std"
     }

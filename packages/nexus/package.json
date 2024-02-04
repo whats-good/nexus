@@ -30,7 +30,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc && tsup",
-    "dev": "ts-node -r tsconfig-paths/register src/index.ts",
+    "dev": "ts-node -r tsconfig-paths/register src/example/index.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",
     "lint": "eslint src/",
