@@ -9,6 +9,7 @@ import {
 } from "@src/rpc-method-desciptor";
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
 import pino from "pino";
+import { NexusMiddleware, NexusMiddlewareManager } from "@src/middleware";
 
 type ConfigOptionFnArgs<TServerContext> = {
   context: TServerContext;
@@ -31,6 +32,7 @@ export type NexusConfigOptions<TServerContext> = {
   >;
   logger?: ConfigOptionField<TServerContext, Logger>;
   relayFailureConfig?: ConfigOptionField<TServerContext, RelayFailureConfig>;
+  middlewares?: NexusMiddleware<TServerContext>[];
 };
 
 export class NexusConfig<TServerContext> {
@@ -41,6 +43,7 @@ export class NexusConfig<TServerContext> {
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
+  public readonly middlewares: NexusMiddleware<TServerContext>[];
 
   constructor(args: {
     cacheHandler?: CacheHandler;
@@ -50,6 +53,7 @@ export class NexusConfig<TServerContext> {
     relayFailureConfig: RelayFailureConfig;
     logger: Logger;
     serverContext: TServerContext;
+    middlewares?: NexusMiddleware<TServerContext>[];
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
@@ -58,6 +62,7 @@ export class NexusConfig<TServerContext> {
     this.logger = args.logger;
     this.serverContext = args.serverContext;
     this.cacheHandler = args.cacheHandler;
+    this.middlewares = args.middlewares || [];
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -125,6 +130,7 @@ export class NexusConfig<TServerContext> {
       logger,
       cacheHandler,
       serverContext: args.context,
+      middlewares: options.middlewares,
     });
   }
 }
