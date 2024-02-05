@@ -3,34 +3,12 @@ import type { Logger } from "@src/logger";
 import type { CacheHandler } from "@src/cache";
 import { RpcContext } from "./rpc-context";
 import {
-  ChainDeniedCustomErrorResponse,
   InternalErrorResponse,
-  InvalidParamsErrorResponse,
-  InvalidRequestErrorResponse,
   MethodDeniedCustomErrorResponse,
-  ParseErrorResponse,
-  ProviderNotConfiguredCustomErrorResponse,
   RpcResponse,
   RpcSuccessResponse,
 } from "./rpc-response";
-import {
-  NexusNotFoundResponse,
-  NexusResponse,
-} from "@src/controller/nexus-response";
-import { NodeProviderRegistry } from "@src/node-provider";
-import { ChainRegistry } from "@src/chain";
-import {
-  RpcRequest,
-  RpcRequestWithInvalidParamsError,
-  RpcRequestWithInvalidRequestError,
-  RpcRequestWithMethodNotFoundError,
-  RpcRequestWithParseError,
-  RpcRequestWithValidPayload,
-} from "./rpc-request";
-import { RpcRequestPayloadSchema } from "./schemas";
-import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
-import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
-import { NexusController } from "@src/controller";
+import { NexusResponse } from "@src/controller/nexus-response";
 import { NexusConfig } from "@src/config";
 import {
   NextFn,
@@ -38,36 +16,18 @@ import {
   NexusMiddlewareManager,
 } from "@src/middleware";
 
-export class RpcRequestHandler<TServerContext> extends NexusController<{
-  chainId: number;
-}> {
+export class RpcRequestHandler<TServerContext> {
   private readonly logger: Logger;
   private readonly cacheHandler?: CacheHandler;
-  private readonly nodeProviderRegistry: NodeProviderRegistry;
-  private readonly chainRegistry: ChainRegistry;
-  private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
-  private readonly relayFailureConfig: RelayFailureConfig;
-  private readonly serverContext: TServerContext;
   private readonly middlewares: NexusMiddleware<TServerContext>[];
 
   constructor(args: {
     logger: Logger;
     cacheHandler?: CacheHandler;
-    nodeProviderRegistry: NodeProviderRegistry;
-    chainRegistry: ChainRegistry;
-    rpcMethodRegistry: RpcMethodDescriptorRegistry;
-    relayFailureConfig: RelayFailureConfig;
-    serverContext: TServerContext;
     middlewares: NexusMiddleware<TServerContext>[];
   }) {
-    super();
     this.logger = args.logger;
     this.cacheHandler = args.cacheHandler;
-    this.nodeProviderRegistry = args.nodeProviderRegistry;
-    this.chainRegistry = args.chainRegistry;
-    this.rpcMethodRegistry = args.rpcMethodRegistry;
-    this.relayFailureConfig = args.relayFailureConfig;
-    this.serverContext = args.serverContext;
     this.middlewares = [
       ...args.middlewares,
       this.requestFilterMiddleware.bind(this),
@@ -83,90 +43,13 @@ export class RpcRequestHandler<TServerContext> extends NexusController<{
     return new RpcRequestHandler({
       logger: config.logger,
       cacheHandler: config.cacheHandler,
-      nodeProviderRegistry: config.nodeProviderRegistry,
-      chainRegistry: config.chainRegistry,
-      rpcMethodRegistry: config.rpcMethodRegistry,
-      relayFailureConfig: config.relayFailureConfig,
-      serverContext: config.serverContext,
       middlewares: config.middlewares,
     });
   }
 
-  private async toRpcRequest(request: Request): Promise<RpcRequest> {
-    let jsonPayload: unknown;
-    try {
-      jsonPayload = await request.json();
-    } catch (e) {
-      return new RpcRequestWithParseError();
-    }
-
-    const parsedBasePayload = RpcRequestPayloadSchema.safeParse(jsonPayload);
-
-    if (!parsedBasePayload.success) {
-      return new RpcRequestWithInvalidRequestError(jsonPayload);
-    }
-
-    const methodDescriptor = this.rpcMethodRegistry.getDescriptorByName(
-      parsedBasePayload.data.method
-    );
-
-    if (!methodDescriptor) {
-      return new RpcRequestWithMethodNotFoundError(parsedBasePayload.data);
-    }
-
-    const parsedStrictPayload =
-      methodDescriptor.requestPayloadSchema.safeParse(jsonPayload);
-
-    if (!parsedStrictPayload.success) {
-      return new RpcRequestWithInvalidParamsError(
-        methodDescriptor,
-        parsedBasePayload.data
-      );
-    }
-
-    return new RpcRequestWithValidPayload(
-      methodDescriptor,
-      parsedBasePayload.data
-    );
-  }
-
   public async handle(
-    request: Request,
-    pathParams: { chainId: number }
+    rpcContext: RpcContext<TServerContext>
   ): Promise<NexusResponse> {
-    const rpcRequest = await this.toRpcRequest(request);
-    const responseId = rpcRequest.getResponseId();
-    if (rpcRequest instanceof RpcRequestWithParseError) {
-      return new ParseErrorResponse();
-    } else if (rpcRequest instanceof RpcRequestWithInvalidRequestError) {
-      return new InvalidRequestErrorResponse(responseId);
-    } else if (rpcRequest instanceof RpcRequestWithMethodNotFoundError) {
-      return new NexusNotFoundResponse();
-    } else if (rpcRequest instanceof RpcRequestWithInvalidParamsError) {
-      return new InvalidParamsErrorResponse(responseId);
-    }
-
-    const chain = this.chainRegistry.getChain(pathParams.chainId);
-    if (!chain) {
-      return new ChainDeniedCustomErrorResponse(responseId);
-    }
-    const endpoints = this.nodeProviderRegistry.getEndpointsForChain(chain);
-    if (endpoints.length === 0) {
-      return new ProviderNotConfiguredCustomErrorResponse(responseId);
-    }
-    const rpcEndpointPool = new RpcEndpointPool(
-      endpoints,
-      this.relayFailureConfig,
-      this.logger
-    );
-
-    const rpcContext = new RpcContext(
-      rpcRequest,
-      chain,
-      rpcEndpointPool,
-      this.serverContext
-    );
-
     const middlewareManager = new NexusMiddlewareManager(
       this.middlewares,
       rpcContext
@@ -175,7 +58,7 @@ export class RpcRequestHandler<TServerContext> extends NexusController<{
     await middlewareManager.run();
 
     if (!rpcContext.response) {
-      return new InternalErrorResponse(responseId);
+      return new InternalErrorResponse(rpcContext.request.getResponseId());
     }
 
     return rpcContext.response;
