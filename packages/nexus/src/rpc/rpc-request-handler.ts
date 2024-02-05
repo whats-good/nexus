@@ -157,8 +157,8 @@ export class RpcRequestHandler<TServerContext> {
           cannedResponse.error
         )}. This should not happen, but it's not fatal. Moving on.`
       );
-      return nextFn();
     }
+    return nextFn();
   }
 
   private async cacheMiddleware(

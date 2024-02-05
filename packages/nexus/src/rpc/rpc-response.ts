@@ -47,7 +47,7 @@ export class RpcSuccessResponse extends RpcResponse<BaseSuccessResponsePayload> 
   }
 }
 
-abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
+export abstract class RpcErrorResponse extends RpcResponse<ErrorResponsePayload> {
   public abstract readonly errorCode: number;
   public abstract readonly message: string;
   public abstract isStandardErrorResponse: boolean;

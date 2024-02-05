@@ -4,21 +4,15 @@ import {
   ChainDeniedCustomErrorResponse,
   InvalidParamsErrorResponse,
   InvalidRequestErrorResponse,
+  MethodNotFoundErrorResponse,
   ParseErrorResponse,
   ProviderNotConfiguredCustomErrorResponse,
+  RpcErrorResponse,
   RpcResponse,
 } from "./rpc-response";
-import { NexusNotFoundResponse } from "@src/controller/nexus-response";
 import { NodeProviderRegistry } from "@src/node-provider";
 import { ChainRegistry } from "@src/chain";
-import {
-  RpcRequest,
-  RpcRequestWithInvalidParamsError,
-  RpcRequestWithInvalidRequestError,
-  RpcRequestWithMethodNotFoundError,
-  RpcRequestWithParseError,
-  RpcRequestWithValidPayload,
-} from "./rpc-request";
+import { RpcRequest, UnknownRpcRequest } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
 import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
 import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
@@ -61,18 +55,33 @@ export class RpcContextFactory<TServerContext> {
     });
   }
 
-  private async toRpcRequest(request: Request): Promise<RpcRequest> {
+  private async toRpcRequest(request: Request): Promise<
+    | {
+        kind: "success";
+        rpcRequest: UnknownRpcRequest;
+      }
+    | {
+        kind: "error";
+        rpcResponse: RpcErrorResponse;
+      }
+  > {
     let jsonPayload: unknown;
     try {
       jsonPayload = await request.json();
     } catch (e) {
-      return new RpcRequestWithParseError();
+      return {
+        kind: "error",
+        rpcResponse: new ParseErrorResponse(),
+      };
     }
 
     const parsedBasePayload = RpcRequestPayloadSchema.safeParse(jsonPayload);
 
     if (!parsedBasePayload.success) {
-      return new RpcRequestWithInvalidRequestError(jsonPayload);
+      return {
+        kind: "error",
+        rpcResponse: new InvalidRequestErrorResponse(null),
+      };
     }
 
     const methodDescriptor = this.rpcMethodRegistry.getDescriptorByName(
@@ -80,23 +89,30 @@ export class RpcContextFactory<TServerContext> {
     );
 
     if (!methodDescriptor) {
-      return new RpcRequestWithMethodNotFoundError(parsedBasePayload.data);
+      return {
+        kind: "error",
+        rpcResponse: new MethodNotFoundErrorResponse(
+          parsedBasePayload.data.id || null
+        ),
+      };
     }
 
     const parsedStrictPayload =
       methodDescriptor.requestPayloadSchema.safeParse(jsonPayload);
 
     if (!parsedStrictPayload.success) {
-      return new RpcRequestWithInvalidParamsError(
-        methodDescriptor,
-        parsedBasePayload.data
-      );
+      return {
+        kind: "error",
+        rpcResponse: new InvalidParamsErrorResponse(
+          parsedBasePayload.data.id || null
+        ),
+      };
     }
 
-    return new RpcRequestWithValidPayload(
-      methodDescriptor,
-      parsedBasePayload.data
-    );
+    return {
+      kind: "success",
+      rpcRequest: new RpcRequest(methodDescriptor, parsedBasePayload.data),
+    };
   }
 
   public async from(
@@ -112,29 +128,15 @@ export class RpcContextFactory<TServerContext> {
         context: RpcContext<TServerContext>;
       }
   > {
-    const rpcRequest = await this.toRpcRequest(request);
-    const responseId = rpcRequest.getResponseId();
-    if (rpcRequest instanceof RpcRequestWithParseError) {
+    const result = await this.toRpcRequest(request);
+    if (result.kind === "error") {
       return {
-        response: new ParseErrorResponse(),
         kind: "rpc-response",
-      };
-    } else if (rpcRequest instanceof RpcRequestWithInvalidRequestError) {
-      return {
-        response: new InvalidRequestErrorResponse(responseId),
-        kind: "rpc-response",
-      };
-    } else if (rpcRequest instanceof RpcRequestWithMethodNotFoundError) {
-      return {
-        response: new NexusNotFoundResponse(),
-        kind: "rpc-response",
-      };
-    } else if (rpcRequest instanceof RpcRequestWithInvalidParamsError) {
-      return {
-        response: new InvalidParamsErrorResponse(responseId),
-        kind: "rpc-response",
+        response: result.rpcResponse,
       };
     }
+    const { rpcRequest } = result;
+    const responseId = rpcRequest.getResponseId();
 
     const chain = this.chainRegistry.getChain(pathParams.chainId);
     if (!chain) {
@@ -150,6 +152,8 @@ export class RpcContextFactory<TServerContext> {
         kind: "rpc-response",
       };
     }
+
+    this.logger.info("pool created.");
     const rpcEndpointPool = new RpcEndpointPool(
       endpoints,
       this.relayFailureConfig,
