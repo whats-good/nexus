@@ -1,3 +1,3 @@
 export * from "./rpc-context";
-export * from "./rpc-request-handler";
+export * from "./rpc-context-handler";
 export * from "./schemas";

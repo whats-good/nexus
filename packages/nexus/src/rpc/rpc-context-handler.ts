@@ -16,7 +16,7 @@ import {
   NexusMiddlewareManager,
 } from "@src/middleware";
 
-export class RpcRequestHandler<TServerContext> {
+export class RpcContextHandler<TServerContext> {
   private readonly logger: Logger;
   private readonly cacheHandler?: CacheHandler;
   private readonly middlewares: NexusMiddleware<TServerContext>[];
@@ -39,8 +39,8 @@ export class RpcRequestHandler<TServerContext> {
 
   public static fromConfig<TServerContext>(
     config: NexusConfig<TServerContext>
-  ): RpcRequestHandler<TServerContext> {
-    return new RpcRequestHandler({
+  ): RpcContextHandler<TServerContext> {
+    return new RpcContextHandler({
       logger: config.logger,
       cacheHandler: config.cacheHandler,
       middlewares: config.middlewares,
