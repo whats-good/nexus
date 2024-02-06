@@ -19,40 +19,21 @@ import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
 import { NexusConfig } from "@src/config";
 
 export class NexusContextFactory<TServerContext> {
-  private readonly logger: Logger;
-  private readonly nodeProviderRegistry: NodeProviderRegistry;
-  private readonly chainRegistry: ChainRegistry;
-  private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
-  private readonly relayFailureConfig: RelayFailureConfig;
-  private readonly serverContext: TServerContext;
+  // private readonly logger: Logger;
+  // private readonly nodeProviderRegistry: NodeProviderRegistry;
+  // private readonly chainRegistry: ChainRegistry;
+  // private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
+  // private readonly relayFailureConfig: RelayFailureConfig;
+  // private readonly serverContext: TServerContext;
+  private readonly config: NexusConfig<TServerContext>;
 
-  constructor(args: {
-    logger: Logger;
-    nodeProviderRegistry: NodeProviderRegistry;
-    chainRegistry: ChainRegistry;
-    rpcMethodRegistry: RpcMethodDescriptorRegistry;
-    relayFailureConfig: RelayFailureConfig;
-    serverContext: TServerContext;
-  }) {
-    this.logger = args.logger;
-    this.nodeProviderRegistry = args.nodeProviderRegistry;
-    this.chainRegistry = args.chainRegistry;
-    this.rpcMethodRegistry = args.rpcMethodRegistry;
-    this.relayFailureConfig = args.relayFailureConfig;
-    this.serverContext = args.serverContext;
-  }
-
-  public static fromConfig<TServerContext>(
-    config: NexusConfig<TServerContext>
-  ): NexusContextFactory<TServerContext> {
-    return new NexusContextFactory({
-      logger: config.logger,
-      nodeProviderRegistry: config.nodeProviderRegistry,
-      chainRegistry: config.chainRegistry,
-      rpcMethodRegistry: config.rpcMethodRegistry,
-      relayFailureConfig: config.relayFailureConfig,
-      serverContext: config.serverContext,
-    });
+  constructor(config: NexusConfig<TServerContext>) {
+    // this.logger = config.logger;
+    // this.nodeProviderRegistry = config.nodeProviderRegistry;
+    // this.chainRegistry = config.chainRegistry;
+    // this.rpcMethodRegistry = config.rpcMethodRegistry;
+    // this.relayFailureConfig = config.relayFailureConfig;
+    // this.serverContext = config.serverContext;
   }
 
   private async toRpcRequest(request: Request): Promise<
@@ -84,7 +65,7 @@ export class NexusContextFactory<TServerContext> {
       };
     }
 
-    const methodDescriptor = this.rpcMethodRegistry.getDescriptorByName(
+    const methodDescriptor = this.config.rpcMethodRegistry.getDescriptorByName(
       parsedBasePayload.data.method
     );
 
@@ -138,14 +119,15 @@ export class NexusContextFactory<TServerContext> {
     const { rpcRequest } = result;
     const responseId = rpcRequest.getResponseId();
 
-    const chain = this.chainRegistry.getChain(pathParams.chainId);
+    const chain = this.config.chainRegistry.getChain(pathParams.chainId);
     if (!chain) {
       return {
         response: new ChainDeniedCustomErrorResponse(responseId),
         kind: "rpc-response",
       };
     }
-    const endpoints = this.nodeProviderRegistry.getEndpointsForChain(chain);
+    const endpoints =
+      this.config.nodeProviderRegistry.getEndpointsForChain(chain);
     if (endpoints.length === 0) {
       return {
         response: new ProviderNotConfiguredCustomErrorResponse(responseId),
@@ -153,18 +135,18 @@ export class NexusContextFactory<TServerContext> {
       };
     }
 
-    this.logger.info("pool created.");
+    this.config.logger.info("pool created.");
     const rpcEndpointPool = new RpcEndpointPool(
       endpoints,
-      this.relayFailureConfig,
-      this.logger
+      this.config.relayFailureConfig,
+      this.config.logger
     );
 
     const context = new NexusContext(
       rpcRequest,
       chain,
       rpcEndpointPool,
-      this.serverContext
+      this.config.serverContext
     );
     return {
       kind: "success",
