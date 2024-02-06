@@ -1,7 +1,7 @@
 import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
 import type { Logger } from "@src/logger";
 import type { CacheHandler } from "@src/cache";
-import { RpcContext } from "./rpc-context";
+import { NexusContext } from "./nexus-context";
 import {
   InternalErrorResponse,
   MethodDeniedCustomErrorResponse,
@@ -16,7 +16,7 @@ import {
   NexusMiddlewareManager,
 } from "@src/middleware";
 
-export class RpcContextHandler<TServerContext> {
+export class NexusContextHandler<TServerContext> {
   private readonly logger: Logger;
   private readonly cacheHandler?: CacheHandler;
   private readonly middlewares: NexusMiddleware<TServerContext>[];
@@ -39,8 +39,8 @@ export class RpcContextHandler<TServerContext> {
 
   public static fromConfig<TServerContext>(
     config: NexusConfig<TServerContext>
-  ): RpcContextHandler<TServerContext> {
-    return new RpcContextHandler({
+  ): NexusContextHandler<TServerContext> {
+    return new NexusContextHandler({
       logger: config.logger,
       cacheHandler: config.cacheHandler,
       middlewares: config.middlewares,
@@ -48,24 +48,24 @@ export class RpcContextHandler<TServerContext> {
   }
 
   public async handle(
-    rpcContext: RpcContext<TServerContext>
+    context: NexusContext<TServerContext>
   ): Promise<NexusResponse> {
     const middlewareManager = new NexusMiddlewareManager(
       this.middlewares,
-      rpcContext
+      context
     );
 
     await middlewareManager.run();
 
-    if (!rpcContext.response) {
-      return new InternalErrorResponse(rpcContext.request.getResponseId());
+    if (!context.response) {
+      return new InternalErrorResponse(context.request.getResponseId());
     }
 
-    return rpcContext.response;
+    return context.response;
   }
 
   private scheduleCacheWrite(
-    context: RpcContext,
+    context: NexusContext,
     response: RpcSuccessResponse
   ): void {
     const { cacheHandler } = this;
@@ -95,8 +95,8 @@ export class RpcContextHandler<TServerContext> {
   }
 
   private async requestFilterMiddleware(
-    context: RpcContext<TServerContext>,
-    nextFn: NextFn
+    context: NexusContext<TServerContext>,
+    next: NextFn
   ) {
     this.logger.info("request filter middleware");
     const { chain, request } = context;
@@ -124,12 +124,12 @@ export class RpcContextHandler<TServerContext> {
         new MethodDeniedCustomErrorResponse(request.getResponseId())
       );
     } else {
-      return nextFn();
+      return next();
     }
   }
 
   private async cannedResponseMiddleware(
-    context: RpcContext<TServerContext>,
+    context: NexusContext<TServerContext>,
     nextFn: NextFn
   ) {
     this.logger.info("canned response middleware");
@@ -162,7 +162,7 @@ export class RpcContextHandler<TServerContext> {
   }
 
   private async cacheMiddleware(
-    context: RpcContext<TServerContext>,
+    context: NexusContext<TServerContext>,
     nextFn: NextFn
   ) {
     this.logger.info("cache middleware");
@@ -184,8 +184,8 @@ export class RpcContextHandler<TServerContext> {
   }
 
   private async relayMiddleware(
-    context: RpcContext<TServerContext>,
-    nextFn: NextFn
+    context: NexusContext<TServerContext>,
+    next: NextFn
   ) {
     this.logger.info("relay middleware");
     const { request, rpcEndpointPool } = context;

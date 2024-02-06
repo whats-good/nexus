@@ -1,4 +1,4 @@
-import { RpcContext } from "@src/rpc";
+import { NexusContext } from "@src/rpc";
 import { NexusMiddleware } from "./nexus-middleware";
 
 const NULL_FN = async () => {};
@@ -6,7 +6,7 @@ const NULL_FN = async () => {};
 export class NexusMiddlewareManager<TServerContext> {
   constructor(
     private readonly middlewares: NexusMiddleware<TServerContext>[],
-    private readonly rpcContext: RpcContext<TServerContext>
+    private readonly context: NexusContext<TServerContext>
   ) {}
 
   public async run(): Promise<void> {
@@ -15,7 +15,7 @@ export class NexusMiddlewareManager<TServerContext> {
       const currentMiddleware = this.middlewares[i];
       const nextFn = runFns[0];
       runFns.unshift(async () => {
-        await currentMiddleware(this.rpcContext, nextFn);
+        await currentMiddleware(this.context, nextFn);
       });
     }
     await runFns[0]();

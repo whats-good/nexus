@@ -1,7 +1,7 @@
 import { NexusConfig, NexusConfigOptions } from "@src/config";
 import { IntString, NexusNotFoundResponse, Route } from "@src/controller";
-import { RpcContextHandler } from "@src/rpc";
-import { RpcContextFactory } from "@src/rpc/rpc-context-factory";
+import { NexusContextHandler } from "@src/rpc";
+import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
 import {
   ServerAdapter,
   ServerAdapterBaseObject,
@@ -38,10 +38,10 @@ export class Nexus<TServerContext>
     });
     const chainIdParams = chainIdRoute.match(request.url);
     if (chainIdParams) {
-      const rpcContextFactory = RpcContextFactory.fromConfig(config);
-      const result = await rpcContextFactory.from(request, chainIdParams);
+      const nexusContextFactory = NexusContextFactory.fromConfig(config);
+      const result = await nexusContextFactory.from(request, chainIdParams);
       if (result.kind === "success") {
-        const contextHandler = RpcContextHandler.fromConfig(config);
+        const contextHandler = NexusContextHandler.fromConfig(config);
         const rpcResponse = await contextHandler.handle(result.context);
         return rpcResponse.buildResponse();
       } else {

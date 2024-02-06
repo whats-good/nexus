@@ -3,7 +3,7 @@ import type { Chain } from "@src/chain";
 import type { UnknownRpcRequest } from "./rpc-request";
 import { RpcResponse } from "./rpc-response";
 
-export class RpcContext<TServerContext = unknown> {
+export class NexusContext<TServerContext = unknown> {
   public response: RpcResponse | null;
 
   constructor(

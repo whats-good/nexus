@@ -1,5 +1,5 @@
 import type { Logger } from "@src/logger";
-import { RpcContext } from "./rpc-context";
+import { NexusContext } from "./nexus-context";
 import {
   ChainDeniedCustomErrorResponse,
   InvalidParamsErrorResponse,
@@ -18,7 +18,7 @@ import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
 import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
 import { NexusConfig } from "@src/config";
 
-export class RpcContextFactory<TServerContext> {
+export class NexusContextFactory<TServerContext> {
   private readonly logger: Logger;
   private readonly nodeProviderRegistry: NodeProviderRegistry;
   private readonly chainRegistry: ChainRegistry;
@@ -44,8 +44,8 @@ export class RpcContextFactory<TServerContext> {
 
   public static fromConfig<TServerContext>(
     config: NexusConfig<TServerContext>
-  ): RpcContextFactory<TServerContext> {
-    return new RpcContextFactory({
+  ): NexusContextFactory<TServerContext> {
+    return new NexusContextFactory({
       logger: config.logger,
       nodeProviderRegistry: config.nodeProviderRegistry,
       chainRegistry: config.chainRegistry,
@@ -125,7 +125,7 @@ export class RpcContextFactory<TServerContext> {
       }
     | {
         kind: "success";
-        context: RpcContext<TServerContext>;
+        context: NexusContext<TServerContext>;
       }
   > {
     const result = await this.toRpcRequest(request);
@@ -160,7 +160,7 @@ export class RpcContextFactory<TServerContext> {
       this.logger
     );
 
-    const rpcContext = new RpcContext(
+    const context = new NexusContext(
       rpcRequest,
       chain,
       rpcEndpointPool,
@@ -168,7 +168,7 @@ export class RpcContextFactory<TServerContext> {
     );
     return {
       kind: "success",
-      context: rpcContext,
+      context,
     };
   }
 }

@@ -1,3 +1,3 @@
-export * from "./rpc-context";
-export * from "./rpc-context-handler";
+export * from "./nexus-context";
+export * from "./nexus-context-handler";
 export * from "./schemas";

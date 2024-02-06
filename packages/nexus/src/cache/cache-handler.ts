@@ -1,5 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import type { RpcContext } from "@src/rpc";
+import type { NexusContext } from "@src/rpc";
 import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
 import type { BaseCache } from "./base-cache";
 
@@ -73,7 +73,7 @@ export class CacheHandler {
   constructor(public readonly cache: BaseCache) {}
 
   public async handleRead(
-    context: RpcContext
+    context: NexusContext
   ): Promise<CacheHandlerReadResult> {
     try {
       const { request } = context;
@@ -125,7 +125,7 @@ export class CacheHandler {
   }
 
   public async handleWrite(
-    context: RpcContext,
+    context: NexusContext,
     result: unknown
   ): Promise<CacheHandlerWriteResult> {
     try {

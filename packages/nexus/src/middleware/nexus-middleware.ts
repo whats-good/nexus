@@ -1,9 +1,9 @@
-import { RpcContext } from "@src/rpc";
+import { NexusContext } from "@src/rpc";
 
 export type NextFn = () => Promise<void>;
 
 export type NexusMiddleware<TServerContext> = (
-  context: RpcContext<TServerContext>,
+  context: NexusContext<TServerContext>,
   next: NextFn
 ) => Promise<void>;
 
