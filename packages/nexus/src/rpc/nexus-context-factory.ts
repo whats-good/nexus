@@ -1,4 +1,3 @@
-import type { Logger } from "@src/logger";
 import { NexusContext } from "./nexus-context";
 import {
   ChainDeniedCustomErrorResponse,
@@ -10,31 +9,13 @@ import {
   RpcErrorResponse,
   RpcResponse,
 } from "./rpc-response";
-import { NodeProviderRegistry } from "@src/node-provider";
-import { ChainRegistry } from "@src/chain";
 import { RpcRequest, UnknownRpcRequest } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
-import { RpcMethodDescriptorRegistry } from "@src/rpc-method-desciptor";
-import { RelayFailureConfig, RpcEndpointPool } from "@src/rpc-endpoint";
+import { RpcEndpointPool } from "@src/rpc-endpoint";
 import { NexusConfig } from "@src/config";
 
 export class NexusContextFactory<TServerContext> {
-  // private readonly logger: Logger;
-  // private readonly nodeProviderRegistry: NodeProviderRegistry;
-  // private readonly chainRegistry: ChainRegistry;
-  // private readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
-  // private readonly relayFailureConfig: RelayFailureConfig;
-  // private readonly serverContext: TServerContext;
-  private readonly config: NexusConfig<TServerContext>;
-
-  constructor(config: NexusConfig<TServerContext>) {
-    // this.logger = config.logger;
-    // this.nodeProviderRegistry = config.nodeProviderRegistry;
-    // this.chainRegistry = config.chainRegistry;
-    // this.rpcMethodRegistry = config.rpcMethodRegistry;
-    // this.relayFailureConfig = config.relayFailureConfig;
-    // this.serverContext = config.serverContext;
-  }
+  constructor(private readonly config: NexusConfig<TServerContext>) {}
 
   private async toRpcRequest(request: Request): Promise<
     | {
@@ -142,12 +123,13 @@ export class NexusContextFactory<TServerContext> {
       this.config.logger
     );
 
-    const context = new NexusContext(
-      rpcRequest,
+    const context = new NexusContext({
+      request: rpcRequest,
       chain,
       rpcEndpointPool,
-      this.config.serverContext
-    );
+      serverContext: this.config.serverContext,
+      config: this.config,
+    });
     return {
       kind: "success",
       context,
