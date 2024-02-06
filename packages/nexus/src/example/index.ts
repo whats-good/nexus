@@ -1,6 +1,8 @@
 import { CHAIN } from "@src/chain";
+import { NextFn, NexusMiddleware } from "@src/middleware";
 import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
+import { NexusContext } from "@src/rpc";
 import { safeJsonStringify } from "@src/utils";
 
 import { createServer } from "node:http";
@@ -10,21 +12,21 @@ let i = 0;
 
 const logger = pino();
 
+const myMiddleware: NexusMiddleware = async (
+  ctx: NexusContext,
+  next: NextFn
+) => {
+  logger.info(`middleware ${i++}`);
+  logger.info(`ctx before: ${safeJsonStringify(ctx.response?.body())}`);
+  await next();
+  logger.info(`ctx after: ${safeJsonStringify(ctx.response?.body())}`);
+};
+
 const nexus = Nexus.create({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
   logger,
-  middlewares: [
-    async (ctx, next) => {
-      // TODO: give access to the config object in the middleware.
-      // or perhaps put the config object in the context.
-      // or start using abstract classes where you make the logger a property of the abstract class.
-      logger.info(`middleware ${i++}`);
-      logger.info(`ctx before: ${safeJsonStringify(ctx.response?.body())}`);
-      await next();
-      logger.info(`ctx after: ${safeJsonStringify(ctx.response?.body())}`);
-    },
-  ],
+  middlewares: [myMiddleware],
 });
 
 createServer(nexus).listen(4005, () => {

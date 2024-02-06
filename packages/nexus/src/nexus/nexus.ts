@@ -38,7 +38,7 @@ export class Nexus<TServerContext>
     });
     const chainIdParams = chainIdRoute.match(request.url);
     if (chainIdParams) {
-      const nexusContextFactory = NexusContextFactory.fromConfig(config);
+      const nexusContextFactory = new NexusContextFactory(config);
       const result = await nexusContextFactory.from(request, chainIdParams);
       if (result.kind === "success") {
         const contextHandler = NexusContextHandler.fromConfig(config);

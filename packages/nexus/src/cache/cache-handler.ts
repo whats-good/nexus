@@ -69,11 +69,11 @@ type CacheHandlerWriteResult =
 // rather than storing the entire response object, or just the error and result fields,
 // we should store this new kind of storage object.
 
-export class CacheHandler {
+export class CacheHandler<TServerContext> {
   constructor(public readonly cache: BaseCache) {}
 
   public async handleRead(
-    context: NexusContext
+    context: NexusContext<TServerContext>
   ): Promise<CacheHandlerReadResult> {
     try {
       const { request } = context;
@@ -125,7 +125,7 @@ export class CacheHandler {
   }
 
   public async handleWrite(
-    context: NexusContext,
+    context: NexusContext<TServerContext>,
     result: unknown
   ): Promise<CacheHandlerWriteResult> {
     try {

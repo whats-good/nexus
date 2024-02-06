@@ -18,12 +18,12 @@ import {
 
 export class NexusContextHandler<TServerContext> {
   private readonly logger: Logger;
-  private readonly cacheHandler?: CacheHandler;
+  private readonly cacheHandler?: CacheHandler<TServerContext>;
   private readonly middlewares: NexusMiddleware<TServerContext>[];
 
   constructor(args: {
     logger: Logger;
-    cacheHandler?: CacheHandler;
+    cacheHandler?: CacheHandler<TServerContext>;
     middlewares: NexusMiddleware<TServerContext>[];
   }) {
     this.logger = args.logger;
@@ -65,7 +65,7 @@ export class NexusContextHandler<TServerContext> {
   }
 
   private scheduleCacheWrite(
-    context: NexusContext,
+    context: NexusContext<TServerContext>,
     response: RpcSuccessResponse
   ): void {
     const { cacheHandler } = this;

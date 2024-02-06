@@ -36,7 +36,7 @@ export type NexusConfigOptions<TServerContext> = {
 };
 
 export class NexusConfig<TServerContext> {
-  public readonly cacheHandler?: CacheHandler;
+  public readonly cacheHandler?: CacheHandler<TServerContext>;
   public readonly chainRegistry: ChainRegistry;
   public readonly nodeProviderRegistry: NodeProviderRegistry;
   public readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
@@ -46,14 +46,14 @@ export class NexusConfig<TServerContext> {
   public readonly middlewares: NexusMiddleware<TServerContext>[];
 
   constructor(args: {
-    cacheHandler?: CacheHandler;
+    cacheHandler?: CacheHandler<TServerContext>;
     chainRegistry: ChainRegistry;
     nodeProviderRegistry: NodeProviderRegistry;
     rpcMethodDescriptorRegistry: RpcMethodDescriptorRegistry;
     relayFailureConfig: RelayFailureConfig;
     logger: Logger;
     serverContext: TServerContext;
-    middlewares?: NexusMiddleware<TServerContext>[];
+    middlewares: NexusMiddleware<TServerContext>[];
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
@@ -62,7 +62,7 @@ export class NexusConfig<TServerContext> {
     this.logger = args.logger;
     this.serverContext = args.serverContext;
     this.cacheHandler = args.cacheHandler;
-    this.middlewares = args.middlewares || [];
+    this.middlewares = args.middlewares;
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -120,7 +120,9 @@ export class NexusConfig<TServerContext> {
     };
 
     const baseCache = NexusConfig.getValueOrExecute(options.cache, args);
-    const cacheHandler = baseCache ? new CacheHandler(baseCache) : undefined;
+    const cacheHandler = baseCache
+      ? new CacheHandler<TServerContext>(baseCache)
+      : undefined;
 
     return new NexusConfig({
       chainRegistry,
@@ -130,7 +132,7 @@ export class NexusConfig<TServerContext> {
       logger,
       cacheHandler,
       serverContext: args.context,
-      middlewares: options.middlewares,
+      middlewares: options.middlewares || [],
     });
   }
 }
