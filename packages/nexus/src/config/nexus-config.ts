@@ -9,7 +9,7 @@ import {
 } from "@src/rpc-method-desciptor";
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
 import pino from "pino";
-import { NexusMiddleware, NexusMiddlewareManager } from "@src/middleware";
+import { NexusMiddleware } from "@src/middleware";
 
 type ConfigOptionFnArgs<TServerContext> = {
   context: TServerContext;
