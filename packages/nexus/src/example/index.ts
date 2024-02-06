@@ -10,7 +10,12 @@ import pino from "pino";
 
 let i = 0;
 
-const logger = pino();
+const logger = pino({
+  transport: {
+    target: "pino-pretty",
+  },
+  level: "debug",
+});
 
 const myMiddleware: NexusMiddleware = async (
   ctx: NexusContext,
@@ -34,5 +39,5 @@ createServer(nexus).listen(4005, () => {
   // first, a static config that doesn't depend on the server context.
   // put the logger in there.
   // and then use nexus.staticConfig.logger to log the message below.
-  console.log(`🚀 Server ready at http://localhost:4005`);
+  logger.info(`🚀 Server ready at http://localhost:4005`);
 });

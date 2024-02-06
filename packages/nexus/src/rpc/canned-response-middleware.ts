@@ -8,7 +8,7 @@ export const cannedResponseMiddleware = async <TServerContext>(
   next: NextFn
 ) => {
   const { logger } = context.config;
-  logger.info("canned response middleware");
+  logger.debug("canned response middleware");
   const { request } = context;
   const { methodDescriptor } = request;
 

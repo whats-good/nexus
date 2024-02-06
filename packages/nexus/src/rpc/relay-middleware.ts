@@ -7,42 +7,12 @@ import {
   InternalErrorResponse,
 } from "./rpc-response";
 
-const scheduleCacheWrite = <TServerContext>(
-  context: NexusContext<TServerContext>,
-  response: RpcSuccessResponse
-): void => {
-  const { cacheHandler, logger } = context.config;
-  if (!cacheHandler) {
-    return;
-  }
-
-  safeAsyncNextTick(
-    async () => {
-      await cacheHandler
-        .handleWrite(context, response.body())
-        .then((writeResult) => {
-          if (writeResult.kind === "success") {
-            logger.info("successfully cached response.");
-          } else {
-            logger.warn("failed to cache response.");
-          }
-        });
-    },
-    (error) => {
-      const errorMsg = `Error while caching response: ${safeJsonStringify(
-        error
-      )}`;
-      logger.error(errorMsg);
-    }
-  );
-};
-
 export const relayMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
   next: NextFn
 ) => {
   const { logger } = context.config;
-  logger.info("relay middleware");
+  logger.debug("relay middleware");
   const { request, rpcEndpointPool } = context;
 
   try {
@@ -54,13 +24,7 @@ export const relayMiddleware = async <TServerContext>(
         relaySuccess.response.result
       );
 
-      // TODO: move this to the cache middleware.
-      // store a flag on the context object to indicate that the
-      // response is appropriate for caching.
-      // but the cache handler itself should make the ultimate
-      // decision about whether to cache the response.
-
-      scheduleCacheWrite(context, response);
+      response.setIsCacheable(true);
 
       return context.respond(response);
     }

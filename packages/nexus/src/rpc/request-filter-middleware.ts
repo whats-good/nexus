@@ -8,7 +8,7 @@ export const requestFilterMiddleware = async <TServerContext>(
   next: NextFn
 ): Promise<void> => {
   const { logger } = context.config;
-  logger.info("request filter middleware");
+  logger.debug("request filter middleware");
   const { chain, request } = context;
   const { methodDescriptor } = request;
   const requestFilterResult = methodDescriptor.requestFilter({

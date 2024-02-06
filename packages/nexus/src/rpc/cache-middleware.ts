@@ -1,13 +1,45 @@
 import { NextFn } from "@src/middleware";
 import { NexusContext } from "./nexus-context";
 import { RpcSuccessResponse } from "./rpc-response";
+import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
+
+const scheduleCacheWrite = <TServerContext>(
+  context: NexusContext<TServerContext>,
+  response: RpcSuccessResponse
+): void => {
+  const { cacheHandler, logger } = context.config;
+  if (!cacheHandler) {
+    logger.debug("cache is not configured. will not schedule cache-write.");
+    return;
+  }
+
+  safeAsyncNextTick(
+    async () => {
+      await cacheHandler
+        .handleWrite(context, response.body())
+        .then((writeResult) => {
+          if (writeResult.kind === "success") {
+            logger.info("successfully cached response.");
+          } else {
+            logger.warn("failed to cache response.");
+          }
+        });
+    },
+    (error) => {
+      const errorMsg = `Error while caching response: ${safeJsonStringify(
+        error
+      )}`;
+      logger.error(errorMsg);
+    }
+  );
+};
 
 export const cacheMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
   next: NextFn
 ) => {
   const { logger, cacheHandler } = context.config;
-  logger.info("cache middleware");
+  logger.debug("cache middleware");
   const { request } = context;
 
   if (cacheHandler) {
@@ -22,5 +54,15 @@ export const cacheMiddleware = async <TServerContext>(
     }
   }
 
-  return next();
+  await next();
+
+  if (
+    context.response instanceof RpcSuccessResponse &&
+    context.response.isCacheable
+  ) {
+    logger.debug(
+      "response was cacheable. will schedule a cache-write if cache is configured."
+    );
+    scheduleCacheWrite(context, context.response);
+  }
 };
