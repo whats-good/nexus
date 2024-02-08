@@ -33,3 +33,11 @@ export function safeAsyncNextTick(
     }
   });
 }
+
+export type AbstractClassConstructor<T, Args extends any[]> = new (
+  ...args: Args
+) => T;
+
+export interface Constructor<T> {
+  new (...args: any[]): T;
+}
