@@ -1,10 +1,10 @@
 import { CHAIN } from "@src/chain";
+import { NexusEvent } from "@src/events";
 import { NextFn, NexusMiddleware } from "@src/middleware";
 import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
 import { NexusContext } from "@src/rpc";
 import { safeJsonStringify } from "@src/utils";
-
 import { createServer } from "node:http";
 import pino from "pino";
 
@@ -17,14 +17,27 @@ const logger = pino({
   level: "debug",
 });
 
+class SomeEvent extends NexusEvent {
+  constructor(public readonly kerem: string) {
+    super();
+  }
+}
+
 const myMiddleware: NexusMiddleware = async (
   ctx: NexusContext,
   next: NextFn
 ) => {
   logger.info(`middleware ${i++}`);
+  ctx.config.eventBus.emit(new SomeEvent(`kerem-${i}`));
   logger.info(`ctx before: ${safeJsonStringify(ctx.response?.body())}`);
   await next();
   logger.info(`ctx after: ${safeJsonStringify(ctx.response?.body())}`);
+};
+
+const myEventHandler = async (event: SomeEvent, context: NexusContext) => {
+  setTimeout(() => {
+    context.config.logger.info(`Handling event: ${event.kerem}`);
+  }, 1000);
 };
 
 const nexus = Nexus.create({
@@ -32,6 +45,12 @@ const nexus = Nexus.create({
   chains: [CHAIN.EthMainnet],
   logger,
   middlewares: [myMiddleware],
+  eventHandlers: [
+    {
+      event: SomeEvent,
+      handler: myEventHandler,
+    },
+  ],
 });
 
 createServer(nexus).listen(4005, () => {

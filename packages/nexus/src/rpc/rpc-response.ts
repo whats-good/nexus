@@ -7,11 +7,6 @@ import type {
 
 export abstract class RpcResponse<T = unknown> extends NexusJsonResponse<T> {
   public abstract readonly id: string | number | null;
-  public isCacheable: boolean = false;
-
-  public setIsCacheable(isCacheable: boolean): void {
-    this.isCacheable = isCacheable;
-  }
 
   public static fromErrorResponsePayload(
     error: ErrorField,

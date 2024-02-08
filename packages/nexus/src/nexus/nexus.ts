@@ -1,8 +1,7 @@
 import { NexusConfig, NexusConfigOptions } from "@src/config";
 import { IntString, NexusNotFoundResponse, Route } from "@src/controller";
-import { NexusEvent, NexusEventBus, NexusEventHandler } from "@src/events";
-import { NexusContextHandler } from "@src/rpc";
 import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
+import { InternalErrorResponse } from "@src/rpc/rpc-response";
 import { safeAsyncNextTick } from "@src/utils";
 import {
   ServerAdapter,
@@ -10,12 +9,6 @@ import {
   createServerAdapter,
 } from "@whatwg-node/server";
 import { z } from "zod";
-
-class SomeEvent extends NexusEvent {
-  constructor(public readonly kerem: string) {
-    super();
-  }
-}
 
 type NexusServerInstance<TServerContext> = ServerAdapter<
   TServerContext,
@@ -34,8 +27,8 @@ export class Nexus<TServerContext>
 {
   private constructor(
     private readonly options: NexusConfigOptions<TServerContext> // TODO: break config into 2 parts: static and dynamic. the first one should
-    // functions at best, or ignore it completely
-  ) // be in charge of producing things that treat the context as an argument into
+    // be in charge of producing things that treat the context as an argument into
+  ) // functions at best, or ignore it completely
   // the second one should be in charge of actually building the context, and eventually passing
   // it into the dyanmic config.
   {}
@@ -44,42 +37,11 @@ export class Nexus<TServerContext>
     request: Request,
     serverContext: TServerContext
   ): Promise<Response> => {
-    const bus = new NexusEventBus<TServerContext>();
-
-    bus.registerHandler(SomeEvent, async (event: SomeEvent, context) => {
-      context.config.logger.info(
-        `Handling event via handler 1: ${event.kerem}`
-      );
-    });
-
-    bus.registerHandler(SomeEvent, async (event: SomeEvent, context) => {
-      context.config.logger.info(
-        `Handling event via handler 2: ${event.kerem}`
-      );
-    });
-
-    bus.registerHandler(SomeEvent, async (event: SomeEvent, context) => {
-      context.config.logger.info(
-        `Handling event via handler 3: ${event.kerem}`
-      );
-    });
-
-    bus.registerHandler(SomeEvent, async (event: SomeEvent, context) => {
-      context.config.logger.info(
-        `Handling event via handler 4: ${event.kerem}`
-      );
-    });
-
-    bus.registerHandler(SomeEvent, async (event: SomeEvent, context) => {
-      context.config.logger.info(
-        `Handling event via handler 5: ${event.kerem}`
-      );
-    });
-
     const config = NexusConfig.fromOptions(this.options, {
       context: serverContext,
       request,
     });
+    const bus = config.eventBus;
 
     const chainIdParams = chainIdRoute.match(request.url);
 
@@ -87,22 +49,24 @@ export class Nexus<TServerContext>
       const nexusContextFactory = new NexusContextFactory(config);
       const result = await nexusContextFactory.from(request, chainIdParams);
       if (result.kind === "success") {
-        const contextHandler = NexusContextHandler.fromConfig(config);
+        const { context } = result;
+        const { middlewareManager } = config;
+        await middlewareManager.run(context);
 
-        bus.schedule(new SomeEvent("kerem-1"));
-        bus.schedule(new SomeEvent("kerem-2"));
-        bus.schedule(new SomeEvent("kerem-3"));
-        bus.schedule(new SomeEvent("kerem-4"));
-        bus.schedule(new SomeEvent("kerem-5"));
+        if (!context.response) {
+          return new InternalErrorResponse(
+            context.request.getResponseId()
+          ).buildResponse();
+        }
 
-        const rpcResponse = await contextHandler.handle(result.context);
         safeAsyncNextTick(
           async () => {
-            await bus.runEvents(result.context);
+            await bus.runEvents(context);
           },
           () => {}
         );
-        return rpcResponse.buildResponse();
+
+        return context.response.buildResponse();
       } else {
         return result.response.buildResponse();
       }

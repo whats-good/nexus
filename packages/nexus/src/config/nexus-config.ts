@@ -9,7 +9,17 @@ import {
 } from "@src/rpc-method-desciptor";
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
 import pino from "pino";
-import { NexusMiddleware } from "@src/middleware";
+import { NexusMiddleware, NexusMiddlewareManager } from "@src/middleware";
+import {
+  EVENT,
+  EVENT_HANDLER,
+  EventAndHandlerPair,
+  NexusEventBus,
+} from "@src/events";
+import { cacheMiddleware } from "@src/rpc/cache-middleware";
+import { cannedResponseMiddleware } from "@src/rpc/canned-response-middleware";
+import { relayMiddleware } from "@src/rpc/relay-middleware";
+import { requestFilterMiddleware } from "@src/rpc/request-filter-middleware";
 
 type ConfigOptionFnArgs<TServerContext> = {
   context: TServerContext;
@@ -33,6 +43,7 @@ export type NexusConfigOptions<TServerContext> = {
   logger?: ConfigOptionField<TServerContext, Logger>;
   relayFailureConfig?: ConfigOptionField<TServerContext, RelayFailureConfig>;
   middlewares?: NexusMiddleware<TServerContext>[];
+  eventHandlers?: EventAndHandlerPair<any, TServerContext>[];
 };
 
 export class NexusConfig<TServerContext> {
@@ -43,7 +54,8 @@ export class NexusConfig<TServerContext> {
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
-  public readonly middlewares: NexusMiddleware<TServerContext>[];
+  public readonly eventBus: NexusEventBus<TServerContext>;
+  public readonly middlewareManager: NexusMiddlewareManager<TServerContext>;
 
   constructor(args: {
     cacheHandler?: CacheHandler<TServerContext>;
@@ -53,7 +65,8 @@ export class NexusConfig<TServerContext> {
     relayFailureConfig: RelayFailureConfig;
     logger: Logger;
     serverContext: TServerContext;
-    middlewares: NexusMiddleware<TServerContext>[];
+    eventBus: NexusEventBus<TServerContext>;
+    middlewareManager: NexusMiddlewareManager<TServerContext>;
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
@@ -62,7 +75,8 @@ export class NexusConfig<TServerContext> {
     this.logger = args.logger;
     this.serverContext = args.serverContext;
     this.cacheHandler = args.cacheHandler;
-    this.middlewares = args.middlewares;
+    this.eventBus = args.eventBus;
+    this.middlewareManager = args.middlewareManager;
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -124,6 +138,26 @@ export class NexusConfig<TServerContext> {
       ? new CacheHandler<TServerContext>(baseCache)
       : undefined;
 
+    const eventHandlers: EventAndHandlerPair<any, TServerContext>[] = [
+      ...(options.eventHandlers || []),
+      {
+        event: EVENT.RelaySuccessEvent,
+        handler: EVENT_HANDLER.cacheWriteOnRelaySuccess,
+      },
+    ];
+
+    const eventBus = new NexusEventBus(eventHandlers, logger);
+
+    const middlewares = [
+      ...(options.middlewares || []),
+      requestFilterMiddleware,
+      cannedResponseMiddleware,
+      cacheMiddleware,
+      relayMiddleware,
+    ];
+
+    const middlewareManager = new NexusMiddlewareManager(middlewares);
+
     return new NexusConfig({
       chainRegistry,
       nodeProviderRegistry,
@@ -132,7 +166,8 @@ export class NexusConfig<TServerContext> {
       logger,
       cacheHandler,
       serverContext: args.context,
-      middlewares: options.middlewares || [],
+      eventBus,
+      middlewareManager,
     });
   }
 }

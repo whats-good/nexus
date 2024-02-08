@@ -1,15 +1,14 @@
-import { NextFn } from "@src/middleware";
-import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
+import { safeJsonStringify } from "@src/utils";
 import { NexusContext } from "./nexus-context";
 import {
   RpcSuccessResponse,
   RpcResponse,
   InternalErrorResponse,
 } from "./rpc-response";
+import { EVENT } from "@src/events";
 
 export const relayMiddleware = async <TServerContext>(
-  context: NexusContext<TServerContext>,
-  next: NextFn
+  context: NexusContext<TServerContext>
 ) => {
   const { logger } = context.config;
   logger.debug("relay middleware");
@@ -24,7 +23,7 @@ export const relayMiddleware = async <TServerContext>(
         relaySuccess.response.result
       );
 
-      response.setIsCacheable(true);
+      context.config.eventBus.emit(new EVENT.RelaySuccessEvent(response));
 
       return context.respond(response);
     }
