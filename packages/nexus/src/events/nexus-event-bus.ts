@@ -3,6 +3,11 @@ import { NexusEvent } from "./nexus-event";
 import { NexusContext } from "@src/rpc";
 import { NexusEventHandler } from "./nexus-event-handler";
 
+type EventAndHandlerPair<E extends NexusEvent, TServerContext> = {
+  event: Constructor<E>;
+  handler: NexusEventHandler<E, TServerContext>;
+};
+
 export class NexusEventBus<TServerContext = unknown> {
   private readonly pendingEvents: NexusEvent[] = [];
   private readonly handlers: Map<
@@ -10,11 +15,17 @@ export class NexusEventBus<TServerContext = unknown> {
     Set<NexusEventHandler<any, TServerContext>>
   > = new Map();
 
+  constructor(eventHandlers: EventAndHandlerPair<any, TServerContext>[]) {
+    eventHandlers.forEach((pair) => {
+      this.registerHandler(pair.event, pair.handler);
+    });
+  }
+
   public schedule(event: NexusEvent): void {
     this.pendingEvents.push(event);
   }
 
-  public registerHandler<E extends NexusEvent>(
+  private registerHandler<E extends NexusEvent>(
     event: Constructor<E>,
     handler: NexusEventHandler<E, TServerContext>
   ): void {
