@@ -14,6 +14,7 @@ import {
   EVENT,
   EVENT_HANDLER,
   EventAndHandlerPair,
+  IEmit,
   NexusEventBus,
 } from "@src/events";
 import { cacheMiddleware } from "@src/rpc/cache-middleware";
@@ -54,7 +55,7 @@ export class NexusConfig<TServerContext> {
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
-  public readonly eventBus: NexusEventBus<TServerContext>;
+  public readonly eventBus: IEmit;
   public readonly middlewareManager: NexusMiddlewareManager<TServerContext>;
 
   constructor(args: {

@@ -28,7 +28,7 @@ const myMiddleware: NexusMiddleware = async (
   next: NextFn
 ) => {
   logger.info(`middleware ${i++}`);
-  ctx.config.eventBus.emit(new SomeEvent(`kerem-${i}`));
+  ctx.eventBus.emit(new SomeEvent(`kerem-${i}`));
   logger.info(`ctx before: ${safeJsonStringify(ctx.response?.body())}`);
   await next();
   logger.info(`ctx after: ${safeJsonStringify(ctx.response?.body())}`);

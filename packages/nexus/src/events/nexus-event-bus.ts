@@ -9,7 +9,17 @@ export type EventAndHandlerPair<E extends NexusEvent, TServerContext> = {
   handler: NexusEventHandler<E, TServerContext>;
 };
 
-export class NexusEventBus<TServerContext = unknown> {
+export interface IEmit {
+  emit(event: NexusEvent): void;
+}
+
+export interface IRunEvents<TServerContext = unknown> {
+  runEvents(context: NexusContext<TServerContext>): Promise<void>;
+}
+
+export class NexusEventBus<TServerContext = unknown>
+  implements IEmit, IRunEvents<TServerContext>
+{
   private readonly pendingEvents: NexusEvent[] = [];
   private readonly handlers: Map<
     Constructor<NexusEvent>,

@@ -23,7 +23,7 @@ export const relayMiddleware = async <TServerContext>(
         relaySuccess.response.result
       );
 
-      context.config.eventBus.emit(new EVENT.RelaySuccessEvent(response));
+      context.eventBus.emit(new EVENT.RelaySuccessEvent(response));
 
       return context.respond(response);
     }

@@ -3,6 +3,7 @@ import type { Chain } from "@src/chain";
 import type { UnknownRpcRequest } from "./rpc-request";
 import { RpcResponse } from "./rpc-response";
 import { NexusConfig } from "..";
+import { IEmit } from "@src/events";
 
 export class NexusContext<TServerContext = unknown> {
   public response: RpcResponse | null;
@@ -10,6 +11,7 @@ export class NexusContext<TServerContext = unknown> {
   public readonly chain: Chain;
   public readonly rpcEndpointPool: RpcEndpointPool;
   public readonly serverContext: TServerContext;
+  public readonly eventBus: IEmit;
   public readonly config: NexusConfig<TServerContext>;
 
   constructor(args: {
@@ -17,6 +19,7 @@ export class NexusContext<TServerContext = unknown> {
     chain: Chain;
     rpcEndpointPool: RpcEndpointPool;
     serverContext: TServerContext;
+    eventBus: IEmit;
     config: NexusConfig<TServerContext>;
   }) {
     this.response = null;
@@ -24,6 +27,7 @@ export class NexusContext<TServerContext = unknown> {
     this.chain = args.chain;
     this.rpcEndpointPool = args.rpcEndpointPool;
     this.serverContext = args.serverContext;
+    this.eventBus = args.eventBus;
     this.config = args.config;
   }
 
