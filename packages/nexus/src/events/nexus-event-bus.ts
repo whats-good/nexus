@@ -20,7 +20,7 @@ export interface IRunEvents<TServerContext = unknown> {
 export class NexusEventBus<TServerContext = unknown>
   implements IEmit, IRunEvents<TServerContext>
 {
-  private readonly pendingEvents: NexusEvent[] = [];
+  private pendingEvents: NexusEvent[] = [];
   private readonly handlers: Map<
     Constructor<NexusEvent>,
     Set<NexusEventHandler<any, TServerContext>>
@@ -54,29 +54,45 @@ export class NexusEventBus<TServerContext = unknown>
     currentHandlers.add(handler);
   }
 
-  private async runHandlersForEvent(
+  private getPromisesForEvent(
     event: NexusEvent,
     context: NexusContext<TServerContext>
-  ): Promise<void> {
+  ): Promise<void>[] {
     const handlersSet = this.handlers.get(event.constructor as any);
     const handlersList = handlersSet ? Array.from(handlersSet) : [];
     if (handlersList.length === 0) {
       this.logger.debug(`No handlers for event: ${event.constructor.name}`);
     }
-    const promises = handlersList.map((handler) => handler(event, context));
+    return handlersList.map((handler) => handler(event, context));
 
     // TODO: add error handling
-    await Promise.all(promises);
   }
 
-  // TODO: this should be idempotent. it should dequeue the events before running them,
-  // such that running it again will not run the same events again.
-  public async runEvents(context: NexusContext<TServerContext>): Promise<void> {
-    const promises: Promise<void>[] = this.pendingEvents.map((event) => {
-      return this.runHandlersForEvent(event, context);
+  private getPromisesForEvents(
+    events: NexusEvent[],
+    context: NexusContext<TServerContext>
+  ): Promise<void>[] {
+    let promises: Promise<void>[] = [];
+    events.forEach((event) => {
+      const currentEventPromises: Promise<void>[] = this.getPromisesForEvent(
+        event,
+        context
+      );
+      promises = promises.concat(currentEventPromises);
     });
 
     // TODO: add error handling
-    await Promise.all(promises);
+    return promises;
+  }
+
+  public async runEvents(context: NexusContext<TServerContext>): Promise<void> {
+    let i = 0;
+    while (this.pendingEvents.length > 0) {
+      this.logger.debug(`Running events iteration: ${i++}`);
+      const pendingEvents = this.pendingEvents;
+      this.pendingEvents = [];
+      const promises = this.getPromisesForEvents(pendingEvents, context);
+      await Promise.all(promises);
+    }
   }
 }
