@@ -1,5 +1,12 @@
 import { NexusConfig, NexusConfigOptions } from "@src/config";
-import { IntString, NexusNotFoundResponse, Route } from "@src/controller";
+import {
+  IntString,
+  NexusNotFoundResponse,
+  PathParamsOf,
+  Route,
+} from "@src/controller";
+import { IRunEvents } from "@src/events";
+import { NexusContext } from "@src/rpc";
 import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
 import { InternalErrorResponse } from "@src/rpc/rpc-response";
 import { safeAsyncNextTick } from "@src/utils";
@@ -27,11 +34,47 @@ export class Nexus<TServerContext>
 {
   private constructor(
     private readonly options: NexusConfigOptions<TServerContext> // TODO: break config into 2 parts: static and dynamic. the first one should
-    // be in charge of producing things that treat the context as an argument into
-  ) // functions at best, or ignore it completely
+    // functions at best, or ignore it completely
+  ) // be in charge of producing things that treat the context as an argument into
   // the second one should be in charge of actually building the context, and eventually passing
   // it into the dyanmic config.
   {}
+
+  private async handleNexusContext(context: NexusContext<TServerContext>) {
+    const bus = context.config
+      .eventBus as unknown as IRunEvents<TServerContext>;
+    const { middlewareManager } = context.config;
+    await middlewareManager.run(context);
+
+    if (!context.response) {
+      return new InternalErrorResponse(
+        context.request.getResponseId()
+      ).buildResponse();
+    }
+
+    safeAsyncNextTick(
+      async () => {
+        await bus.runEvents(context);
+      },
+      () => {}
+    );
+
+    return context.response.buildResponse();
+  }
+
+  private async handleChainIdRoute(
+    config: NexusConfig<TServerContext>,
+    request: Request,
+    params: PathParamsOf<typeof chainIdRoute>
+  ) {
+    const nexusContextFactory = new NexusContextFactory(config);
+    const result = await nexusContextFactory.from(request, params);
+    if (result.kind === "success") {
+      return this.handleNexusContext(result.context);
+    } else {
+      return result.response.buildResponse();
+    }
+  }
 
   public handle = async (
     request: Request,
@@ -41,35 +84,11 @@ export class Nexus<TServerContext>
       context: serverContext,
       request,
     });
-    const bus = config.eventBus;
 
     const chainIdParams = chainIdRoute.match(request.url);
 
     if (chainIdParams) {
-      const nexusContextFactory = new NexusContextFactory(config);
-      const result = await nexusContextFactory.from(request, chainIdParams);
-      if (result.kind === "success") {
-        const { context } = result;
-        const { middlewareManager } = config;
-        await middlewareManager.run(context);
-
-        if (!context.response) {
-          return new InternalErrorResponse(
-            context.request.getResponseId()
-          ).buildResponse();
-        }
-
-        safeAsyncNextTick(
-          async () => {
-            await bus.runEvents(context);
-          },
-          () => {}
-        );
-
-        return context.response.buildResponse();
-      } else {
-        return result.response.buildResponse();
-      }
+      return this.handleChainIdRoute(config, request, chainIdParams);
     }
 
     return new NexusNotFoundResponse().buildResponse();
