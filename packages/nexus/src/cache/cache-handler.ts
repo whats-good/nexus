@@ -2,6 +2,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import type { NexusContext } from "@src/rpc";
 import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
 import type { BaseCache } from "./base-cache";
+import { NexusEvent } from "@src/events";
 
 type CacheHandlerReadResult =
   | {
@@ -23,12 +24,25 @@ type CacheHandlerReadResult =
       kind: "denied";
     }
   | {
-      kind: "not-configured";
-    }
-  | {
       kind: "unexpected-error";
       error: unknown;
     };
+
+export class CacheReadDeniedEvent extends NexusEvent {}
+
+export class CacheReadMissEvent extends NexusEvent {
+  constructor(
+    public readonly kind: "not-found" | "unexpected-error" | "invalid"
+  ) {
+    super();
+  }
+}
+
+export class CacheReadHitEvent extends NexusEvent {
+  constructor(public readonly kind: "success" | "legal-error") {
+    super();
+  }
+}
 
 type CacheHandlerWriteResult =
   | {
@@ -42,12 +56,24 @@ type CacheHandlerWriteResult =
       kind: "denied";
     }
   | {
-      kind: "not-configured";
-    }
-  | {
       kind: "invalid-result";
       result: unknown;
     };
+
+export class CacheWriteSuccessEvent extends NexusEvent {}
+
+export class CacheWriteDeniedEvent extends NexusEvent {}
+
+export class CacheWriteFailureEvent extends NexusEvent {
+  constructor(
+    public readonly kind:
+      | "unexpected-error"
+      | "not-configured"
+      | "invalid-result"
+  ) {
+    super();
+  }
+}
 
 // TODO: the cache handler is doing to much allow/deny work by parsing the input.
 // especially the read part.
@@ -69,19 +95,60 @@ type CacheHandlerWriteResult =
 // rather than storing the entire response object, or just the error and result fields,
 // we should store this new kind of storage object.
 
+// export class CacheNotConfiguredEvent extends NexusEvent {}
+
+// export class CacheReadDeniedEvent extends NexusEvent {}
+
 export class CacheHandler<TServerContext> {
   constructor(public readonly cache: BaseCache) {}
 
   public async handleRead(
     context: NexusContext<TServerContext>
   ): Promise<CacheHandlerReadResult> {
+    const result = await this._handleRead(context);
+
+    switch (result.kind) {
+      case "success-result": {
+        context.eventBus.emit(new CacheReadHitEvent("success"));
+        break;
+      }
+      case "legal-error-result": {
+        context.eventBus.emit(new CacheReadHitEvent("legal-error"));
+        break;
+      }
+      case "invalid-result": {
+        // even though this was technically a hit, this result will be discarded
+        // and this should be treated as a miss.
+        context.eventBus.emit(new CacheReadMissEvent("invalid"));
+        break;
+      }
+      case "not-found": {
+        context.eventBus.emit(new CacheReadMissEvent("not-found"));
+        break;
+      }
+      case "denied": {
+        context.eventBus.emit(new CacheReadDeniedEvent());
+        break;
+      }
+      case "unexpected-error": {
+        context.eventBus.emit(new CacheReadMissEvent("unexpected-error"));
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  private async _handleRead(
+    context: NexusContext<TServerContext>
+  ): Promise<CacheHandlerReadResult> {
     try {
-      const { request } = context;
+      const { request, eventBus } = context;
       const { methodDescriptor } = request;
       const { cacheConfig } = methodDescriptor;
 
       if (!cacheConfig) {
-        return { kind: "not-configured" };
+        return { kind: "denied" };
       }
 
       const readConfig = cacheConfig.getReadConfig({
@@ -127,6 +194,30 @@ export class CacheHandler<TServerContext> {
   public async handleWrite(
     context: NexusContext<TServerContext>,
     result: unknown
+  ) {
+    const writeResult = await this._handleWrite(context, result);
+    switch (writeResult.kind) {
+      case "success": {
+        context.eventBus.emit(new CacheWriteSuccessEvent());
+        break;
+      }
+      case "denied": {
+        context.eventBus.emit(new CacheWriteDeniedEvent());
+        break;
+      }
+      case "unexpected-error":
+      case "invalid-result": {
+        context.eventBus.emit(new CacheWriteFailureEvent(writeResult.kind));
+        break;
+      }
+    }
+
+    return writeResult;
+  }
+
+  private async _handleWrite(
+    context: NexusContext<TServerContext>,
+    result: unknown
   ): Promise<CacheHandlerWriteResult> {
     try {
       const { request } = context;
@@ -135,7 +226,7 @@ export class CacheHandler<TServerContext> {
 
       if (!cacheConfig) {
         return {
-          kind: "not-configured",
+          kind: "denied",
         };
       }
 

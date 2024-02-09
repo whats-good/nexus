@@ -2,6 +2,17 @@ import { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
 import { NexusContext } from "./nexus-context";
 import { MethodDeniedCustomErrorResponse } from "./rpc-response";
+import { NexusEvent } from "@src/events";
+
+export class RequestFilterDeniedEvent extends NexusEvent {}
+
+export class RequestFilterFailureEvent extends NexusEvent {
+  constructor(public readonly error: unknown) {
+    super();
+  }
+}
+
+export class RequestFilterAllowedEvent extends NexusEvent {}
 
 export const requestFilterMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
@@ -20,6 +31,7 @@ export const requestFilterMiddleware = async <TServerContext>(
     context.respond(
       new MethodDeniedCustomErrorResponse(request.getResponseId())
     );
+    context.eventBus.emit(new RequestFilterDeniedEvent());
   } else if (requestFilterResult.kind === "failure") {
     // TODO: make this behavior configurable.
     logger.error(
@@ -33,7 +45,11 @@ export const requestFilterMiddleware = async <TServerContext>(
     context.respond(
       new MethodDeniedCustomErrorResponse(request.getResponseId())
     );
+    context.eventBus.emit(
+      new RequestFilterFailureEvent(requestFilterResult.error)
+    );
   } else {
+    context.eventBus.emit(new RequestFilterAllowedEvent());
     return next();
   }
 };

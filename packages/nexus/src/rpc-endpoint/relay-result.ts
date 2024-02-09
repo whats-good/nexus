@@ -47,7 +47,7 @@ export class RelaySuccessResponse extends RelayResultBase {
 export class RelayLegalErrorResponse extends RelayResultBase {
   public readonly kind = "error-response";
 
-  constructor(public readonly response: ErrorResponsePayload) {
+  constructor(public readonly error: ErrorResponsePayload) {
     super();
   }
 }

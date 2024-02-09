@@ -1,4 +1,4 @@
-import { BaseCache, CacheHandler } from "@src/cache";
+import { BaseCache, CacheHandler, cacheWriteOnRelaySuccess } from "@src/cache";
 import { Chain, ChainRegistry } from "@src/chain";
 import { Logger } from "@src/logger";
 import { RelayFailureConfig } from "@src/rpc-endpoint";
@@ -10,14 +10,8 @@ import {
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
 import pino from "pino";
 import { NexusMiddleware, NexusMiddlewareManager } from "@src/middleware";
-import {
-  EVENT,
-  EVENT_HANDLER,
-  EventAndHandlerPair,
-  IEmit,
-  NexusEventBus,
-} from "@src/events";
-import { cacheMiddleware } from "@src/rpc/cache-middleware";
+import { EVENT, EventAndHandlerPair, IEmit, NexusEventBus } from "@src/events";
+import { cacheMiddleware } from "@src/cache/cache-middleware";
 import { cannedResponseMiddleware } from "@src/rpc/canned-response-middleware";
 import { relayMiddleware } from "@src/rpc/relay-middleware";
 import { requestFilterMiddleware } from "@src/rpc/request-filter-middleware";
@@ -142,8 +136,8 @@ export class NexusConfig<TServerContext> {
     const eventHandlers: EventAndHandlerPair<any, TServerContext>[] = [
       ...(options.eventHandlers || []),
       {
-        event: EVENT.RelaySuccessEvent,
-        handler: EVENT_HANDLER.cacheWriteOnRelaySuccess,
+        event: EVENT.RelaySuccessResponseEvent,
+        handler: cacheWriteOnRelaySuccess,
       },
     ];
 

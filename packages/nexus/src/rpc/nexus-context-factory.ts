@@ -129,6 +129,7 @@ export class NexusContextFactory<TServerContext> {
       rpcEndpointPool,
       serverContext: this.config.serverContext,
       config: this.config,
+      eventBus: this.config.eventBus,
     });
     return {
       kind: "success",

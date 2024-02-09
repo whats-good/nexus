@@ -23,17 +23,6 @@ class SomeEvent extends NexusEvent {
   }
 }
 
-const myMiddleware: NexusMiddleware = async (
-  ctx: NexusContext,
-  next: NextFn
-) => {
-  logger.info(`middleware ${i++}`);
-  ctx.eventBus.emit(new SomeEvent(`kerem-${i}`));
-  logger.info(`ctx before: ${safeJsonStringify(ctx.response?.body())}`);
-  await next();
-  logger.info(`ctx after: ${safeJsonStringify(ctx.response?.body())}`);
-};
-
 const myEventHandler = async (event: SomeEvent, context: NexusContext) => {
   setTimeout(() => {
     context.config.logger.info(`Handling event: ${event.kerem}`);
@@ -44,7 +33,6 @@ const nexus = Nexus.create({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
   logger,
-  middlewares: [myMiddleware],
   eventHandlers: [
     {
       event: SomeEvent,
