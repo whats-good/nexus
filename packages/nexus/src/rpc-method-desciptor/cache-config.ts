@@ -123,7 +123,7 @@ export class CacheConfig<P, R> {
     return {
       kind: "allow",
       ttl: this.getTtl(args),
-      key: this.getParamsKeySuffix(args),
+      key: this.getCacheKey(args),
     };
   }
 }

@@ -1,3 +1,4 @@
+import { SimpleMemoryCache } from "@src/cache/simple-memory-cache";
 import { CHAIN } from "@src/chain";
 import { NexusEvent } from "@src/events";
 import { NextFn, NexusMiddleware } from "@src/middleware";
@@ -33,6 +34,7 @@ const nexus = Nexus.create({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
   logger,
+  cache: new SimpleMemoryCache(),
   eventHandlers: [
     {
       event: SomeEvent,

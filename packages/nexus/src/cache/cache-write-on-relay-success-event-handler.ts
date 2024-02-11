@@ -18,15 +18,7 @@ export const cacheWriteOnRelaySuccess: NexusEventHandler<
 
   safeAsyncNextTick(
     async () => {
-      await cacheHandler
-        .handleWrite(context, response.body())
-        .then((writeResult) => {
-          if (writeResult.kind === "success") {
-            logger.info("successfully cached response.");
-          } else {
-            logger.warn("failed to cache response.");
-          }
-        });
+      await cacheHandler.handleWrite(context, response.result);
     },
     (error) => {
       const errorMsg = `Error while caching response: ${safeJsonStringify(

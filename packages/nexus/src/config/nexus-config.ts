@@ -130,7 +130,7 @@ export class NexusConfig<TServerContext> {
 
     const baseCache = NexusConfig.getValueOrExecute(options.cache, args);
     const cacheHandler = baseCache
-      ? new CacheHandler<TServerContext>(baseCache)
+      ? new CacheHandler<TServerContext>(baseCache, logger)
       : undefined;
 
     const eventHandlers: EventAndHandlerPair<any, TServerContext>[] = [

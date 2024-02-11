@@ -117,7 +117,12 @@ export const eth_blockNumber = new RpcMethodDescriptorBuilder({
   method: "eth_blockNumber",
   params: NoParams,
   result: Quantity,
-}).build();
+})
+  .cacheConfig({
+    paramsKeySuffix: "",
+    ttl: ({ chain }) => chain.blockTime * 1000,
+  })
+  .build();
 
 export const eth_getBalance = new RpcMethodDescriptorBuilder({
   method: "eth_getBalance",

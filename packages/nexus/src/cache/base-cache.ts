@@ -1,14 +1,10 @@
-type ReadResult =
+export type ReadResult =
   | {
-      kind: "success";
+      kind: "hit";
       value: unknown;
     }
   | {
-      kind: "not-found";
-    }
-  | {
-      kind: "failure";
-      error: unknown;
+      kind: "miss";
     };
 
 export interface CacheWriteArgs {
