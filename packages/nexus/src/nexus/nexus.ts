@@ -43,6 +43,7 @@ export class Nexus<TServerContext>
   private async handleNexusContext(context: NexusContext<TServerContext>) {
     const bus = context.config
       .eventBus as unknown as IRunEvents<TServerContext>;
+    const { logger } = context.config;
     const { middlewareManager } = context.config;
     await middlewareManager.run(context);
 
@@ -54,11 +55,13 @@ export class Nexus<TServerContext>
 
     safeAsyncNextTick(
       async () => {
+        logger.debug("running events");
         await bus.runEvents(context);
       },
       () => {}
     );
 
+    logger.debug("sending response");
     return context.response.buildResponse();
   }
 
@@ -68,6 +71,20 @@ export class Nexus<TServerContext>
     params: PathParamsOf<typeof chainIdRoute>
   ) {
     const nexusContextFactory = new NexusContextFactory(config);
+    // TODO: how can we instrument pre-context failures and events?
+    // the current eventBus system assumes the existence of a NexusContext
+    // AND a nexusConfig instance.
+    // maybe some events should be emitted before the context is created?
+    // and maybe events should optionally hold the context object inside,
+    // rather than relying on the context to be an argument in their respective event handlers?
+    // ^^^^ THIS IS THE MOVE ^^^^
+    // if an event needs its context, it should be passed in as an argument.
+    // otherwise, a solo, empty, context-less event is not just okay, but preferred.
+    // ~~~~
+    // ~~~~
+    // But then all events have to be aware of TServerContext, which is not ideal.
+    // Maybe context can stay in the handler after all.
+
     const result = await nexusContextFactory.from(request, params);
     if (result.kind === "success") {
       return this.handleNexusContext(result.context);
