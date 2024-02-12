@@ -20,9 +20,9 @@ export const cannedResponseMiddleware = async <TServerContext>(
   const { logger } = context.config;
   logger.debug("canned response middleware");
   const { request } = context;
-  const { methodDescriptor } = request;
+  const { rpcMethod } = request;
 
-  const cannedResponse = methodDescriptor.cannedResponse({
+  const cannedResponse = rpcMethod.cannedResponse({
     chain: context.chain,
     params: request.payload.params,
   });

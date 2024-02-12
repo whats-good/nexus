@@ -154,8 +154,8 @@ export class CacheHandler<TServerContext> {
   ): Promise<CacheHandlerReadResult> {
     try {
       const { request } = context;
-      const { methodDescriptor } = request;
-      const { cacheConfig } = methodDescriptor;
+      const { rpcMethod } = request;
+      const { cacheConfig } = rpcMethod;
 
       if (!cacheConfig) {
         return { kind: "denied" };
@@ -180,8 +180,7 @@ export class CacheHandler<TServerContext> {
 
       const { value } = baseCacheResponse;
 
-      const successResultParsed =
-        methodDescriptor.resultSchema.safeParse(value);
+      const successResultParsed = rpcMethod.resultSchema.safeParse(value);
 
       if (successResultParsed.success) {
         return { kind: "success-result", result: successResultParsed.data };
@@ -234,8 +233,8 @@ export class CacheHandler<TServerContext> {
   ): Promise<CacheHandlerWriteResult> {
     try {
       const { request } = context;
-      const { methodDescriptor } = request;
-      const { cacheConfig } = methodDescriptor;
+      const { rpcMethod } = request;
+      const { cacheConfig } = rpcMethod;
 
       if (!cacheConfig) {
         return {
@@ -243,7 +242,7 @@ export class CacheHandler<TServerContext> {
         };
       }
 
-      // TODO: we should only pass chain, highestKnownBlockNumber and methodDescriptor to the write config. same for the read config. the rest can be handled internally
+      // TODO: we should only pass chain, highestKnownBlockNumber and rpcMethod to the write config. same for the read config. the rest can be handled internally
       const writeConfig = cacheConfig.getWriteConfig({
         chain: context.chain,
         params: request.payload.params,

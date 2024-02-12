@@ -21,8 +21,8 @@ export const requestFilterMiddleware = async <TServerContext>(
   const { logger } = context.config;
   logger.debug("request filter middleware");
   const { chain, request } = context;
-  const { methodDescriptor } = request;
-  const requestFilterResult = methodDescriptor.requestFilter({
+  const { rpcMethod } = request;
+  const requestFilterResult = rpcMethod.requestFilter({
     chain,
     params: request.payload.params,
   });

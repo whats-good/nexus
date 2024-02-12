@@ -18,7 +18,7 @@ import type {
 } from "./request-filter";
 import type { CacheConfig } from "./cache-config";
 
-export class RpcMethodDescriptor<M extends string, P, R> {
+export class RpcMethod<M extends string, P, R> {
   public readonly method: M;
   public readonly methodSchema: z.ZodLiteral<M>;
   public readonly paramsSchema: z.ZodType<P, any, any>;
@@ -101,10 +101,6 @@ export class RpcMethodDescriptor<M extends string, P, R> {
   }
 }
 
-export type UnknownRpcMethodDescriptor = RpcMethodDescriptor<
-  string,
-  unknown,
-  unknown
->;
+export type UnknownRpcMethod = RpcMethod<string, unknown, unknown>;
 
-export type AnyRpcMethodDescriptor = RpcMethodDescriptor<string, any, any>;
+export type AnyRpcMethod = RpcMethod<string, any, any>;

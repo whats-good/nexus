@@ -46,11 +46,11 @@ export class NexusContextFactory<TServerContext> {
       };
     }
 
-    const methodDescriptor = this.config.rpcMethodRegistry.getDescriptorByName(
+    const rpcMethod = this.config.rpcMethodRegistry.get(
       parsedBasePayload.data.method
     );
 
-    if (!methodDescriptor) {
+    if (!rpcMethod) {
       return {
         kind: "error",
         rpcResponse: new MethodNotFoundErrorResponse(
@@ -60,7 +60,7 @@ export class NexusContextFactory<TServerContext> {
     }
 
     const parsedStrictPayload =
-      methodDescriptor.requestPayloadSchema.safeParse(jsonPayload);
+      rpcMethod.requestPayloadSchema.safeParse(jsonPayload);
 
     if (!parsedStrictPayload.success) {
       return {
@@ -73,7 +73,7 @@ export class NexusContextFactory<TServerContext> {
 
     return {
       kind: "success",
-      rpcRequest: new RpcRequest(methodDescriptor, parsedBasePayload.data),
+      rpcRequest: new RpcRequest(rpcMethod, parsedBasePayload.data),
     };
   }
 

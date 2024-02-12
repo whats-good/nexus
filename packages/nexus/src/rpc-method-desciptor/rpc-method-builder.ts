@@ -1,10 +1,10 @@
 import type { z } from "zod";
-import { RpcMethodDescriptor } from "./rpc-method-descriptor";
+import { RpcMethod } from "./rpc-method";
 import type { CannedResponseFn } from "./canned-response";
 import type { RequestFilterFn } from "./request-filter";
 import { CacheConfig, type CacheConfigOptions } from "./cache-config";
 
-export class RpcMethodDescriptorBuilder<M extends string, P, R> {
+export class RpcMethodBuilder<M extends string, P, R> {
   private fields: {
     method: M;
     params: z.ZodType<P, any, any>;
@@ -30,8 +30,8 @@ export class RpcMethodDescriptorBuilder<M extends string, P, R> {
     };
   }
 
-  public build(): RpcMethodDescriptor<M, P, R> {
-    return new RpcMethodDescriptor(this.fields);
+  public build(): RpcMethod<M, P, R> {
+    return new RpcMethod(this.fields);
   }
 
   public cannedResponse(cannedResponseFn: CannedResponseFn<P, R>) {

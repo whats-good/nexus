@@ -1,12 +1,9 @@
-import {
-  RpcMethodDescriptor,
-  UnknownRpcMethodDescriptor,
-} from "@src/rpc-method-desciptor";
+import { RpcMethod, UnknownRpcMethod } from "@src/rpc-method-desciptor";
 import type { RpcRequestPayload } from "./schemas";
 
 export class RpcRequest<M extends string, P, R> {
   constructor(
-    public readonly methodDescriptor: RpcMethodDescriptor<M, P, R>,
+    public readonly rpcMethod: RpcMethod<M, P, R>,
     public readonly payload: RpcRequestPayload
   ) {}
 

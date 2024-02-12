@@ -3,9 +3,9 @@ import { Chain, ChainRegistry } from "@src/chain";
 import { Logger } from "@src/logger";
 import { RelayFailureConfig } from "@src/rpc-endpoint";
 import {
-  RpcMethodDescriptorRegistry,
+  RpcMethodRegistry,
   RPC_METHOD_BUILDER,
-  AnyRpcMethodDescriptor,
+  AnyRpcMethod,
 } from "@src/rpc-method-desciptor";
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
 import pino from "pino";
@@ -31,10 +31,7 @@ export type NexusConfigOptions<TServerContext> = {
   cache?: BaseCache;
   chains: ConfigOptionField<TServerContext, Chain[]>; // TODO: make this a tuple
   nodeProviders: ConfigOptionField<TServerContext, NodeProvider[]>; // TODO: make this a tuple
-  rpcMethodDescriptors?: ConfigOptionField<
-    TServerContext,
-    AnyRpcMethodDescriptor[]
-  >;
+  rpcMethods?: ConfigOptionField<TServerContext, AnyRpcMethod[]>;
   logger?: ConfigOptionField<TServerContext, Logger>;
   relayFailureConfig?: ConfigOptionField<TServerContext, RelayFailureConfig>;
   middlewares?: NexusMiddleware<TServerContext>[];
@@ -45,7 +42,7 @@ export class NexusConfig<TServerContext> {
   public readonly cacheHandler?: CacheHandler<TServerContext>;
   public readonly chainRegistry: ChainRegistry;
   public readonly nodeProviderRegistry: NodeProviderRegistry;
-  public readonly rpcMethodRegistry: RpcMethodDescriptorRegistry;
+  public readonly rpcMethodRegistry: RpcMethodRegistry;
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
@@ -56,7 +53,7 @@ export class NexusConfig<TServerContext> {
     cacheHandler?: CacheHandler<TServerContext>;
     chainRegistry: ChainRegistry;
     nodeProviderRegistry: NodeProviderRegistry;
-    rpcMethodDescriptorRegistry: RpcMethodDescriptorRegistry;
+    rpcMethodRegistry: RpcMethodRegistry;
     relayFailureConfig: RelayFailureConfig;
     logger: Logger;
     serverContext: TServerContext;
@@ -65,7 +62,7 @@ export class NexusConfig<TServerContext> {
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
-    this.rpcMethodRegistry = args.rpcMethodDescriptorRegistry;
+    this.rpcMethodRegistry = args.rpcMethodRegistry;
     this.relayFailureConfig = args.relayFailureConfig;
     this.logger = args.logger;
     this.serverContext = args.serverContext;
@@ -113,12 +110,10 @@ export class NexusConfig<TServerContext> {
     });
     nodeProviderRegistry.addNodeProviders(nodeProviders);
 
-    const rpcMethodDescriptors =
-      NexusConfig.getValueOrExecute(options.rpcMethodDescriptors, args) ||
+    const rpcMethods =
+      NexusConfig.getValueOrExecute(options.rpcMethods, args) ||
       Object.values(RPC_METHOD_BUILDER).map((builder) => builder.build());
-    const rpcMethodDescriptorRegistry = new RpcMethodDescriptorRegistry(
-      rpcMethodDescriptors
-    );
+    const rpcMethodRegistry = new RpcMethodRegistry(rpcMethods);
 
     const relayFailureConfig = NexusConfig.getValueOrExecute(
       options.relayFailureConfig,
@@ -156,7 +151,7 @@ export class NexusConfig<TServerContext> {
     return new NexusConfig({
       chainRegistry,
       nodeProviderRegistry,
-      rpcMethodDescriptorRegistry,
+      rpcMethodRegistry,
       relayFailureConfig,
       logger,
       cacheHandler,

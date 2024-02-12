@@ -1,9 +1,6 @@
 export { NexusConfig } from "./config";
 export type { NexusConfigOptions } from "./config";
-export {
-  RpcMethodDescriptor,
-  RPC_METHOD_BUILDER,
-} from "./rpc-method-desciptor";
+export { RpcMethod, RPC_METHOD_BUILDER } from "./rpc-method-desciptor";
 export { CHAIN, Chain } from "./chain";
 export {
   NODE_PROVIDER,
