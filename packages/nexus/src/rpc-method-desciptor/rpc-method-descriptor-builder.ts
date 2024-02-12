@@ -40,14 +40,32 @@ export class RpcMethodDescriptorBuilder<M extends string, P, R> {
     return this;
   }
 
+  public removeCannedResponse() {
+    this.fields.cannedResponseFn = undefined;
+
+    return this;
+  }
+
   public requestFilter(requestFilterFn: RequestFilterFn<P>) {
     this.fields.requestFilterFn = requestFilterFn;
 
     return this;
   }
 
+  public removeRequestFilter() {
+    this.fields.requestFilterFn = undefined;
+
+    return this;
+  }
+
   public cacheConfig(cacheConfigOptions: CacheConfigOptions<P, R>) {
     this.fields.cacheConfig = new CacheConfig(cacheConfigOptions);
+
+    return this;
+  }
+
+  public removeCacheConfig() {
+    this.fields.cacheConfig = undefined;
 
     return this;
   }
