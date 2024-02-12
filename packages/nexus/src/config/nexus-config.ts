@@ -4,7 +4,7 @@ import { Logger } from "@src/logger";
 import { RelayFailureConfig } from "@src/rpc-endpoint";
 import {
   RpcMethodDescriptorRegistry,
-  RPC_METHOD_DESCRIPTOR,
+  RPC_METHOD_BUILDER,
   AnyRpcMethodDescriptor,
 } from "@src/rpc-method-desciptor";
 import { NodeProvider, NodeProviderRegistry } from "@src/node-provider";
@@ -115,7 +115,7 @@ export class NexusConfig<TServerContext> {
 
     const rpcMethodDescriptors =
       NexusConfig.getValueOrExecute(options.rpcMethodDescriptors, args) ||
-      Object.values(RPC_METHOD_DESCRIPTOR);
+      Object.values(RPC_METHOD_BUILDER).map((builder) => builder.build());
     const rpcMethodDescriptorRegistry = new RpcMethodDescriptorRegistry(
       rpcMethodDescriptors
     );

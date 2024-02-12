@@ -1,11 +1,9 @@
 import { SimpleMemoryCache } from "@src/cache/simple-memory-cache";
 import { CHAIN } from "@src/chain";
 import { NexusEvent } from "@src/events";
-import { NextFn, NexusMiddleware } from "@src/middleware";
 import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
 import { NexusContext } from "@src/rpc";
-import { safeJsonStringify } from "@src/utils";
 import { createServer } from "node:http";
 import pino from "pino";
 
@@ -30,6 +28,12 @@ const myEventHandler = async (event: SomeEvent, context: NexusContext) => {
   }, 1000);
 };
 
+const myOtherEventHandler = async (event: SomeEvent, context: NexusContext) => {
+  setTimeout(() => {
+    context.config.logger.info(`Handling event again: ${event.kerem}`);
+  }, 1000);
+};
+
 const nexus = Nexus.create({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
@@ -39,6 +43,10 @@ const nexus = Nexus.create({
     {
       event: SomeEvent,
       handler: myEventHandler,
+    },
+    {
+      event: SomeEvent,
+      handler: myOtherEventHandler,
     },
   ],
 });
