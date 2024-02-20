@@ -33,12 +33,8 @@ export class Nexus<TServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
   private constructor(
-    private readonly options: NexusConfigOptions<TServerContext> // TODO: break config into 2 parts: static and dynamic. the first one should
-    // functions at best, or ignore it completely
-  ) // be in charge of producing things that treat the context as an argument into
-  // the second one should be in charge of actually building the context, and eventually passing
-  // it into the dyanmic config.
-  {}
+    private readonly options: NexusConfigOptions<TServerContext>
+  ) {}
 
   private async handleNexusContext(context: NexusContext<TServerContext>) {
     const bus = context.config
