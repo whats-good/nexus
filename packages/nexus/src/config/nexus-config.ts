@@ -38,7 +38,7 @@ export type NexusConfigOptions<TServerContext> = {
   eventHandlers?: EventAndHandlerPair<any, TServerContext>[];
 };
 
-export class NexusConfig<TServerContext> {
+export class NexusConfig<TServerContext = unknown> {
   public readonly cacheHandler?: CacheHandler<TServerContext>;
   public readonly chainRegistry: ChainRegistry;
   public readonly nodeProviderRegistry: NodeProviderRegistry;

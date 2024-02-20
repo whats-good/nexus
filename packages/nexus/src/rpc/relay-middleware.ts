@@ -11,7 +11,10 @@ import { ErrorResponsePayload } from "./schemas";
 import { RpcEndpointPool } from "@src/rpc-endpoint";
 
 export class RelaySuccessResponseEvent extends NexusEvent {
-  constructor(public readonly response: RpcSuccessResponse) {
+  constructor(
+    public readonly response: RpcSuccessResponse,
+    public readonly context: NexusContext<any>
+  ) {
     super();
   }
 }
@@ -57,7 +60,7 @@ export const relayMiddleware = async <TServerContext>(
         relaySuccess.response.result
       );
 
-      context.eventBus.emit(new RelaySuccessResponseEvent(response));
+      context.eventBus.emit(new RelaySuccessResponseEvent(response, context));
 
       return context.respond(response);
     }

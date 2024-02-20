@@ -34,8 +34,8 @@ export class Nexus<TServerContext>
 {
   private constructor(
     private readonly options: NexusConfigOptions<TServerContext> // TODO: break config into 2 parts: static and dynamic. the first one should
-    // functions at best, or ignore it completely
-  ) // be in charge of producing things that treat the context as an argument into
+    // be in charge of producing things that treat the context as an argument into
+  ) // functions at best, or ignore it completely
   // the second one should be in charge of actually building the context, and eventually passing
   // it into the dyanmic config.
   {}
@@ -56,7 +56,7 @@ export class Nexus<TServerContext>
     safeAsyncNextTick(
       async () => {
         logger.debug("running events");
-        await bus.runEvents(context);
+        await bus.runEvents(context.config);
       },
       () => {}
     );

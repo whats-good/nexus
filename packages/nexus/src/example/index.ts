@@ -3,9 +3,9 @@ import { CHAIN } from "@src/chain";
 import { NexusEvent } from "@src/events";
 import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
-import { NexusContext } from "@src/rpc";
 import { createServer } from "node:http";
 import pino from "pino";
+import { NexusConfig } from "@src/config";
 
 let i = 0;
 
@@ -22,15 +22,15 @@ class SomeEvent extends NexusEvent {
   }
 }
 
-const myEventHandler = async (event: SomeEvent, context: NexusContext) => {
+const myEventHandler = async (event: SomeEvent, config: NexusConfig) => {
   setTimeout(() => {
-    context.config.logger.info(`Handling event: ${event.kerem}`);
+    config.logger.info(`Handling event: ${event.kerem}`);
   }, 1000);
 };
 
-const myOtherEventHandler = async (event: SomeEvent, context: NexusContext) => {
+const myOtherEventHandler = async (event: SomeEvent, config: NexusConfig) => {
   setTimeout(() => {
-    context.config.logger.info(`Handling event again: ${event.kerem}`);
+    config.logger.info(`Handling event again: ${event.kerem}`);
   }, 1000);
 };
 

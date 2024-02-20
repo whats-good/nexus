@@ -1,8 +1,8 @@
 import { Constructor } from "@src/utils";
 import { NexusEvent } from "./nexus-event";
-import { NexusContext } from "@src/rpc";
 import { NexusEventHandler } from "./nexus-event-handler";
 import { Logger } from "@src/logger";
+import { NexusConfig } from "@src/config";
 
 export type EventAndHandlerPair<E extends NexusEvent, TServerContext> = {
   event: Constructor<E>;
@@ -14,7 +14,7 @@ export interface IEmit {
 }
 
 export interface IRunEvents<TServerContext = unknown> {
-  runEvents(context: NexusContext<TServerContext>): Promise<void>;
+  runEvents(config: NexusConfig<TServerContext>): Promise<void>;
 }
 
 export class NexusEventBus<TServerContext = unknown>
@@ -56,27 +56,27 @@ export class NexusEventBus<TServerContext = unknown>
 
   private getPromisesForEvent(
     event: NexusEvent,
-    context: NexusContext<TServerContext>
+    config: NexusConfig<TServerContext>
   ): Promise<void>[] {
     const handlersSet = this.handlers.get(event.constructor as any);
     const handlersList = handlersSet ? Array.from(handlersSet) : [];
     if (handlersList.length === 0) {
       this.logger.debug(`No handlers for event: ${event.constructor.name}`);
     }
-    return handlersList.map((handler) => handler(event, context));
+    return handlersList.map((handler) => handler(event, config));
 
     // TODO: add error handling
   }
 
   private getPromisesForEvents(
     events: NexusEvent[],
-    context: NexusContext<TServerContext>
+    config: NexusConfig<TServerContext>
   ): Promise<void>[] {
     let promises: Promise<void>[] = [];
     events.forEach((event) => {
       const currentEventPromises: Promise<void>[] = this.getPromisesForEvent(
         event,
-        context
+        config
       );
       promises = promises.concat(currentEventPromises);
     });
@@ -85,13 +85,13 @@ export class NexusEventBus<TServerContext = unknown>
     return promises;
   }
 
-  public async runEvents(context: NexusContext<TServerContext>): Promise<void> {
+  public async runEvents(config: NexusConfig<TServerContext>): Promise<void> {
     let i = 0;
     while (this.pendingEvents.length > 0) {
       this.logger.debug(`Running events iteration: ${i++}`);
       const pendingEvents = this.pendingEvents;
       this.pendingEvents = [];
-      const promises = this.getPromisesForEvents(pendingEvents, context);
+      const promises = this.getPromisesForEvents(pendingEvents, config);
       await Promise.all(promises);
     }
   }
