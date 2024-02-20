@@ -18,7 +18,7 @@ export const requestFilterMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
   next: NextFn
 ): Promise<void> => {
-  const { logger } = context.config;
+  const { logger } = context.container;
   logger.debug("request filter middleware");
   const { chain, request } = context;
   const { rpcMethod } = request;

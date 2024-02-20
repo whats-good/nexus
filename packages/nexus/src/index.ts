@@ -1,4 +1,4 @@
-export { NexusConfig } from "./config";
+export { Container } from "./dependency-injection";
 export type { NexusConfigOptions } from "./config";
 export { RpcMethod, RPC_METHOD_BUILDER } from "./rpc-method-desciptor";
 export { CHAIN, Chain } from "./chain";

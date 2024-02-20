@@ -7,7 +7,7 @@ export const cacheMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
   next: NextFn
 ) => {
-  const { logger, cacheHandler } = context.config;
+  const { logger, cacheHandler } = context.container;
   logger.debug("cache middleware");
   const { request, eventBus } = context;
 

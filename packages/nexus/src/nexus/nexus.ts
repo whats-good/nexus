@@ -1,4 +1,4 @@
-import { NexusConfig, NexusConfigOptions } from "@src/config";
+import { NexusConfigOptions } from "@src/config";
 import {
   IntString,
   NexusNotFoundResponse,
@@ -16,6 +16,7 @@ import {
   createServerAdapter,
 } from "@whatwg-node/server";
 import { z } from "zod";
+import { Container } from "@src/dependency-injection";
 
 type NexusServerInstance<TServerContext> = ServerAdapter<
   TServerContext,
@@ -37,10 +38,10 @@ export class Nexus<TServerContext>
   ) {}
 
   private async handleNexusContext(context: NexusContext<TServerContext>) {
-    const bus = context.config
+    const bus = context.container
       .eventBus as unknown as IRunEvents<TServerContext>;
-    const { logger } = context.config;
-    const { middlewareManager } = context.config;
+    const { logger } = context.container;
+    const { middlewareManager } = context.container;
     await middlewareManager.run(context);
 
     if (!context.response) {
@@ -52,7 +53,7 @@ export class Nexus<TServerContext>
     safeAsyncNextTick(
       async () => {
         logger.debug("running events");
-        await bus.runEvents(context.config);
+        await bus.runEvents(context.container);
       },
       () => {}
     );
@@ -62,11 +63,11 @@ export class Nexus<TServerContext>
   }
 
   private async handleChainIdRoute(
-    config: NexusConfig<TServerContext>,
+    container: Container<TServerContext>,
     request: Request,
     params: PathParamsOf<typeof chainIdRoute>
   ) {
-    const nexusContextFactory = new NexusContextFactory(config);
+    const nexusContextFactory = new NexusContextFactory(container);
 
     const result = await nexusContextFactory.from(request, params);
     if (result.kind === "success") {
@@ -80,7 +81,7 @@ export class Nexus<TServerContext>
     request: Request,
     serverContext: TServerContext
   ): Promise<Response> => {
-    const config = NexusConfig.fromOptions(this.options, {
+    const container = Container.fromOptionsAndRequest(this.options, {
       context: serverContext,
       request,
     });
@@ -88,7 +89,7 @@ export class Nexus<TServerContext>
     const chainIdParams = chainIdRoute.match(request.url);
 
     if (chainIdParams) {
-      return this.handleChainIdRoute(config, request, chainIdParams);
+      return this.handleChainIdRoute(container, request, chainIdParams);
     }
 
     return new NexusNotFoundResponse().buildResponse();

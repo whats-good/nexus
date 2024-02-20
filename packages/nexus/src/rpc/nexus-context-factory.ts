@@ -10,10 +10,10 @@ import {
 } from "./rpc-response";
 import { RpcRequest, UnknownRpcRequest } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
-import { NexusConfig } from "@src/config";
+import { Container } from "@src/dependency-injection";
 
 export class NexusContextFactory<TServerContext> {
-  constructor(private readonly config: NexusConfig<TServerContext>) {}
+  constructor(private readonly container: Container<TServerContext>) {}
 
   private async toRpcRequest(request: Request): Promise<
     | {
@@ -44,7 +44,7 @@ export class NexusContextFactory<TServerContext> {
       };
     }
 
-    const rpcMethod = this.config.rpcMethodRegistry.get(
+    const rpcMethod = this.container.rpcMethodRegistry.get(
       parsedBasePayload.data.method
     );
 
@@ -98,7 +98,7 @@ export class NexusContextFactory<TServerContext> {
     const { rpcRequest } = result;
     const responseId = rpcRequest.getResponseId();
 
-    const chain = this.config.chainRegistry.getChain(pathParams.chainId);
+    const chain = this.container.chainRegistry.getChain(pathParams.chainId);
     if (!chain) {
       return {
         response: new ChainDeniedCustomErrorResponse(responseId),
@@ -109,9 +109,9 @@ export class NexusContextFactory<TServerContext> {
     const context = new NexusContext({
       request: rpcRequest,
       chain,
-      serverContext: this.config.serverContext,
-      config: this.config,
-      eventBus: this.config.eventBus,
+      serverContext: this.container.serverContext,
+      container: this.container,
+      eventBus: this.container.eventBus,
     });
     return {
       kind: "success",

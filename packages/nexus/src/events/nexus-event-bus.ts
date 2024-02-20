@@ -2,7 +2,7 @@ import { Constructor } from "@src/utils";
 import { NexusEvent } from "./nexus-event";
 import { NexusEventHandler } from "./nexus-event-handler";
 import { Logger } from "@src/logger";
-import { NexusConfig } from "@src/config";
+import { Container } from "@src/dependency-injection";
 
 export type EventAndHandlerPair<E extends NexusEvent, TServerContext> = {
   event: Constructor<E>;
@@ -14,7 +14,7 @@ export interface IEmit {
 }
 
 export interface IRunEvents<TServerContext = unknown> {
-  runEvents(config: NexusConfig<TServerContext>): Promise<void>;
+  runEvents(container: Container<TServerContext>): Promise<void>;
 }
 
 export class NexusEventBus<TServerContext = unknown>
@@ -56,27 +56,27 @@ export class NexusEventBus<TServerContext = unknown>
 
   private getPromisesForEvent(
     event: NexusEvent,
-    config: NexusConfig<TServerContext>
+    container: Container<TServerContext>
   ): Promise<void>[] {
     const handlersSet = this.handlers.get(event.constructor as any);
     const handlersList = handlersSet ? Array.from(handlersSet) : [];
     if (handlersList.length === 0) {
       this.logger.debug(`No handlers for event: ${event.constructor.name}`);
     }
-    return handlersList.map((handler) => handler(event, config));
+    return handlersList.map((handler) => handler(event, container));
 
     // TODO: add error handling
   }
 
   private getPromisesForEvents(
     events: NexusEvent[],
-    config: NexusConfig<TServerContext>
+    container: Container<TServerContext>
   ): Promise<void>[] {
     let promises: Promise<void>[] = [];
     events.forEach((event) => {
       const currentEventPromises: Promise<void>[] = this.getPromisesForEvent(
         event,
-        config
+        container
       );
       promises = promises.concat(currentEventPromises);
     });
@@ -85,13 +85,13 @@ export class NexusEventBus<TServerContext = unknown>
     return promises;
   }
 
-  public async runEvents(config: NexusConfig<TServerContext>): Promise<void> {
+  public async runEvents(container: Container<TServerContext>): Promise<void> {
     let i = 0;
     while (this.pendingEvents.length > 0) {
       this.logger.debug(`Running events iteration: ${i++}`);
       const pendingEvents = this.pendingEvents;
       this.pendingEvents = [];
-      const promises = this.getPromisesForEvents(pendingEvents, config);
+      const promises = this.getPromisesForEvents(pendingEvents, container);
       await Promise.all(promises);
     }
   }

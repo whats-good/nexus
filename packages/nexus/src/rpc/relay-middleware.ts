@@ -35,7 +35,8 @@ export const relayMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>
 ) => {
   const { chain, request } = context;
-  const { logger, nodeProviderRegistry, relayFailureConfig } = context.config;
+  const { logger, nodeProviderRegistry, relayFailureConfig } =
+    context.container;
   logger.debug("relay middleware");
   const endpoints = nodeProviderRegistry.getEndpointsForChain(chain);
   if (endpoints.length === 0) {

@@ -17,7 +17,7 @@ export const cannedResponseMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,
   next: NextFn
 ) => {
-  const { logger } = context.config;
+  const { logger } = context.container;
   logger.debug("canned response middleware");
   const { request } = context;
   const { rpcMethod } = request;

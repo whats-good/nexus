@@ -5,7 +5,7 @@ import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
 import { createServer } from "node:http";
 import pino from "pino";
-import { NexusConfig } from "@src/config";
+import { Container } from "@src/dependency-injection";
 
 let i = 0;
 
@@ -22,15 +22,15 @@ class SomeEvent extends NexusEvent {
   }
 }
 
-const myEventHandler = async (event: SomeEvent, config: NexusConfig) => {
+const myEventHandler = async (event: SomeEvent, container: Container) => {
   setTimeout(() => {
-    config.logger.info(`Handling event: ${event.kerem}`);
+    container.logger.info(`Handling event: ${event.kerem}`);
   }, 1000);
 };
 
-const myOtherEventHandler = async (event: SomeEvent, config: NexusConfig) => {
+const myOtherEventHandler = async (event: SomeEvent, container: Container) => {
   setTimeout(() => {
-    config.logger.info(`Handling event again: ${event.kerem}`);
+    container.logger.info(`Handling event again: ${event.kerem}`);
   }, 1000);
 };
 
