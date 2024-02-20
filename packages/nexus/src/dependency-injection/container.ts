@@ -34,6 +34,7 @@ export class Container<TServerContext = unknown> {
   public readonly serverContext: TServerContext;
   public readonly eventBus: IEmit;
   public readonly middlewareManager: NexusMiddlewareManager<TServerContext>;
+  public readonly request: Request;
 
   constructor(args: {
     cacheHandler?: CacheHandler<TServerContext>;
@@ -45,6 +46,7 @@ export class Container<TServerContext = unknown> {
     serverContext: TServerContext;
     eventBus: NexusEventBus<TServerContext>;
     middlewareManager: NexusMiddlewareManager<TServerContext>;
+    request: Request;
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
@@ -55,6 +57,7 @@ export class Container<TServerContext = unknown> {
     this.cacheHandler = args.cacheHandler;
     this.eventBus = args.eventBus;
     this.middlewareManager = args.middlewareManager;
+    this.request = args.request;
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -144,6 +147,7 @@ export class Container<TServerContext = unknown> {
       serverContext: args.context,
       eventBus,
       middlewareManager,
+      request: args.request,
     });
   }
 }

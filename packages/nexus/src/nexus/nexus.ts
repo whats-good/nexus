@@ -64,12 +64,11 @@ export class Nexus<TServerContext>
 
   private async handleChainIdRoute(
     container: Container<TServerContext>,
-    request: Request,
     params: PathParamsOf<typeof chainIdRoute>
   ) {
     const nexusContextFactory = new NexusContextFactory(container);
 
-    const result = await nexusContextFactory.from(request, params);
+    const result = await nexusContextFactory.from(container.request, params);
     if (result.kind === "success") {
       return this.handleNexusContext(result.context);
     } else {
@@ -89,7 +88,7 @@ export class Nexus<TServerContext>
     const chainIdParams = chainIdRoute.match(request.url);
 
     if (chainIdParams) {
-      return this.handleChainIdRoute(container, request, chainIdParams);
+      return this.handleChainIdRoute(container, chainIdParams);
     }
 
     return new NexusNotFoundResponse().buildResponse();
