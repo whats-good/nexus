@@ -34,8 +34,8 @@ export class Nexus<TServerContext>
 {
   private constructor(
     private readonly options: NexusConfigOptions<TServerContext> // TODO: break config into 2 parts: static and dynamic. the first one should
-    // be in charge of producing things that treat the context as an argument into
-  ) // functions at best, or ignore it completely
+    // functions at best, or ignore it completely
+  ) // be in charge of producing things that treat the context as an argument into
   // the second one should be in charge of actually building the context, and eventually passing
   // it into the dyanmic config.
   {}
@@ -71,19 +71,6 @@ export class Nexus<TServerContext>
     params: PathParamsOf<typeof chainIdRoute>
   ) {
     const nexusContextFactory = new NexusContextFactory(config);
-    // TODO: how can we instrument pre-context failures and events?
-    // the current eventBus system assumes the existence of a NexusContext
-    // AND a nexusConfig instance.
-    // maybe some events should be emitted before the context is created?
-    // and maybe events should optionally hold the context object inside,
-    // rather than relying on the context to be an argument in their respective event handlers?
-    // ^^^^ THIS IS THE MOVE ^^^^
-    // if an event needs its context, it should be passed in as an argument.
-    // otherwise, a solo, empty, context-less event is not just okay, but preferred.
-    // ~~~~
-    // ~~~~
-    // But then all events have to be aware of TServerContext, which is not ideal.
-    // Maybe context can stay in the handler after all.
 
     const result = await nexusContextFactory.from(request, params);
     if (result.kind === "success") {
