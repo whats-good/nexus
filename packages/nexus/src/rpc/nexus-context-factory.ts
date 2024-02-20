@@ -5,13 +5,11 @@ import {
   InvalidRequestErrorResponse,
   MethodNotFoundErrorResponse,
   ParseErrorResponse,
-  ProviderNotConfiguredCustomErrorResponse,
   RpcErrorResponse,
   RpcResponse,
 } from "./rpc-response";
 import { RpcRequest, UnknownRpcRequest } from "./rpc-request";
 import { RpcRequestPayloadSchema } from "./schemas";
-import { RpcEndpointPool } from "@src/rpc-endpoint";
 import { NexusConfig } from "@src/config";
 
 export class NexusContextFactory<TServerContext> {
@@ -107,26 +105,10 @@ export class NexusContextFactory<TServerContext> {
         kind: "rpc-response",
       };
     }
-    const endpoints =
-      this.config.nodeProviderRegistry.getEndpointsForChain(chain);
-    if (endpoints.length === 0) {
-      return {
-        response: new ProviderNotConfiguredCustomErrorResponse(responseId),
-        kind: "rpc-response",
-      };
-    }
-
-    this.config.logger.info("pool created.");
-    const rpcEndpointPool = new RpcEndpointPool(
-      endpoints,
-      this.config.relayFailureConfig,
-      this.config.logger
-    );
 
     const context = new NexusContext({
       request: rpcRequest,
       chain,
-      rpcEndpointPool,
       serverContext: this.config.serverContext,
       config: this.config,
       eventBus: this.config.eventBus,

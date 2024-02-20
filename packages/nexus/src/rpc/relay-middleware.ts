@@ -4,9 +4,11 @@ import {
   RpcSuccessResponse,
   RpcResponse,
   InternalErrorResponse,
+  ProviderNotConfiguredCustomErrorResponse,
 } from "./rpc-response";
 import { NexusEvent } from "@src/events";
 import { ErrorResponsePayload } from "./schemas";
+import { RpcEndpointPool } from "@src/rpc-endpoint";
 
 export class RelaySuccessResponseEvent extends NexusEvent {
   constructor(public readonly response: RpcSuccessResponse) {
@@ -29,9 +31,22 @@ export class RelayUnexpectedErrorEvent extends NexusEvent {
 export const relayMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>
 ) => {
-  const { logger } = context.config;
+  const { chain, request } = context;
+  const { logger, nodeProviderRegistry, relayFailureConfig } = context.config;
   logger.debug("relay middleware");
-  const { request, rpcEndpointPool } = context;
+  const endpoints = nodeProviderRegistry.getEndpointsForChain(chain);
+  if (endpoints.length === 0) {
+    return context.respond(
+      new ProviderNotConfiguredCustomErrorResponse(request.getResponseId())
+    );
+  }
+
+  logger.info("pool created.");
+  const rpcEndpointPool = new RpcEndpointPool(
+    endpoints,
+    relayFailureConfig,
+    logger
+  );
 
   try {
     const relaySuccess = await rpcEndpointPool.relay(request.payload);
