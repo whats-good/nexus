@@ -164,3 +164,12 @@ export class BadUrlCustomErrorResponse extends NexusCustomErrorResponse {
     super();
   }
 }
+
+export class UnauthorizedCustomErrorResponse extends NexusCustomErrorResponse {
+  public readonly httpStatusCode = 401;
+  public readonly errorCode = -32024;
+  public readonly message = "Unauthorized";
+  constructor(public readonly id: string | number | null) {
+    super();
+  }
+}

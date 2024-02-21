@@ -6,6 +6,8 @@ import { NODE_PROVIDER } from "@src/node-provider";
 import { createServer } from "node:http";
 import pino from "pino";
 import { Container } from "@src/dependency-injection";
+import { queryParamKeyAuthMiddleware } from "@src/auth";
+import { httpHeaderKeyAuthMiddleware } from "@src/auth/http-header-key-auth-middleware";
 
 let i = 0;
 
@@ -34,11 +36,22 @@ const myOtherEventHandler = async (event: SomeEvent, container: Container) => {
   }, 1000);
 };
 
+if (process.env.ALCHEMY_KEY === undefined) {
+  throw new Error("ALCHEMY_KEY env var is required");
+}
+if (process.env.QUERY_PARAM_AUTH_KEY === undefined) {
+  throw new Error("QUERY_PARAM_AUTH_KEY env var is required");
+}
+
 const nexus = Nexus.create({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
   logger,
   cache: new SimpleMemoryCache(),
+  middlewares: [
+    // queryParamKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "key"),
+    httpHeaderKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "X-Auth-Key"),
+  ],
   eventHandlers: [
     {
       event: SomeEvent,

@@ -25,6 +25,12 @@ export type NexusConfigOptions<TServerContext> = {
   rpcMethods?: ConfigOptionField<TServerContext, AnyRpcMethod[]>;
   logger?: ConfigOptionField<TServerContext, Logger>;
   relayFailureConfig?: ConfigOptionField<TServerContext, RelayFailureConfig>;
-  middlewares?: NexusMiddleware<TServerContext>[];
-  eventHandlers?: EventAndHandlerPair<any, TServerContext>[];
+  middlewares?: ConfigOptionField<
+    TServerContext,
+    NexusMiddleware<TServerContext>[]
+  >;
+  eventHandlers?: ConfigOptionField<
+    TServerContext,
+    EventAndHandlerPair<any, TServerContext>[]
+  >;
 };

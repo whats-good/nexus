@@ -85,7 +85,8 @@ export class Nexus<TServerContext>
       request,
     });
 
-    const chainIdParams = chainIdRoute.match(request.url);
+    const url = new URL(request.url);
+    const chainIdParams = chainIdRoute.match(url.pathname);
 
     if (chainIdParams) {
       return this.handleChainIdRoute(container, chainIdParams);

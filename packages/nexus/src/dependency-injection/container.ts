@@ -117,23 +117,28 @@ export class Container<TServerContext = unknown> {
       ? new CacheHandler<TServerContext>(baseCache, logger)
       : undefined;
 
-    const eventHandlers: EventAndHandlerPair<any, TServerContext>[] = [
-      ...(options.eventHandlers || []),
-      {
-        event: EVENT.RelaySuccessResponseEvent,
-        handler: cacheWriteOnRelaySuccess,
-      },
-    ];
+    const givenEventHandlers =
+      Container.getValueOrExecute(options.eventHandlers, args) || [];
+
+    const eventHandlers: EventAndHandlerPair<any, TServerContext>[] =
+      givenEventHandlers.concat([
+        {
+          event: EVENT.RelaySuccessResponseEvent,
+          handler: cacheWriteOnRelaySuccess,
+        },
+      ]);
 
     const eventBus = new NexusEventBus(eventHandlers, logger);
 
-    const middlewares = [
-      ...(options.middlewares || []),
+    const givenMiddlewares =
+      Container.getValueOrExecute(options.middlewares, args) || [];
+
+    const middlewares = givenMiddlewares.concat([
       requestFilterMiddleware,
       cannedResponseMiddleware,
       cacheMiddleware,
       relayMiddleware,
-    ];
+    ]);
 
     const middlewareManager = new NexusMiddlewareManager(middlewares);
 
