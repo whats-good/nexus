@@ -16,7 +16,7 @@ export class ChainRegistry {
       );
     }
     this.chains.set(chain.chainId, chain);
-    this.logger.info(`Added chain ${chain.name} with id ${chain.chainId}`);
+    this.logger.debug(`Added chain ${chain.name} with id ${chain.chainId}`);
   }
 
   public addChains(chains: Chain[]) {

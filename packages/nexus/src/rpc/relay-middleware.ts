@@ -45,7 +45,7 @@ export const relayMiddleware = async <TServerContext>(
     );
   }
 
-  logger.info("pool created.");
+  logger.debug("pool created.");
   const rpcEndpointPool = new RpcEndpointPool(
     endpoints,
     relayFailureConfig,
