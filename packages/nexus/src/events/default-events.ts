@@ -9,7 +9,7 @@ export {
   CacheWriteDeniedEvent,
   CacheWriteFailureEvent,
   CacheWriteSuccessEvent,
-} from "@src/cache/cache-handler";
+} from "@src/cache/events";
 export {
   RequestFilterAllowedEvent,
   RequestFilterFailureEvent,

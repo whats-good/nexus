@@ -2,8 +2,15 @@ import { BigNumber } from "@ethersproject/bignumber";
 import type { NexusContext } from "@src/rpc";
 import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
 import type { BaseCache } from "./base-cache";
-import { NexusEvent } from "@src/events";
 import { Logger } from "@src/logger";
+import {
+  CacheReadDeniedEvent,
+  CacheReadHitEvent,
+  CacheReadMissEvent,
+  CacheWriteDeniedEvent,
+  CacheWriteFailureEvent,
+  CacheWriteSuccessEvent,
+} from "./events";
 
 type CacheHandlerReadResult =
   | {
@@ -29,22 +36,6 @@ type CacheHandlerReadResult =
       error: unknown;
     };
 
-export class CacheReadDeniedEvent extends NexusEvent {}
-
-export class CacheReadMissEvent extends NexusEvent {
-  constructor(
-    public readonly kind: "not-found" | "unexpected-error" | "invalid"
-  ) {
-    super();
-  }
-}
-
-export class CacheReadHitEvent extends NexusEvent {
-  constructor(public readonly kind: "success" | "legal-error") {
-    super();
-  }
-}
-
 type CacheHandlerWriteResult =
   | {
       kind: "success";
@@ -60,21 +51,6 @@ type CacheHandlerWriteResult =
       kind: "invalid-result";
       result: unknown;
     };
-
-export class CacheWriteSuccessEvent extends NexusEvent {}
-
-export class CacheWriteDeniedEvent extends NexusEvent {}
-
-export class CacheWriteFailureEvent extends NexusEvent {
-  constructor(
-    public readonly kind:
-      | "unexpected-error"
-      | "not-configured"
-      | "invalid-result"
-  ) {
-    super();
-  }
-}
 
 // TODO: the cache handler is doing to much allow/deny work by parsing the input.
 // especially the read part.
