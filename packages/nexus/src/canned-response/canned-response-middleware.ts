@@ -1,17 +1,8 @@
 import { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
-import { NexusContext } from "./nexus-context";
-import { RpcSuccessResponse } from "./rpc-response";
-import { NexusEvent } from "@src/events";
-
-export class CannedResponseHitEvent extends NexusEvent {}
-export class CannedResponseMissEvent extends NexusEvent {
-  constructor(
-    public readonly kind: "not-configured" | "unexpected-error" | "cancelled"
-  ) {
-    super();
-  }
-}
+import { NexusContext } from "../rpc/nexus-context";
+import { RpcSuccessResponse } from "../rpc/rpc-response";
+import { CannedResponseHitEvent } from "./events";
 
 export const cannedResponseMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,

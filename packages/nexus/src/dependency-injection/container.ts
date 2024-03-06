@@ -12,7 +12,7 @@ import {
   RPC_METHOD_BUILDER,
   RpcMethodRegistry,
 } from "@src/rpc-method-desciptor";
-import { cannedResponseMiddleware } from "@src/rpc/canned-response-middleware";
+import { cannedResponseMiddleware } from "@src/canned-response";
 import { relayMiddleware } from "@src/rpc/relay-middleware";
 import { requestFilterMiddleware } from "@src/rpc/request-filter-middleware";
 import { Logger } from "@src/logger";

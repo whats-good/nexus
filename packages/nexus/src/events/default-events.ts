@@ -1,7 +1,7 @@
 export {
   CannedResponseHitEvent,
   CannedResponseMissEvent,
-} from "@src/rpc/canned-response-middleware";
+} from "@src/canned-response/events";
 export {
   CacheReadHitEvent,
   CacheReadMissEvent,
