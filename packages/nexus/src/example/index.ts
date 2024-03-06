@@ -7,9 +7,6 @@ import { createServer } from "node:http";
 import pino from "pino";
 import { Container } from "@src/dependency-injection";
 import { queryParamKeyAuthMiddleware } from "@src/auth";
-import { httpHeaderKeyAuthMiddleware } from "@src/auth/http-header-key-auth-middleware";
-
-let i = 0;
 
 const logger = pino({
   transport: {
@@ -49,8 +46,8 @@ const nexus = Nexus.create({
   logger,
   cache: new SimpleMemoryCache(),
   middlewares: [
-    // queryParamKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "key"),
-    httpHeaderKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "X-Auth-Key"),
+    queryParamKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "key"),
+    // httpHeaderKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "X-Auth-Key"),
   ],
   eventHandlers: [
     {
