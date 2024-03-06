@@ -33,9 +33,12 @@ const chainIdRoute = new Route(
 export class Nexus<TServerContext>
   implements ServerAdapterBaseObject<TServerContext>
 {
+  public readonly port?: number;
   private constructor(
     private readonly options: NexusConfigOptions<TServerContext>
-  ) {}
+  ) {
+    this.port = options.port;
+  }
 
   private async handleNexusContext(context: NexusContext<TServerContext>) {
     const bus = context.container

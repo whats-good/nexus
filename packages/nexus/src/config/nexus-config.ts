@@ -33,4 +33,5 @@ export type NexusConfigOptions<TServerContext> = {
     TServerContext,
     EventAndHandlerPair<any, TServerContext>[]
   >;
+  port?: number;
 };

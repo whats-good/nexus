@@ -45,11 +45,12 @@ const nexus = Nexus.create({
       handler: onUnauthorizedAccess,
     },
   ],
+  port: 4005,
 });
 
 // Step 4: Start the server
-createServer(nexus).listen(4005, () => {
-  console.log(`🚀 Server ready at http://localhost:4005`);
+createServer(nexus).listen(nexus.port, () => {
+  console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
 });
 
 // Step 5: Send a request to the server
