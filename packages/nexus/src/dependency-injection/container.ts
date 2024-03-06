@@ -14,7 +14,7 @@ import {
 } from "@src/rpc-method-desciptor";
 import { cannedResponseMiddleware } from "@src/canned-response";
 import { relayMiddleware } from "@src/rpc/relay-middleware";
-import { requestFilterMiddleware } from "@src/rpc/request-filter-middleware";
+import { requestFilterMiddleware } from "@src/request-filter";
 import { Logger } from "@src/logger";
 import { NexusConfigOptions } from "@src/config";
 import {

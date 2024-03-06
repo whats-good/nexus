@@ -1,18 +1,12 @@
 import { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
-import { NexusContext } from "./nexus-context";
-import { MethodDeniedCustomErrorResponse } from "./rpc-response";
-import { NexusEvent } from "@src/events";
-
-export class RequestFilterDeniedEvent extends NexusEvent {}
-
-export class RequestFilterFailureEvent extends NexusEvent {
-  constructor(public readonly error: unknown) {
-    super();
-  }
-}
-
-export class RequestFilterAllowedEvent extends NexusEvent {}
+import { NexusContext } from "../rpc/nexus-context";
+import { MethodDeniedCustomErrorResponse } from "../rpc/rpc-response";
+import {
+  RequestFilterAllowedEvent,
+  RequestFilterDeniedEvent,
+  RequestFilterFailureEvent,
+} from "./events";
 
 export const requestFilterMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,

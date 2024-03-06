@@ -14,7 +14,7 @@ export {
   RequestFilterAllowedEvent,
   RequestFilterFailureEvent,
   RequestFilterDeniedEvent,
-} from "@src/rpc/request-filter-middleware";
+} from "@src/request-filter/events";
 export {
   RelayLegalErrorResponeEvent,
   RelaySuccessResponseEvent,
