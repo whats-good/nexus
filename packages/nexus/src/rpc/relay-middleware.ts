@@ -6,30 +6,12 @@ import {
   InternalErrorResponse,
   ProviderNotConfiguredCustomErrorResponse,
 } from "./rpc-response";
-import { NexusEvent } from "@src/events";
-import { ErrorResponsePayload } from "./schemas";
 import { RpcEndpointPool } from "@src/rpc-endpoint";
-
-export class RelaySuccessResponseEvent extends NexusEvent {
-  constructor(
-    public readonly response: RpcSuccessResponse,
-    public readonly context: NexusContext<any>
-  ) {
-    super();
-  }
-}
-
-export class RelayLegalErrorResponeEvent extends NexusEvent {
-  constructor(public readonly error: ErrorResponsePayload) {
-    super();
-  }
-}
-
-export class RelayUnexpectedErrorEvent extends NexusEvent {
-  constructor(public readonly error: unknown) {
-    super();
-  }
-}
+import {
+  RelaySuccessResponseEvent,
+  RelayLegalErrorResponeEvent,
+  RelayUnexpectedErrorEvent,
+} from "./events";
 
 export const relayMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>

@@ -19,4 +19,4 @@ export {
   RelayLegalErrorResponeEvent,
   RelaySuccessResponseEvent,
   RelayUnexpectedErrorEvent,
-} from "@src/rpc/relay-middleware";
+} from "@src/rpc/events";
