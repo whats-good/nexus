@@ -2,7 +2,7 @@ import { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
 import { NexusContext } from "../rpc/nexus-context";
 import { RpcSuccessResponse } from "../rpc/rpc-response";
-import { CannedResponseHitEvent } from "./events";
+import { CannedResponseHitEvent, CannedResponseMissEvent } from "./events";
 
 export const cannedResponseMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,

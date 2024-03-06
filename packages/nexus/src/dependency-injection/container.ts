@@ -4,7 +4,7 @@ import {
   cacheMiddleware,
 } from "@src/cache";
 import { ChainRegistry } from "@src/chain";
-import { IEmit, NexusEventBus, EventAndHandlerPair, EVENT } from "@src/events";
+import { IEmit, NexusEventBus, EventAndHandlerPair } from "@src/events";
 import { NexusMiddlewareManager } from "@src/middleware";
 import { NodeProviderRegistry } from "@src/node-provider";
 import { RelayFailureConfig } from "@src/rpc-endpoint";
@@ -23,6 +23,7 @@ import {
   ConfigOptionFnArgs,
 } from "@src/config";
 import pino from "pino";
+import { RelaySuccessResponseEvent } from "@src/rpc/events";
 
 export class Container<TServerContext = unknown> {
   public readonly cacheHandler?: CacheHandler<TServerContext>;
@@ -123,7 +124,7 @@ export class Container<TServerContext = unknown> {
     const eventHandlers: EventAndHandlerPair<any, TServerContext>[] =
       givenEventHandlers.concat([
         {
-          event: EVENT.RelaySuccessResponseEvent,
+          event: RelaySuccessResponseEvent,
           handler: cacheWriteOnRelaySuccess,
         },
       ]);

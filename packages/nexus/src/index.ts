@@ -10,3 +10,4 @@ export {
 export type { ChainSupportInitArgs } from "./node-provider";
 export type { BaseCache } from "./cache";
 export { Nexus } from "./nexus";
+export * as EVENT from "./events/default-events";

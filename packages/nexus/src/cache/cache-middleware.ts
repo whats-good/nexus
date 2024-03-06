@@ -1,7 +1,7 @@
 import { NextFn } from "@src/middleware";
 import { NexusContext } from "../rpc/nexus-context";
 import { RpcErrorResponse, RpcSuccessResponse } from "../rpc/rpc-response";
-import { CacheReadDeniedEvent } from "./cache-handler";
+import { CacheReadDeniedEvent } from "./events";
 
 export const cacheMiddleware = async <TServerContext>(
   context: NexusContext<TServerContext>,

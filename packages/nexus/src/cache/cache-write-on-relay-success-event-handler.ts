@@ -1,8 +1,8 @@
 import { NexusEventHandler } from "@src/events/nexus-event-handler";
-import { RelaySuccessResponseEvent } from "@src/rpc/relay-middleware";
 import { safeAsyncNextTick, safeJsonStringify } from "@src/utils";
-import { CacheWriteDeniedEvent } from "./cache-handler";
 import { Container } from "@src/dependency-injection";
+import { RelaySuccessResponseEvent } from "@src/rpc/events";
+import { CacheWriteDeniedEvent } from "./events";
 
 export const cacheWriteOnRelaySuccess: NexusEventHandler<
   RelaySuccessResponseEvent,
