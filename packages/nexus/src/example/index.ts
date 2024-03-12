@@ -62,6 +62,7 @@ const nexus = Nexus.create({
   ],
 });
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises -- library type issue
 createServer(nexus).listen(4005, () => {
   // TODO: separate config into 2 parts:
   // first, a static config that doesn't depend on the server context.

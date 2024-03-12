@@ -60,6 +60,7 @@ export class NexusEventBus<TServerContext = unknown>
     event: NexusEvent,
     container: Container<TServerContext>
   ): Promise<void>[] {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- this function needs the any type
     const handlersSet = this.handlers.get(event.constructor as any);
     const handlersList = handlersSet ? Array.from(handlersSet) : [];
 
