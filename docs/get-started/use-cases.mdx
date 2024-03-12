@@ -15,11 +15,6 @@ Most node providers bill their clients based on the number of requests they serv
 
 Since blocks are mined at fixed intervals, this is the perfect use-case for caching read requests. In fact, this is how most node providers operate: they wrap their nodes with a reverse proxy of their own, and serve their clients their own cached results. You can employ this very same strategy and significantly cut down on your node provider costs. Check out [Caching](/features/caching) for more information.
 
-<Warning>
-  Caching is currently under development and will be available in the next
-  release.
-</Warning>
-
 ## Privacy
 
 While there are many successful and trustworthy node providers out there, it is still a good idea to avoid exposing the IP addresses of your users. When you use `Nexus` as a reverse proxy, the node provider will only see the IP address of your `Nexus` server, thus respecting the privacy of your end users.
@@ -45,9 +40,6 @@ If one of the RPC providers you’re using experiences failure or downtime, `Nex
   availability of your providers and will automatically forward requests to the
   fastest one.
 </Note>
-Furthermore, if you deploy `Nexus` as a [Cloudflare Worker](/integrations/cloudflare-worker),
-you will benefit from Cloudflare’s global network of edge servers, which will further
-increase your availability and reduce latency.
 
 ## Key protection
 
@@ -64,11 +56,6 @@ Industry leaders have done good progress in implementing [access protection](htt
 IP addresses. These are all great solutions, but they are not universal or standard. If you commit
 to a provider that implements these measures, you will risk vendor lock-in. If you switch providers,
 you will risk key exposure.
-
-<Warning>
-  `Nexus` is currently under development. Token based access protection
-  (described below) will be available in the next release.
-</Warning>
 
 `Nexus` brings the best of both worlds: you can use any provider you want, and
 you can protect your keys from being exposed. `Nexus` will protect your keys and
@@ -89,7 +76,7 @@ The industry standard for access protection is to isolate modes of access into "
   (described below) will be available in an upcoming release.
 </Warning>
 
-`Nexus` allows you to create fine-grained scopes via [jwt](https://jwt.io) tokens and distribute them to your users at runtime. If you're already using a token-based authentication system, you can configure your services to sign `Nexus` tokens as you authenticate your users. Check out [Authorization](/features/authorization) docs for more information.
+`Nexus` allows you to create fine-grained scopes via middlewares. If you're already using a token-based authentication system, you can configure your services to sign `Nexus` tokens as you authenticate your users. Check out [Authorization](/features/authorization) and [Middlewares](/features/middlewares) for more information.
 
 ## Decentralization
 
@@ -120,19 +107,7 @@ Alternatives include orchestrating a series of api calls directly on the client-
 
 `Nexus` allows you to execute custom code before, during and after your web3 transactions, allowing you to handle state transitions atomically and in a single request. Since this happens on the server-side, you are no longer required to implement web2 subscriptions on the client-side. You are further protected from client-specific failure modes, such as network connectivity issues or request interruptions (e.g. user closes the browser tab in the middle of a state transition).
 
-`Nexus` does this through [Lifecycle Hooks](/features/lifecycle-hooks), which allow you to coordinate web2 and web3 state updates in a single request. This is a much more robust solution, as it allows you to handle errors and retries in a single place, and it also allows you to implement atomicity, as you can rollback your web2 state if your web3 transaction fails. `Nexus` allows you to inject custom code in the following lifecycle stages:
-
-- `pre-request`: before the request is processed by `Nexus`
-- `pre-relay`: before the request is relayed to the blockchain
-- `post-relay`: after the request is relayed to the blockchain
-- `post-receipt`: after the transaction receipt is received
-- `pre-response`: before the response is sent to the client
-- `post-response`: after the response is sent to the client
-
-<Warning>
-  `Nexus` is currently under development. Lifecycle hooks will be available in
-  an upcoming release.
-</Warning>
+`Nexus` does this through [Event Handlers](/features/event-handlers), which allow you to coordinate web2 and web3 state updates in a single request. This is a much more robust solution, as it allows you to handle errors and retries in a single place, and it also allows you to implement atomicity, as you can rollback your web2 state if your web3 transaction fails. `Nexus` allows you to inject custom code based on built-in events, as well as custom events that you define yourself.
 
 ## Rate limiting
 

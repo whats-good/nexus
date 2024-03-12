@@ -44,7 +44,6 @@
     {
       "group": "Development",
       "pages": [
-        "development/setup",
         {
           "group": "Features",
           "pages": [
@@ -52,10 +51,11 @@
             "features/registry",
             "features/request-cycling",
             "features/adaptive-performance",
+            "features/middlewares",
             "features/authorization",
             "features/caching",
             "features/quorum",
-            "features/lifecycle-hooks",
+            "features/event-handlers",
             "features/rate-limiting",
             "features/observability"
           ]
