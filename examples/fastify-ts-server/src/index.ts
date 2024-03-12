@@ -6,7 +6,7 @@ import {
   EVENT,
   Container,
 } from "@whatsgood/nexus";
-import Fastify from "fastify";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 
 // Step 1: Set up environment variables
 // - Try putting your Alchemy key and a query param auth key in a .env file.
@@ -35,7 +35,10 @@ const onUnauthorizedAccess = async (
 // - Nexus ships with a query param auth middleware, which you can use to gate access to your server.
 // - If you don't neet authorization, you can remove the queryParamKeyAuthMiddleware from the middlewares array.
 // - You can also create your own middlewares and event handlers.
-const nexus = Nexus.create({
+const nexus = Nexus.create<{
+  req: FastifyRequest;
+  reply: FastifyReply;
+}>({
   nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
   chains: [CHAIN.EthMainnet],
   middlewares: [queryParamKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY)],
