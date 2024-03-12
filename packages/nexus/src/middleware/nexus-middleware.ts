@@ -1,4 +1,4 @@
-import { NexusContext } from "@src/rpc";
+import type { NexusContext } from "@src/rpc";
 
 export type NextFn = () => Promise<void>;
 

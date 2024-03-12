@@ -7,10 +7,10 @@ interface CacheConfigOptionReadFnArgs<P> {
   highestKnownBlockNumber: BigNumber;
   method: string;
 }
-type CacheConfigOptionReadFn<T, P, R> = (
+type CacheConfigOptionReadFn<T, P> = (
   args: CacheConfigOptionReadFnArgs<P>
 ) => T;
-type CacheConfigOptionReadField<T, P, R> = T | CacheConfigOptionReadFn<T, P, R>;
+type CacheConfigOptionReadField<T, P> = T | CacheConfigOptionReadFn<T, P>;
 
 interface CacheConfigOptionWriteFnArgs<P, R>
   extends CacheConfigOptionReadFnArgs<P> {
@@ -46,9 +46,9 @@ type FinalizedWriteTimeConfigResult =
     };
 
 export interface CacheConfigOptions<P, R> {
-  paramsKeySuffix: CacheConfigOptionReadField<string, P, R>;
+  paramsKeySuffix: CacheConfigOptionReadField<string, P>;
   ttl: CacheConfigOptionWriteField<number, P, R>;
-  disableRead?: CacheConfigOptionReadField<boolean, P, R>;
+  disableRead?: CacheConfigOptionReadField<boolean, P>;
   disableWrite?: CacheConfigOptionWriteField<boolean, P, R>;
 }
 
