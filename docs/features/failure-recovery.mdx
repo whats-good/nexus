@@ -1,0 +1,33 @@
+---
+title: "Failure Recovery"
+description: "Learn how to configure failure recorvery in Nexus"
+---
+
+## Request cycling
+
+If you configure Nexus with multiple providers that support the same chain, Nexus will by default cycle requests between them. If a request to one provider fails, Nexus will try the next provider in the list. This is useful for load balancing and failover. You can configure this behavior through the `relayFailureConfig` parameter:
+
+```typescript
+const nexus = Nexus.create({
+  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
+  chains: [CHAIN.EthMainnet],
+  relayFailureConfig: {
+    kind: 'cycle-requests',
+    maxAttempts: 3,
+  },
+});
+```
+
+## Disabling request cycling
+
+If you don't want Nexus to cycle requests between providers, you can disable this behavior by setting `relayFailureConfig` to `failImmediately`:
+
+```typescript
+const nexus = Nexus.create({
+  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
+  chains: [CHAIN.EthMainnet],
+  relayFailureConfig: {
+    kind: 'fail-immediately',
+  },
+});
+```
