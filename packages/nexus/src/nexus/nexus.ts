@@ -9,7 +9,7 @@ import { IRunEvents } from "@src/events";
 import { NexusContext } from "@src/rpc";
 import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
 import { InternalErrorResponse } from "@src/rpc/rpc-response";
-import { safeAsyncNextTick } from "@src/utils";
+import { safeJsonStringify } from "@src/utils";
 import {
   ServerAdapter,
   ServerAdapterBaseObject,
@@ -18,7 +18,7 @@ import {
 import { z } from "zod";
 import { Container } from "@src/dependency-injection";
 
-type NexusServerInstance<TServerContext> = ServerAdapter<
+export type NexusServerInstance<TServerContext> = ServerAdapter<
   TServerContext,
   Nexus<TServerContext>
 >;
@@ -53,13 +53,14 @@ export class Nexus<TServerContext>
       ).buildResponse();
     }
 
-    safeAsyncNextTick(
-      async () => {
-        logger.debug("running events");
+    context.container.deferAsync(async () => {
+      logger.debug("running events");
+      try {
         await bus.runEvents(context.container);
-      },
-      () => {}
-    );
+      } catch (error) {
+        logger.error(`Error while running events: ${safeJsonStringify(error)}`);
+      }
+    });
 
     logger.debug("sending response");
     return context.response.buildResponse();

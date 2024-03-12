@@ -6,6 +6,7 @@ import { AnyRpcMethod } from "@src/rpc-method-desciptor";
 import { NodeProvider } from "@src/node-provider";
 import { NexusMiddleware } from "@src/middleware";
 import { EventAndHandlerPair } from "@src/events";
+import { DeferAsyncFn } from "@src/utils";
 
 export type ConfigOptionFnArgs<TServerContext> = {
   context: TServerContext;
@@ -34,4 +35,9 @@ export type NexusConfigOptions<TServerContext> = {
     EventAndHandlerPair<any, TServerContext>[]
   >;
   port?: number;
+
+  // use this to configure async work that can be completed after the response is sent.
+  // warning: this does not guarantee that the work will start before the response is sent.
+  // some runtimes, like Cloudflare Workers,
+  deferAsync?: ConfigOptionFn<TServerContext, DeferAsyncFn>;
 };

@@ -24,6 +24,7 @@ import {
 } from "@src/config";
 import pino from "pino";
 import { RelaySuccessResponseEvent } from "@src/rpc/events";
+import { DeferAsyncFn, defaultDeferAsync } from "@src/utils";
 
 export class Container<TServerContext = unknown> {
   public readonly cacheHandler?: CacheHandler<TServerContext>;
@@ -36,6 +37,7 @@ export class Container<TServerContext = unknown> {
   public readonly eventBus: IEmit;
   public readonly middlewareManager: NexusMiddlewareManager<TServerContext>;
   public readonly request: Request;
+  public readonly deferAsync: DeferAsyncFn;
 
   constructor(args: {
     cacheHandler?: CacheHandler<TServerContext>;
@@ -48,6 +50,7 @@ export class Container<TServerContext = unknown> {
     eventBus: NexusEventBus<TServerContext>;
     middlewareManager: NexusMiddlewareManager<TServerContext>;
     request: Request;
+    deferAsync: DeferAsyncFn;
   }) {
     this.chainRegistry = args.chainRegistry;
     this.nodeProviderRegistry = args.nodeProviderRegistry;
@@ -59,6 +62,7 @@ export class Container<TServerContext = unknown> {
     this.eventBus = args.eventBus;
     this.middlewareManager = args.middlewareManager;
     this.request = args.request;
+    this.deferAsync = args.deferAsync;
   }
 
   private static getValueOrExecute<TServerContext, TField>(
@@ -143,6 +147,10 @@ export class Container<TServerContext = unknown> {
 
     const middlewareManager = new NexusMiddlewareManager(middlewares);
 
+    const deferAsync =
+      Container.getValueOrExecute(options.deferAsync, args) ||
+      defaultDeferAsync;
+
     return new Container({
       chainRegistry,
       nodeProviderRegistry,
@@ -154,6 +162,7 @@ export class Container<TServerContext = unknown> {
       eventBus,
       middlewareManager,
       request: args.request,
+      deferAsync,
     });
   }
 }

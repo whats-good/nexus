@@ -11,6 +11,17 @@
       "resolveSourceMapLocations": ["${cwd}/**", "!**/node_modules/**"],
       "internalConsoleOptions": "openOnSessionStart",
       "outputCapture": "std"
+    },
+    {
+      "name": "Miniflare",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      // "cwd": "${workspaceFolder}/examples/cloudflare-worker",
+      "cwd": "/",
+      "resolveSourceMapLocations": null,
+      "attachExistingChildren": false,
+      "autoAttachChildProcesses": false
     }
   ]
 }
