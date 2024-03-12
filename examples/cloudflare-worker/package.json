@@ -12,10 +12,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@whatsgood/nexus": "workspace:*"
+    "@whatsgood/nexus": "workspace:*",
+    "@whatwg-node/server": "0.9.22"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230419.0",
+    "@cloudflare/workers-types": "^4.20230518.0",
     "typescript": "5.2.2",
     "wrangler": "^3.0.0"
   }

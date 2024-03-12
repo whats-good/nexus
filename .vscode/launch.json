@@ -4,11 +4,24 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug RPC Proxy",
-      "program": "${workspaceFolder}/packages/rpc-proxy/src/setup/provider.ts",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceFolder}/packages/rpc-proxy",
-      "resolveSourceMapLocations": ["!**/node_modules/**"]
+      "name": "Debug Nexus with direnv",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["./scripts/start-debug.sh"],
+      "cwd": "${workspaceFolder}/packages/nexus",
+      "resolveSourceMapLocations": ["${cwd}/**", "!**/node_modules/**"],
+      "internalConsoleOptions": "openOnSessionStart",
+      "outputCapture": "std"
+    },
+    {
+      "name": "Miniflare",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      // "cwd": "${workspaceFolder}/examples/cloudflare-worker",
+      "cwd": "/",
+      "resolveSourceMapLocations": null,
+      "attachExistingChildren": false,
+      "autoAttachChildProcesses": false
     }
   ]
 }

@@ -1,2 +1,3 @@
 export * from "./chain";
-export * from "./network";
+export * as CHAIN from "./chains";
+export * from "./chain-registry";

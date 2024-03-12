@@ -1,263 +1,103 @@
-import { Response } from "@whatwg-node/fetch";
-import type { RpcRequestCache } from "@src/cache";
-import type {
-  MethodDescriptorRegistry,
-  UnknownMethodDescriptor,
-} from "@src/method-descriptor";
-import type { Config, Logger } from "../config";
-import type { Chain } from "../chain/chain";
-import type { ServiceProvider } from "../service-provider/service-provider";
-import type { JsonRPCRequest } from "./json-rpc-types";
+import type { RpcRequestPayload } from "@src/rpc";
+import type { Logger } from "@src/logger";
 import type { RpcEndpoint } from "./rpc-endpoint";
+import type {
+  RelayLegalErrorResponse,
+  RelayResult,
+  RelaySuccessResponse,
+} from "./relay-result";
+
+// a config object that determines how to treat failed relay requests
+
+export type RelayFailureConfig = CycleRequests | FailImmediately;
+
+export interface CycleRequests {
+  kind: "cycle-requests";
+  maxAttempts: number;
+}
+
+export interface FailImmediately {
+  kind: "fail-immediately";
+}
 
 export class RpcEndpointPool {
-  public readonly chain: Chain;
+  private numAllowedAttempts: number;
+  private numAttempts = 0;
+  private currentEndpointIndex = 0;
 
-  // TODO: remove this eligibleServiceWorkers property. the reason this is here is to signal that
-  // there are providers that are eligible for the chain, but not
-  // configured. However, this should not be this class' responsibility.
+  public readonly relayAttempts: RelayResult[] = [];
 
-  public readonly eligibleServiceProviders: ServiceProvider[];
-  public readonly configuredServiceProviders: ServiceProvider[];
-  public readonly methodDescriptorRegistry: MethodDescriptorRegistry<any>;
-
-  private readonly config: Config;
-  private currentServiceProviderIndex = 0;
-  private readonly logger: Logger;
-
-  private readonly rpcRequestCache: RpcRequestCache;
-
-  constructor(params: {
-    chain: Chain;
-    eligibleServiceProviders: ServiceProvider[];
-    configuredServiceProviders: ServiceProvider[];
-    config: Config;
-    rpcRequestCache: RpcRequestCache;
-    methodDescriptorRegistry: MethodDescriptorRegistry<any>;
-  }) {
-    this.chain = params.chain;
-    this.eligibleServiceProviders = params.eligibleServiceProviders;
-    this.configuredServiceProviders = params.configuredServiceProviders;
-    this.config = params.config;
-    this.logger = this.config.logger;
-    this.rpcRequestCache = params.rpcRequestCache;
-    this.methodDescriptorRegistry = params.methodDescriptorRegistry;
+  constructor(
+    public readonly endpoints: RpcEndpoint[],
+    public readonly failureConfig: RelayFailureConfig,
+    private readonly logger: Logger
+  ) {
+    this.numAllowedAttempts =
+      this.failureConfig.kind === "cycle-requests"
+        ? this.failureConfig.maxAttempts
+        : 1;
   }
 
-  // TODO: maybe we should allow recycling of endpoints? what if one comes back up?
-  // or what if the issue was on the client side?
-
-  // TODO: maybe this function shouldn't exist, or it should be
-  // called next() and actually return the next endpoint?
-  public advance(): void {
-    if (this.hasNext()) {
-      this.currentServiceProviderIndex++;
-    }
+  private hasNextEndpoint() {
+    return this.currentEndpointIndex < this.endpoints.length;
   }
 
-  public get current(): RpcEndpoint | undefined {
-    while (this.hasNext()) {
-      const provider =
-        this.configuredServiceProviders[this.currentServiceProviderIndex];
-
-      const endpoint = provider.getRpcEndpoint(this.chain, this.config);
-
-      if (endpoint) {
-        return endpoint;
-      }
-
-      this.currentServiceProviderIndex++;
-    }
+  private hasRemainingAttempts() {
+    return this.numAttempts < this.numAllowedAttempts;
   }
 
-  // not really shows whether there is a next, but whether we should try the next
-  public hasNext(): boolean {
-    return (
-      this.currentServiceProviderIndex < this.configuredServiceProviders.length
-    );
-  }
-
-  public async isUp(): Promise<boolean> {
-    if (this.config.recoveryMode === "none") {
-      return (await this.current?.isUp()) || false;
+  private getNextEndpoint(): RpcEndpoint | null {
+    if (!this.hasNextEndpoint()) {
+      return null;
     }
 
-    while (this.hasNext()) {
-      if (await this.current?.isUp()) {
-        return true;
-      }
+    const endpoint = this.endpoints[this.currentEndpointIndex];
 
-      this.currentServiceProviderIndex++;
-    }
+    this.currentEndpointIndex += 1;
 
-    return false;
-  }
-
-  private async getCannedResponse(chain: Chain, request: JsonRPCRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Need to use the any type here since the generics are impossible to infer from within.
-    const methodDescriptor: UnknownMethodDescriptor | undefined =
-      this.methodDescriptorRegistry.getDescriptorByName(request.method);
-
-    // TODO: change how this is named. instead of calling it `...config`, find a better name.
-    // this problem is due to how the setter for this config is named. (i.e .cannedResponse).
-    // the same problem applies for the .cacheConfig property.
-
-    if (!methodDescriptor?.cannedResponse) {
-      return undefined;
-    }
-
-    const parsedParams = methodDescriptor.paramsSchema.safeParse(
-      request.params
-    );
-
-    if (!parsedParams.success) {
-      this.logger.info(
-        `Cache: Invalid params for method ${request.method}: ${parsedParams.error.message}`
-      );
-
-      return undefined;
-    }
-
-    const cannedResponse: unknown = await methodDescriptor.cannedResponse({
-      chain,
-      params: parsedParams.data,
-    });
-
-    // TODO: extend the canned response mechanism to support "Method Not Allowed".
-    // update the api to go beyond "success", and to cover "acceptable" error responses.
-
-    return cannedResponse;
+    return endpoint;
   }
 
   public async relay(
-    methodDescriptor: UnknownMethodDescriptor,
-    request: JsonRPCRequest
-  ) {
-    const parsedParams = methodDescriptor.paramsSchema.safeParse(
-      request.params
-    );
+    request: RpcRequestPayload
+  ): Promise<RelaySuccessResponse | null> {
+    while (this.hasRemainingAttempts() && this.hasNextEndpoint()) {
+      // we're using the ! operator here because we know that this.hasNextEndpoint() is true
+      const endpoint = this.getNextEndpoint()!;
 
-    if (!parsedParams.success) {
-      // TODO: what if the parsing is wrong?
-      // TODO: is this where this parsing should happen?
-      // if we're exiting our early, maybe params should be parsed before this function is called?
-      this.logger.warn(
-        `Invalid params for method ${request.method}: ${parsedParams.error.message}`
-      );
+      this.numAttempts += 1;
 
-      return {
-        type: "invalid-params",
-        request,
-        error: parsedParams.error,
-      } as const;
-    }
+      const relayResult = await endpoint.relay(request);
 
-    if (!methodDescriptor.requestFilter({ params: parsedParams.data })) {
-      this.logger.info(
-        `Request filter denied: ${request.method} with params: ${JSON.stringify(
-          parsedParams.data,
-          null,
-          2
-        )}`
-      );
+      this.relayAttempts.push(relayResult);
 
-      return {
-        type: "method-not-allowed",
-        request,
-      } as const;
-    }
-
-    try {
-      const cannedResponse = await this.getCannedResponse(this.chain, request);
-
-      if (cannedResponse) {
-        return {
-          // TODO: add a .canned field here.
-          type: "success",
-          request,
-          result: cannedResponse,
-        };
-      }
-    } catch (e) {
-      this.logger.warn(
-        `Uncaught error in canned response: ${JSON.stringify(e, null, 2)}`
-      );
-    }
-
-    try {
-      const cachedResponse = await this.rpcRequestCache.get(
-        this.chain,
-        methodDescriptor,
-        request
-      );
-
-      if (cachedResponse) {
-        // TODO: should we do anything to indicate that this was
-        // the result of a cache hit?
-        return {
-          type: "success",
-          cached: true,
-          request,
-          result: cachedResponse,
-        };
-      }
-    } catch (e) {
-      this.logger.warn(
-        `Uncaught error in cache: ${JSON.stringify(e, null, 2)}`
-      );
-    }
-
-    // TODO: what should we return if no endpoint is available?
-    if (this.config.recoveryMode === "none") {
-      return (
-        this.current?.relay(request) ?? new Response(null, { status: 500 })
-      );
-      // TODO: standardize these Response objects
-    }
-
-    const errors = [];
-
-    while (this.hasNext()) {
-      const endpoint = this.current;
-
-      if (!endpoint) {
-        break;
-      }
-
-      const response = await endpoint.relay(request);
-
-      if (response.type === "success") {
-        try {
-          await this.rpcRequestCache.set(
-            this.chain,
-            methodDescriptor,
-            request,
-            response.result
-          );
-        } catch (error) {
-          this.logger.error("failed to cache response");
-          this.logger.error(JSON.stringify(error, null, 2));
-        }
-
-        return response;
+      if (relayResult.kind === "success-response") {
+        return relayResult;
       }
 
       this.logger.warn(
-        `Provider: ${endpoint.provider.name} failed to relay request:`
+        [
+          "Relay failed.",
+          `Provider: ${endpoint.nodeProvider.name}`,
+          `Relay result: ${relayResult.stringify()}`,
+        ].join("\n")
       );
-      this.logger.warn(JSON.stringify(response, null, 2));
 
-      errors.push({
-        provider: endpoint.provider.name,
-        error: response,
-      });
-      this.currentServiceProviderIndex++;
+      // TODO: how do we handle unexpected errors, as well as expected errors? How do we determine when to retry, and when to return the error as-is?
     }
 
-    return {
-      type: "all-failed",
-      request,
-      errors,
-    } as const;
+    return null;
+  }
+
+  public getLatestLegalRelayError(): RelayLegalErrorResponse | null {
+    for (let i = this.relayAttempts.length - 1; i >= 0; i--) {
+      const relayAttempt = this.relayAttempts[i];
+
+      if (relayAttempt.kind === "error-response") {
+        return relayAttempt;
+      }
+    }
+
+    return null;
   }
 }
