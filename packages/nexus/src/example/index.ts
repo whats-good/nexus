@@ -1,11 +1,11 @@
+import { createServer } from "node:http";
+import pino from "pino";
 import { SimpleMemoryCache } from "@src/cache/simple-memory-cache";
 import { CHAIN } from "@src/chain";
 import { NexusEvent } from "@src/events";
 import { Nexus } from "@src/nexus";
 import { NODE_PROVIDER } from "@src/node-provider";
-import { createServer } from "node:http";
-import pino from "pino";
-import { Container } from "@src/dependency-injection";
+import type { Container } from "@src/dependency-injection";
 import { queryParamKeyAuthMiddleware } from "@src/auth";
 
 const logger = pino({
@@ -36,6 +36,7 @@ const myOtherEventHandler = async (event: SomeEvent, container: Container) => {
 if (process.env.ALCHEMY_KEY === undefined) {
   throw new Error("ALCHEMY_KEY env var is required");
 }
+
 if (process.env.QUERY_PARAM_AUTH_KEY === undefined) {
   throw new Error("QUERY_PARAM_AUTH_KEY env var is required");
 }

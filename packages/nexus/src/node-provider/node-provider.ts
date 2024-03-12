@@ -15,6 +15,7 @@ export class NodeProvider {
       chainSupport.chain,
       chainSupport.url
     );
+
     this.endpoints.set(endpoint.chain, endpoint);
   }
 

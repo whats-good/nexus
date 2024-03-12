@@ -1,7 +1,7 @@
-import { NextFn } from "@src/middleware";
+import type { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
-import { NexusContext } from "../rpc/nexus-context";
-import { RpcSuccessResponse } from "../rpc/rpc-response";
+import type { NexusContext } from "@src/rpc/nexus-context";
+import { RpcSuccessResponse } from "@src/rpc/rpc-response";
 import { CannedResponseHitEvent, CannedResponseMissEvent } from "./events";
 
 export const cannedResponseMiddleware = async <TServerContext>(
@@ -9,6 +9,7 @@ export const cannedResponseMiddleware = async <TServerContext>(
   next: NextFn
 ) => {
   const { logger } = context.container;
+
   logger.debug("canned response middleware");
   const { request } = context;
   const { rpcMethod } = request;
@@ -24,9 +25,11 @@ export const cannedResponseMiddleware = async <TServerContext>(
     );
     context.eventBus.emit(new CannedResponseHitEvent());
 
-    return context.respond(
+    context.respond(
       new RpcSuccessResponse(request.getResponseId(), cannedResponse.result)
     );
+
+    return;
   } else if (cannedResponse.kind === "failure") {
     logger.error(
       `Canned response for method ${
@@ -42,5 +45,6 @@ export const cannedResponseMiddleware = async <TServerContext>(
     // i.e "cancelled"
     context.eventBus.emit(new CannedResponseMissEvent("not-configured"));
   }
+
   return next();
 };

@@ -1,13 +1,15 @@
+import pino from "pino";
 import {
   CacheHandler,
   cacheWriteOnRelaySuccess,
   cacheMiddleware,
 } from "@src/cache";
 import { ChainRegistry } from "@src/chain";
-import { IEmit, NexusEventBus, EventAndHandlerPair } from "@src/events";
+import type { Emit, EventAndHandlerPair } from "@src/events";
+import { NexusEventBus } from "@src/events";
 import { NexusMiddlewareManager } from "@src/middleware";
 import { NodeProviderRegistry } from "@src/node-provider";
-import { RelayFailureConfig } from "@src/rpc-endpoint";
+import type { RelayFailureConfig } from "@src/rpc-endpoint";
 import {
   RPC_METHOD_BUILDER,
   RpcMethodRegistry,
@@ -15,16 +17,16 @@ import {
 import { cannedResponseMiddleware } from "@src/canned-response";
 import { relayMiddleware } from "@src/rpc/relay-middleware";
 import { requestFilterMiddleware } from "@src/request-filter";
-import { Logger } from "@src/logger";
-import { NexusConfigOptions } from "@src/config";
-import {
+import type { Logger } from "@src/logger";
+import type {
+  NexusConfigOptions,
   ConfigOptionField,
   ConfigOptionFn,
   ConfigOptionFnArgs,
 } from "@src/config";
-import pino from "pino";
 import { RelaySuccessResponseEvent } from "@src/rpc/events";
-import { DeferAsyncFn, defaultDeferAsync } from "@src/utils";
+import type { DeferAsyncFn } from "@src/utils";
+import { defaultDeferAsync } from "@src/utils";
 
 export class Container<TServerContext = unknown> {
   public readonly cacheHandler?: CacheHandler<TServerContext>;
@@ -34,7 +36,7 @@ export class Container<TServerContext = unknown> {
   public readonly relayFailureConfig: RelayFailureConfig;
   public readonly logger: Logger;
   public readonly serverContext: TServerContext;
-  public readonly eventBus: IEmit;
+  public readonly eventBus: Emit;
   public readonly middlewareManager: NexusMiddlewareManager<TServerContext>;
   public readonly request: Request;
   public readonly deferAsync: DeferAsyncFn;
@@ -72,6 +74,7 @@ export class Container<TServerContext = unknown> {
     if (typeof valueOrFunction === "function") {
       return (valueOrFunction as ConfigOptionFn<TServerContext, TField>)(args);
     }
+
     return valueOrFunction;
   }
 
@@ -89,6 +92,7 @@ export class Container<TServerContext = unknown> {
 
     const chains = Container.getValueOrExecute(options.chains, args);
     const chainRegistry = new ChainRegistry({ logger });
+
     chainRegistry.addChains(chains);
 
     const nodeProviders = Container.getValueOrExecute(
@@ -99,9 +103,11 @@ export class Container<TServerContext = unknown> {
     if (nodeProviders.length === 0) {
       throw new Error("At least one node provider is required");
     }
+
     const nodeProviderRegistry = new NodeProviderRegistry({
       logger,
     });
+
     nodeProviderRegistry.addNodeProviders(nodeProviders);
 
     const rpcMethods =

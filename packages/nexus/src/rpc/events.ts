@@ -1,7 +1,7 @@
 import { NexusEvent } from "@src/events";
-import { NexusContext } from "./nexus-context";
-import { RpcSuccessResponse } from "./rpc-response";
-import { ErrorResponsePayload } from "./schemas";
+import type { NexusContext } from "./nexus-context";
+import type { RpcSuccessResponse } from "./rpc-response";
+import type { ErrorResponsePayload } from "./schemas";
 
 export class RelaySuccessResponseEvent extends NexusEvent {
   constructor(

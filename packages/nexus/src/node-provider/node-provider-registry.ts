@@ -1,12 +1,12 @@
 import type { Chain } from "@src/chain";
 import type { RpcEndpoint } from "@src/rpc-endpoint";
+import type { Logger } from "@src/logger";
 import type { NodeProvider } from "./node-provider";
-import { Logger } from "@src/logger";
 
 export class NodeProviderRegistry {
   private readonly logger: Logger;
 
-  public constructor(args: { logger: Logger }) {
+  constructor(args: { logger: Logger }) {
     this.logger = args.logger;
   }
 
@@ -31,7 +31,9 @@ export class NodeProviderRegistry {
   }
 
   public addNodeProviders(providers: NodeProvider[]) {
-    providers.forEach((provider) => this.addNodeProvider(provider));
+    providers.forEach((provider) => {
+      this.addNodeProvider(provider);
+    });
   }
 
   public getEndpointsForChain(chain: Chain): RpcEndpoint[] {

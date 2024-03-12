@@ -1,7 +1,7 @@
-import { NextFn } from "@src/middleware";
+import type { NextFn } from "@src/middleware";
 import { safeJsonStringify } from "@src/utils";
-import { NexusContext } from "../rpc/nexus-context";
-import { MethodDeniedCustomErrorResponse } from "../rpc/rpc-response";
+import type { NexusContext } from "@src/rpc/nexus-context";
+import { MethodDeniedCustomErrorResponse } from "@src/rpc/rpc-response";
 import {
   RequestFilterAllowedEvent,
   RequestFilterDeniedEvent,
@@ -13,6 +13,7 @@ export const requestFilterMiddleware = async <TServerContext>(
   next: NextFn
 ): Promise<void> => {
   const { logger } = context.container;
+
   logger.debug("request filter middleware");
   const { chain, request } = context;
   const { rpcMethod } = request;
@@ -44,6 +45,7 @@ export const requestFilterMiddleware = async <TServerContext>(
     );
   } else {
     context.eventBus.emit(new RequestFilterAllowedEvent());
+
     return next();
   }
 };

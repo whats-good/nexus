@@ -15,12 +15,15 @@ export class ChainRegistry {
         `Chain with id ${chain.chainId} already exists. Overwriting.`
       );
     }
+
     this.chains.set(chain.chainId, chain);
     this.logger.debug(`Added chain ${chain.name} with id ${chain.chainId}`);
   }
 
   public addChains(chains: Chain[]) {
-    chains.forEach((chain) => this.addChain(chain));
+    chains.forEach((chain) => {
+      this.addChain(chain);
+    });
   }
 
   public getChain(chainId: number): Chain | null {

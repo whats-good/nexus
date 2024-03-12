@@ -1,21 +1,17 @@
-import { NexusConfigOptions } from "@src/config";
-import {
-  IntString,
-  NexusNotFoundResponse,
-  PathParamsOf,
-  Route,
-} from "@src/controller";
-import { IRunEvents } from "@src/events";
-import { NexusContext } from "@src/rpc";
+import type {
+  ServerAdapter,
+  ServerAdapterBaseObject,
+} from "@whatwg-node/server";
+import { createServerAdapter } from "@whatwg-node/server";
+import { z } from "zod";
+import type { NexusConfigOptions } from "@src/config";
+import type { PathParamsOf } from "@src/controller";
+import { IntString, NexusNotFoundResponse, Route } from "@src/controller";
+import type { RunEvents } from "@src/events";
+import type { NexusContext } from "@src/rpc";
 import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
 import { InternalErrorResponse } from "@src/rpc/rpc-response";
 import { safeJsonStringify } from "@src/utils";
-import {
-  ServerAdapter,
-  ServerAdapterBaseObject,
-  createServerAdapter,
-} from "@whatwg-node/server";
-import { z } from "zod";
 import { Container } from "@src/dependency-injection";
 
 export type NexusServerInstance<TServerContext> = ServerAdapter<
@@ -42,9 +38,10 @@ export class Nexus<TServerContext>
 
   private async handleNexusContext(context: NexusContext<TServerContext>) {
     const bus = context.container
-      .eventBus as unknown as IRunEvents<TServerContext>;
+      .eventBus as unknown as RunEvents<TServerContext>;
     const { logger } = context.container;
     const { middlewareManager } = context.container;
+
     await middlewareManager.run(context);
 
     if (!context.response) {
@@ -55,6 +52,7 @@ export class Nexus<TServerContext>
 
     context.container.deferAsync(async () => {
       logger.debug("running events");
+
       try {
         await bus.runEvents(context.container);
       } catch (error) {
@@ -63,6 +61,7 @@ export class Nexus<TServerContext>
     });
 
     logger.debug("sending response");
+
     return context.response.buildResponse();
   }
 
@@ -73,11 +72,12 @@ export class Nexus<TServerContext>
     const nexusContextFactory = new NexusContextFactory(container);
 
     const result = await nexusContextFactory.from(container.request, params);
+
     if (result.kind === "success") {
       return this.handleNexusContext(result.context);
-    } else {
-      return result.response.buildResponse();
     }
+
+    return result.response.buildResponse();
   }
 
   public handle = async (

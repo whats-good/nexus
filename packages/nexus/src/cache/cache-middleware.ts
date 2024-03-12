@@ -1,5 +1,5 @@
-import { NextFn } from "@src/middleware";
-import { NexusContext } from "../rpc/nexus-context";
+import type { NextFn } from "@src/middleware";
+import type { NexusContext } from "../rpc/nexus-context";
 import { RpcErrorResponse, RpcSuccessResponse } from "../rpc/rpc-response";
 import { CacheReadDeniedEvent } from "./events";
 
@@ -8,6 +8,7 @@ export const cacheMiddleware = async <TServerContext>(
   next: NextFn
 ) => {
   const { logger, cacheHandler } = context.container;
+
   logger.debug("cache middleware");
   const { request, eventBus } = context;
 
@@ -15,16 +16,20 @@ export const cacheMiddleware = async <TServerContext>(
     const cacheResult = await cacheHandler.handleRead(context);
 
     if (cacheResult.kind === "success-result") {
-      return context.respond(
+      context.respond(
         new RpcSuccessResponse(request.getResponseId(), cacheResult.result)
       );
+
+      return;
     } else if (cacheResult.kind === "legal-error-result") {
-      return context.respond(
+      context.respond(
         RpcErrorResponse.fromErrorResponsePayload(
           cacheResult.error,
           request.getResponseId()
         )
       );
+
+      return;
     }
   } else {
     logger.debug("no cache handler configured. will not schedule cache-read.");

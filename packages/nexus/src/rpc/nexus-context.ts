@@ -1,22 +1,22 @@
 import type { Chain } from "@src/chain";
+import type { Emit } from "@src/events";
+import type { Container } from "@src/dependency-injection";
 import type { UnknownRpcRequest } from "./rpc-request";
-import { RpcResponse } from "./rpc-response";
-import { IEmit } from "@src/events";
-import { Container } from "@src/dependency-injection";
+import type { RpcResponse } from "./rpc-response";
 
 export class NexusContext<TServerContext = unknown> {
   public response: RpcResponse | null;
   public readonly request: UnknownRpcRequest;
   public readonly chain: Chain;
   public readonly serverContext: TServerContext;
-  public readonly eventBus: IEmit;
+  public readonly eventBus: Emit;
   public readonly container: Container<TServerContext>;
 
   constructor(args: {
     request: UnknownRpcRequest;
     chain: Chain;
     serverContext: TServerContext;
-    eventBus: IEmit;
+    eventBus: Emit;
     container: Container<TServerContext>;
   }) {
     this.response = null;
@@ -31,6 +31,7 @@ export class NexusContext<TServerContext = unknown> {
     if (this.response !== null) {
       throw new Error("Response already set");
     }
+
     this.response = response;
   }
 }

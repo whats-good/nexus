@@ -1,5 +1,5 @@
-import { NexusEvent } from "./nexus-event";
-import { Container } from "@src/dependency-injection";
+import type { Container } from "@src/dependency-injection";
+import type { NexusEvent } from "./nexus-event";
 
 export type NexusEventHandler<
   E extends NexusEvent,

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { match } from "path-to-regexp";
 
 export type PathParamsOf<T> = T extends Route<any, infer S> ? S : never;

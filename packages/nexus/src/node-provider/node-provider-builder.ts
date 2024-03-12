@@ -1,6 +1,6 @@
-import { Chain } from "@src/chain";
+import type { Chain } from "@src/chain";
+import type { ChainSupport } from "./chain-support";
 import {
-  ChainSupport,
   KeyAppendedUrlChainSupport,
   PureUrlChainSupport,
 } from "./chain-support";
@@ -29,6 +29,7 @@ export class NodeProviderBuilder {
 
   public addChainSupport(chainSupport: ChainSupportInitArgs) {
     this.chainSupportInitArgs.push(chainSupport);
+
     return this;
   }
 
@@ -37,6 +38,7 @@ export class NodeProviderBuilder {
     key?: string
   ): ChainSupport {
     const { chain } = initArgs;
+
     switch (initArgs.kind) {
       case "key-appended-url": {
         if (!key) {
@@ -55,8 +57,10 @@ export class NodeProviderBuilder {
 
   public build(key?: string): NodeProvider {
     const nodeProvider = new NodeProvider(this.name);
+
     this.chainSupportInitArgs.forEach((initArgs) => {
       const chainSupport = this.buildChainSupport(initArgs, key);
+
       nodeProvider.addChainSupport(chainSupport);
     });
 

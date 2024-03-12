@@ -1,8 +1,8 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import type { NexusContext } from "@src/rpc";
 import { ErrorFieldSchema, type ErrorField } from "@src/rpc/schemas";
+import type { Logger } from "@src/logger";
 import type { BaseCache } from "./base-cache";
-import { Logger } from "@src/logger";
 import {
   CacheReadDeniedEvent,
   CacheReadHitEvent,
@@ -52,30 +52,6 @@ type CacheHandlerWriteResult =
       result: unknown;
     };
 
-// TODO: the cache handler is doing to much allow/deny work by parsing the input.
-// especially the read part.
-// all of that should be handled by the cache config, whichever way the user sets it up.
-// this implies that errors, as well as success results, could be cached.
-// which means that we should come up with our own storage format.
-// something like:
-/**
- * {
- *  kind: "success",
- *  result: ...
- * }
- *
- * {
- * kind: "error",
- * error: ...
- * }
- */
-// rather than storing the entire response object, or just the error and result fields,
-// we should store this new kind of storage object.
-
-// export class CacheNotConfiguredEvent extends NexusEvent {}
-
-// export class CacheReadDeniedEvent extends NexusEvent {}
-
 export class CacheHandler<TServerContext> {
   constructor(
     private readonly cache: BaseCache,
@@ -93,11 +69,13 @@ export class CacheHandler<TServerContext> {
         context.eventBus.emit(new CacheReadHitEvent("success"));
         break;
       }
+
       case "legal-error-result": {
         this.logger.debug("cache read hit: legal error");
         context.eventBus.emit(new CacheReadHitEvent("legal-error"));
         break;
       }
+
       case "invalid-result": {
         // even though this was technically a hit, this result will be discarded
         // and this should be treated as a miss.
@@ -105,16 +83,19 @@ export class CacheHandler<TServerContext> {
         context.eventBus.emit(new CacheReadMissEvent("invalid"));
         break;
       }
+
       case "not-found": {
         this.logger.debug("cache read miss: not found");
         context.eventBus.emit(new CacheReadMissEvent("not-found"));
         break;
       }
+
       case "denied": {
         this.logger.debug("cache read denied.");
         context.eventBus.emit(new CacheReadDeniedEvent());
         break;
       }
+
       case "unexpected-error": {
         this.logger.error("cache read miss: unexpected error");
         context.eventBus.emit(new CacheReadMissEvent("unexpected-error"));
@@ -179,20 +160,24 @@ export class CacheHandler<TServerContext> {
     result: unknown
   ) {
     const writeResult = await this._handleWrite(context, result);
+
     switch (writeResult.kind) {
       case "success": {
         context.eventBus.emit(new CacheWriteSuccessEvent());
         break;
       }
+
       case "denied": {
         context.eventBus.emit(new CacheWriteDeniedEvent());
         break;
       }
+
       case "invalid-result": {
         this.logger.error("failed to cache response due to invalid result.");
         context.eventBus.emit(new CacheWriteFailureEvent("invalid-result"));
         break;
       }
+
       case "unexpected-error": {
         this.logger.error("failed to cache response due to unexpected error.");
         context.eventBus.emit(new CacheWriteFailureEvent("unexpected-error"));

@@ -1,30 +1,30 @@
-import { Constructor } from "@src/utils";
-import { NexusEvent } from "./nexus-event";
-import { NexusEventHandler } from "./nexus-event-handler";
-import { Logger } from "@src/logger";
-import { Container } from "@src/dependency-injection";
+import type { Constructor } from "@src/utils";
+import type { Logger } from "@src/logger";
+import type { Container } from "@src/dependency-injection";
+import type { NexusEvent } from "./nexus-event";
+import type { NexusEventHandler } from "./nexus-event-handler";
 
-export type EventAndHandlerPair<E extends NexusEvent, TServerContext> = {
+export interface EventAndHandlerPair<E extends NexusEvent, TServerContext> {
   event: Constructor<E>;
   handler: NexusEventHandler<E, TServerContext>;
-};
-
-export interface IEmit {
-  emit(event: NexusEvent): void;
 }
 
-export interface IRunEvents<TServerContext = unknown> {
-  runEvents(container: Container<TServerContext>): Promise<void>;
+export interface Emit {
+  emit: (event: NexusEvent) => void;
+}
+
+export interface RunEvents<TServerContext = unknown> {
+  runEvents: (container: Container<TServerContext>) => Promise<void>;
 }
 
 export class NexusEventBus<TServerContext = unknown>
-  implements IEmit, IRunEvents<TServerContext>
+  implements Emit, RunEvents<TServerContext>
 {
   private pendingEvents: NexusEvent[] = [];
-  private readonly handlers: Map<
+  private readonly handlers = new Map<
     Constructor<NexusEvent>,
     Set<NexusEventHandler<any, TServerContext>>
-  > = new Map();
+  >();
 
   private readonly logger: Logger;
 
@@ -47,9 +47,11 @@ export class NexusEventBus<TServerContext = unknown>
     handler: NexusEventHandler<E, TServerContext>
   ): void {
     const currentHandlers = this.handlers.get(event) || new Set();
+
     if (currentHandlers.has(handler)) {
       throw new Error("Handler already registered");
     }
+
     this.handlers.set(event, currentHandlers);
     currentHandlers.add(handler);
   }
@@ -60,9 +62,11 @@ export class NexusEventBus<TServerContext = unknown>
   ): Promise<void>[] {
     const handlersSet = this.handlers.get(event.constructor as any);
     const handlersList = handlersSet ? Array.from(handlersSet) : [];
+
     if (handlersList.length === 0) {
       this.logger.debug(`No handlers for event: ${event.constructor.name}`);
     }
+
     return handlersList.map((handler) => handler(event, container));
 
     // TODO: add error handling
@@ -73,11 +77,13 @@ export class NexusEventBus<TServerContext = unknown>
     container: Container<TServerContext>
   ): Promise<void>[] {
     let promises: Promise<void>[] = [];
+
     events.forEach((event) => {
       const currentEventPromises: Promise<void>[] = this.getPromisesForEvent(
         event,
         container
       );
+
       promises = promises.concat(currentEventPromises);
     });
 
@@ -87,11 +93,14 @@ export class NexusEventBus<TServerContext = unknown>
 
   public async runEvents(container: Container<TServerContext>): Promise<void> {
     let i = 0;
+
     while (this.pendingEvents.length > 0) {
       this.logger.debug(`Running events iteration: ${i++}`);
       const pendingEvents = this.pendingEvents;
+
       this.pendingEvents = [];
       const promises = this.getPromisesForEvents(pendingEvents, container);
+
       await Promise.all(promises);
     }
   }

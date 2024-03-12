@@ -1,11 +1,11 @@
 import type { RpcRequestPayload } from "@src/rpc";
+import type { Logger } from "@src/logger";
 import type { RpcEndpoint } from "./rpc-endpoint";
 import type {
   RelayLegalErrorResponse,
   RelayResult,
   RelaySuccessResponse,
 } from "./relay-result";
-import { Logger } from "@src/logger";
 
 // a config object that determines how to treat failed relay requests
 

@@ -1,12 +1,12 @@
 import { safeJsonStringify } from "@src/utils";
-import { NexusContext } from "./nexus-context";
+import { RpcEndpointPool } from "@src/rpc-endpoint";
+import type { NexusContext } from "./nexus-context";
 import {
   RpcSuccessResponse,
   RpcResponse,
   InternalErrorResponse,
   ProviderNotConfiguredCustomErrorResponse,
 } from "./rpc-response";
-import { RpcEndpointPool } from "@src/rpc-endpoint";
 import {
   RelaySuccessResponseEvent,
   RelayLegalErrorResponeEvent,
@@ -19,12 +19,16 @@ export const relayMiddleware = async <TServerContext>(
   const { chain, request } = context;
   const { logger, nodeProviderRegistry, relayFailureConfig } =
     context.container;
+
   logger.debug("relay middleware");
   const endpoints = nodeProviderRegistry.getEndpointsForChain(chain);
+
   if (endpoints.length === 0) {
-    return context.respond(
+    context.respond(
       new ProviderNotConfiguredCustomErrorResponse(request.getResponseId())
     );
+
+    return;
   }
 
   logger.debug("pool created.");
@@ -45,31 +49,38 @@ export const relayMiddleware = async <TServerContext>(
 
       context.eventBus.emit(new RelaySuccessResponseEvent(response, context));
 
-      return context.respond(response);
+      context.respond(response);
+
+      return;
     }
 
     const relayError = rpcEndpointPool.getLatestLegalRelayError();
 
     if (relayError) {
       context.eventBus.emit(new RelayLegalErrorResponeEvent(relayError.error));
-      return context.respond(
+
+      context.respond(
         RpcResponse.fromErrorResponsePayload(
           relayError.error.error,
           request.getResponseId()
         )
       );
+
+      return;
     }
 
     context.eventBus.emit(
       new RelayUnexpectedErrorEvent("no response or error")
     );
-    return context.respond(new InternalErrorResponse(request.getResponseId()));
+
+    context.respond(new InternalErrorResponse(request.getResponseId()));
   } catch (e) {
     const error = safeJsonStringify(e);
 
     logger.error(error);
 
     context.eventBus.emit(new RelayUnexpectedErrorEvent(e));
-    return context.respond(new InternalErrorResponse(request.getResponseId()));
+
+    context.respond(new InternalErrorResponse(request.getResponseId()));
   }
 };

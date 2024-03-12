@@ -1,4 +1,4 @@
-import { RpcMethod, UnknownRpcMethod } from "@src/rpc-method-desciptor";
+import type { RpcMethod } from "@src/rpc-method-desciptor";
 import type { RpcRequestPayload } from "./schemas";
 
 export class RpcRequest<M extends string, P, R> {

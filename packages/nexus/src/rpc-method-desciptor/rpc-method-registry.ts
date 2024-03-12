@@ -1,7 +1,7 @@
 import type { AnyRpcMethod, UnknownRpcMethod } from "./rpc-method";
 
 export class RpcMethodRegistry {
-  private readonly rpcMethodMap: Map<string, UnknownRpcMethod> = new Map();
+  private readonly rpcMethodMap = new Map<string, UnknownRpcMethod>();
 
   constructor(private readonly rpcMethodList: AnyRpcMethod[]) {
     this.rpcMethodList.forEach((rpcMethod) => {
