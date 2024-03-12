@@ -1,5 +1,16 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.3.0
+
+### Minor Changes
+
+- 4ed911a: Refactored the nexus system
+
+### Patch Changes
+
+- Updated dependencies [4ed911a]
+  - @whatsgood/nexus@0.12.0
+
 ## 0.2.10
 
 ### Patch Changes

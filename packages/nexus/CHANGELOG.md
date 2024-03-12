@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.12.0
+
+### Minor Changes
+
+- 4ed911a: Refactored the nexus system
+
 ## 0.11.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/example-cloudflare-worker",
-  "version": "0.2.10",
+  "version": "0.3.0",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
