@@ -44,20 +44,16 @@
     {
       "group": "Development",
       "pages": [
-        "development/setup",
         {
           "group": "Features",
           "pages": [
-            "features/provider-configuration",
-            "features/registry",
-            "features/request-cycling",
-            "features/adaptive-performance",
+            "features/node-providers",
+            "features/failure-recovery",
+            "features/middlewares",
             "features/authorization",
             "features/caching",
-            "features/quorum",
-            "features/lifecycle-hooks",
-            "features/rate-limiting",
-            "features/observability"
+            "features/event-handlers",
+            "features/rate-limiting"
           ]
         },
         {
@@ -67,12 +63,7 @@
             "integrations/node-js",
             "integrations/express",
             "integrations/fastify",
-            "integrations/koa",
-            "integrations/hapi",
-            "integrations/next-js",
-            "integrations/nest-js",
-            "integrations/bun",
-            "integrations/deno"
+            "integrations/bun"
           ]
         },
         "development/changelog"
