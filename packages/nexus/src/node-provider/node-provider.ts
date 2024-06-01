@@ -1,29 +1,14 @@
 import type { Chain } from "@src/chain";
-import { RpcEndpoint } from "@src/rpc-endpoint";
-import type { ChainSupport } from "./chain-support";
+import { NodeEndpoint } from "@src/node-endpoint/node-endpoint";
 
 export class NodeProvider {
-  private readonly endpoints: Map<Chain, RpcEndpoint>;
-  constructor(public readonly name: string) {
-    this.endpoints = new Map();
-  }
+  public readonly url: string;
+  public readonly chain: Chain;
+  public readonly nodeEndpoint: NodeEndpoint;
 
-  public addChainSupport(chainSupport: ChainSupport) {
-    // TODO: check if endpoint already exists
-    const endpoint = new RpcEndpoint(
-      this,
-      chainSupport.chain,
-      chainSupport.url
-    );
-
-    this.endpoints.set(endpoint.chain, endpoint);
-  }
-
-  public getSupportedChains(): Chain[] {
-    return Array.from(this.endpoints.keys());
-  }
-
-  public getEndpointForChain(chain: Chain): RpcEndpoint | null {
-    return this.endpoints.get(chain) || null;
+  constructor(params: { url: string; chain: Chain }) {
+    this.url = params.url;
+    this.chain = params.chain;
+    this.nodeEndpoint = new NodeEndpoint({ nodeProvider: this });
   }
 }
