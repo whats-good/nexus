@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { requiredUnknown } from "@src/utils";
 
+/*************** Common ***************/
 const IntSchema = z.number().int();
 const IntStringSchema = z.string().regex(/^[0-9]+$/);
 
 export const RpcRequestIdSchema = IntSchema.or(IntStringSchema).nullish();
 export type RpcRequestId = z.infer<typeof RpcRequestIdSchema>;
+
+/*************** RPC Request ***************/
 
 export const RpcRequestPayloadSchema = z.object({
   jsonrpc: z.literal("2.0"),
@@ -15,6 +18,8 @@ export const RpcRequestPayloadSchema = z.object({
 });
 
 export type RpcRequestPayloadType = z.infer<typeof RpcRequestPayloadSchema>;
+
+/*************** RPC Response ***************/
 
 export const RpcResponsePayloadBaseSchema = z.object({
   id: RpcRequestIdSchema,
