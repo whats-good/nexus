@@ -28,7 +28,7 @@ const chainIdRoute = new Route(
   })
 );
 
-export class Controller {
+export class Controller<TServerContext = unknown> {
   private readonly container: StaticContainer;
   private readonly config: NexusConfig;
   private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
@@ -39,12 +39,15 @@ export class Controller {
     this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
   }
 
-  public async handleRequest(request: Request): Promise<NexusResponse> {
+  public async handleRequest(
+    request: Request,
+    serverContext: TServerContext
+  ): Promise<NexusResponse> {
     const url = new URL(request.url);
     const chainIdParams = chainIdRoute.match(url.pathname);
 
     if (chainIdParams) {
-      return this.handleChainIdRoute(chainIdParams, request);
+      return this.handleChainIdRoute(chainIdParams, request, serverContext);
     }
 
     return new NexusNotFoundResponse();
@@ -52,7 +55,8 @@ export class Controller {
 
   private async handleChainIdRoute(
     params: PathParamsOf<typeof chainIdRoute>,
-    request: Request
+    request: Request,
+    serverContext: TServerContext
   ): Promise<NexusResponse> {
     const chain = this.config.chains.get(params.chainId);
 
@@ -92,6 +96,7 @@ export class Controller {
 
     const container = new RequestContainer({
       parent: this.container,
+      serverContext,
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,

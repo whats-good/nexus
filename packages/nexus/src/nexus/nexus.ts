@@ -23,10 +23,12 @@ export class Nexus<TServerContext = unknown>
   }
 
   public handle = async (
-    request: Request
-    // serverContext: TServerContext
+    request: Request,
+    serverContext: TServerContext
   ): Promise<Response> => {
-    return (await this.controller.handleRequest(request)).buildResponse();
+    return (
+      await this.controller.handleRequest(request, serverContext)
+    ).buildResponse();
   };
 
   public static create(options: NexusConfigOptions) {

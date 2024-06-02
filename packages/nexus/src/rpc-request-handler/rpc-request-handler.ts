@@ -18,6 +18,8 @@ export class RpcRequestHandler {
     this.nodeEndpointPool = container.nodeEndpointPool;
     this.rpcRequestPayload = container.rpcRequestPayload;
     this.requestId = container.requestId;
+
+    console.log(container.serverContext);
   }
 
   public async handle(): Promise<RpcResponse> {

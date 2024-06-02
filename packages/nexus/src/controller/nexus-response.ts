@@ -3,7 +3,6 @@ import type { Chain } from "@src/chain";
 
 export abstract class NexusResponse<T = unknown> {
   public abstract readonly httpStatusCode: number;
-  public abstract readonly id: string | number | null;
   public abstract body(): T;
 
   public abstract buildResponse(): Response;
@@ -22,7 +21,6 @@ export abstract class NexusJsonResponse<T = unknown> extends NexusResponse<T> {
 
 export class NexusNotFoundResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 404;
-  public readonly id = null;
 
   public body(): string {
     return "Not Found";
@@ -31,7 +29,6 @@ export class NexusNotFoundResponse extends NexusJsonResponse {
 
 export class NexusInternalServerErrorResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 500;
-  public readonly id = null;
 
   public body(): string {
     return "Internal Server Error";
@@ -40,7 +37,6 @@ export class NexusInternalServerErrorResponse extends NexusJsonResponse {
 
 export class NexusBadRequestResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 400;
-  public readonly id = null;
 
   public body(): string {
     return "Bad Request";
@@ -49,7 +45,6 @@ export class NexusBadRequestResponse extends NexusJsonResponse {
 
 export class ChainNotFoundErrorResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 404;
-  public readonly id = null;
   public readonly chainId: number;
 
   constructor(chainId: number) {
@@ -64,7 +59,6 @@ export class ChainNotFoundErrorResponse extends NexusJsonResponse {
 
 export class ProviderNotConfiguredErrorResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 400;
-  public readonly id = null;
   public readonly chain: Chain;
 
   constructor(chain: Chain) {
