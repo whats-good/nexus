@@ -4,16 +4,16 @@ import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 import { RequestContainer } from "@src/dependency-injection";
+import type { RpcResponse } from "@src/rpc-request-handler/rpc-response";
+import {
+  ChainNotFoundErrorResponse,
+  ParseErrorResponse,
+  ProviderNotConfiguredErrorResponse,
+} from "@src/rpc-request-handler/rpc-response";
 import { RpcRequestHandler } from "../rpc-request-handler";
 import type { PathParamsOf } from "./route";
 import { Route } from "./route";
-import {
-  ChainNotFoundErrorResponse,
-  NexusBadRequestResponse,
-  NexusNotFoundResponse,
-  ProviderNotConfiguredErrorResponse,
-  type NexusResponse,
-} from "./nexus-response";
+import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 const IntString = z
   .number({
@@ -57,32 +57,13 @@ export class Controller<TServerContext = unknown> {
     params: PathParamsOf<typeof chainIdRoute>,
     request: Request,
     serverContext: TServerContext
-  ): Promise<NexusResponse> {
-    const chain = this.config.chains.get(params.chainId);
-
-    // TODO: maybe everything within this method should be a json rpc response
-    // TODO: maybe we should first try and parse out the requestId first, without
-    // checking the rest
-
-    if (!chain) {
-      return new ChainNotFoundErrorResponse(params.chainId);
-    }
-
-    const nodeEndpointPool =
-      this.nodeEndpointPoolFactory.getEndpointPoolForChain(chain);
-
-    if (!nodeEndpointPool) {
-      // TODO: maybe this should be a json rpc response
-      return new ProviderNotConfiguredErrorResponse(chain);
-    }
-
+  ): Promise<RpcResponse> {
     let parsedJsonRequestPayload: unknown;
 
     try {
       parsedJsonRequestPayload = await request.json();
     } catch (error) {
-      // TODO: replace these with typed json rpc responses
-      return new NexusBadRequestResponse();
+      return new ParseErrorResponse();
     }
 
     const rpcRequestPayload = RpcRequestPayloadSchema.safeParse(
@@ -90,8 +71,26 @@ export class Controller<TServerContext = unknown> {
     );
 
     if (!rpcRequestPayload.success) {
-      // TODO: replace these with typed json rpc responses
-      return new NexusBadRequestResponse();
+      return new ParseErrorResponse();
+    }
+
+    const chain = this.config.chains.get(params.chainId);
+
+    if (!chain) {
+      return new ChainNotFoundErrorResponse(
+        rpcRequestPayload.data.id || null,
+        params.chainId
+      );
+    }
+
+    const nodeEndpointPool =
+      this.nodeEndpointPoolFactory.getEndpointPoolForChain(chain);
+
+    if (!nodeEndpointPool) {
+      return new ProviderNotConfiguredErrorResponse(
+        rpcRequestPayload.data.id || null,
+        chain
+      );
     }
 
     const container = new RequestContainer({

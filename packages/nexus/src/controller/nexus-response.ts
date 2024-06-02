@@ -43,34 +43,6 @@ export class NexusBadRequestResponse extends NexusJsonResponse {
   }
 }
 
-export class ChainNotFoundErrorResponse extends NexusJsonResponse {
-  public readonly httpStatusCode = 404;
-  public readonly chainId: number;
-
-  constructor(chainId: number) {
-    super();
-    this.chainId = chainId;
-  }
-
-  public body(): string {
-    return `Chain not found for chain id: ${this.chainId}`;
-  }
-}
-
-export class ProviderNotConfiguredErrorResponse extends NexusJsonResponse {
-  public readonly httpStatusCode = 400;
-  public readonly chain: Chain;
-
-  constructor(chain: Chain) {
-    super();
-    this.chain = chain;
-  }
-
-  public body(): string {
-    return `Provider not configured for chain id: ${this.chain.chainId}`;
-  }
-}
-
 // export class ChainDeniedCustomErrorResponse extends NexusCustomErrorResponse {
 //   public readonly httpStatusCode = 403;
 //   public readonly errorCode = -32021;

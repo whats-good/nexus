@@ -5,6 +5,7 @@ import type {
 } from "@src/rpc-schema";
 import { NexusJsonResponse } from "@src/controller/nexus-response";
 import type { NodeProvider } from "@src/node-provider";
+import type { Chain } from "@src/chain";
 
 export abstract class RpcResponse<T = unknown> extends NexusJsonResponse<T> {
   public abstract readonly id: string | number | null;
@@ -145,6 +146,38 @@ export class NodeProviderReturnedNon200ErrorResponse extends NexusCustomErrorRes
 
   public get message(): string {
     return `Node provider returned non-200 response: ${this.nodeProvider.name}`;
+  }
+}
+
+export class ChainNotFoundErrorResponse extends NexusCustomErrorResponse {
+  public readonly httpStatusCode = 404;
+  public readonly errorCode = -32011;
+
+  constructor(
+    public readonly id: string | number | null,
+    public readonly chainId: number
+  ) {
+    super();
+  }
+
+  public get message(): string {
+    return `Chain not found for chain id: ${this.chainId}`;
+  }
+}
+
+export class ProviderNotConfiguredErrorResponse extends NexusJsonResponse {
+  public readonly httpStatusCode = 400;
+  public readonly errorCode = -32012;
+
+  constructor(
+    public readonly id: string | number | null,
+    public readonly chain: Chain
+  ) {
+    super();
+  }
+
+  public body(): string {
+    return `Provider not configured for chain id: ${this.chain.chainId}`;
   }
 }
 
