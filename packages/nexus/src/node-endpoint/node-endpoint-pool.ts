@@ -2,20 +2,27 @@ import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import { randomizeArray } from "@src/utils";
 import type { RelayConfig } from "./relay-config";
-import type { NodeRpcResponse } from "./node-rpc-response";
 import {
-  NodeEndpointPoolProviderNotFoundResponse,
   NodeEndpointPoolAllFailedResponse,
   NodeEndpointPoolSuccessResponse,
 } from "./node-endpoint-pool-response";
-import type { NodeEndpointPoolResponse } from "./node-endpoint-pool-response";
+import type {
+  EndpointResponseFailurePair,
+  NodeEndpointPoolResponse,
+} from "./node-endpoint-pool-response";
 import type { NodeEndpoint } from ".";
 
 export class NodeEndpointPool {
+  private readonly chain: Chain;
   private readonly nodeEndpoints: NodeEndpoint[];
   private readonly config: RelayConfig;
 
-  constructor(params: { nodeEndpoints: NodeEndpoint[]; config: RelayConfig }) {
+  constructor(params: {
+    chain: Chain;
+    nodeEndpoints: NodeEndpoint[];
+    config: RelayConfig;
+  }) {
+    this.chain = params.chain;
     this.nodeEndpoints = params.nodeEndpoints;
     this.config = params.config;
   }
@@ -35,41 +42,29 @@ export class NodeEndpointPool {
   }
 
   public async relay(
-    chain: Chain,
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {
     const endpoints = this.getAvailableNodeEndpoints();
-
-    if (endpoints.length === 0) {
-      return new NodeEndpointPoolProviderNotFoundResponse({
-        chain,
-        request,
-      });
-    }
-
-    const failedResponses: {
-      response: NodeRpcResponse;
-      endpoint: NodeEndpoint;
-    }[] = [];
+    const failedResponses: EndpointResponseFailurePair[] = [];
 
     for (const endpoint of endpoints) {
       const response = await endpoint.relay(request);
 
       if (response.kind === "success-rpc-response") {
         return new NodeEndpointPoolSuccessResponse({
-          chain,
+          chain: this.chain,
           request,
-          response,
+          success: response,
           endpoint,
           failures: failedResponses,
         });
       }
 
-      failedResponses.push({ response, endpoint });
+      failedResponses.push({ failure: response, endpoint });
     }
 
     return new NodeEndpointPoolAllFailedResponse({
-      chain,
+      chain: this.chain,
       request,
       failures: failedResponses,
     });

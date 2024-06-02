@@ -87,10 +87,11 @@ export class NodeRpcResponseUnknown extends NodeRpcResponseBase<
   }
 }
 
-export type NodeRpcResponse =
+export type NodeRpcResponseFailure =
   | NodeRpcResponseInternalFetchError
   | NodeRpcResponseNon200Response
   | NodeRpcResponseNonJsonResponse
-  | NodeRpcResponseSuccess
   | NodeRpcResponseError
   | NodeRpcResponseUnknown;
+
+export type NodeRpcResponse = NodeRpcResponseSuccess | NodeRpcResponseFailure;

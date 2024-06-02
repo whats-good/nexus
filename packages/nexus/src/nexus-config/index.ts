@@ -1,1 +1,1 @@
-export * from "./config";
+export * from "./nexus-config";

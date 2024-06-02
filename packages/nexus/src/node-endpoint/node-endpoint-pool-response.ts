@@ -1,7 +1,10 @@
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import type { NodeEndpoint } from "./node-endpoint";
-import type { NodeRpcResponse } from "./node-rpc-response";
+import type {
+  NodeRpcResponseFailure,
+  NodeRpcResponseSuccess,
+} from "./node-rpc-response";
 
 abstract class NodeEndpointPoolResponseBase<K extends string> {
   public abstract readonly kind: K;
@@ -14,32 +17,27 @@ abstract class NodeEndpointPoolResponseBase<K extends string> {
   }
 }
 
-export class NodeEndpointPoolProviderNotFoundResponse extends NodeEndpointPoolResponseBase<"node-provider-not-found"> {
-  public readonly kind = "node-provider-not-found";
+export interface EndpointResponseFailurePair {
+  failure: NodeRpcResponseFailure;
+  endpoint: NodeEndpoint;
 }
 
 export class NodeEndpointPoolSuccessResponse extends NodeEndpointPoolResponseBase<"success"> {
   public readonly kind = "success";
 
-  public readonly response: NodeRpcResponse;
+  public readonly success: NodeRpcResponseSuccess;
   public readonly endpoint: NodeEndpoint;
-  public readonly failures: {
-    response: NodeRpcResponse;
-    endpoint: NodeEndpoint;
-  }[];
+  public readonly failures: EndpointResponseFailurePair[];
 
   constructor(params: {
     chain: Chain;
     request: RpcRequestPayloadType;
-    response: NodeRpcResponse;
+    success: NodeRpcResponseSuccess;
     endpoint: NodeEndpoint;
-    failures: {
-      response: NodeRpcResponse;
-      endpoint: NodeEndpoint;
-    }[];
+    failures: EndpointResponseFailurePair[];
   }) {
     super(params);
-    this.response = params.response;
+    this.success = params.success;
     this.endpoint = params.endpoint;
     this.failures = params.failures;
   }
@@ -48,18 +46,12 @@ export class NodeEndpointPoolSuccessResponse extends NodeEndpointPoolResponseBas
 export class NodeEndpointPoolAllFailedResponse extends NodeEndpointPoolResponseBase<"all-failed"> {
   public readonly kind = "all-failed";
 
-  public readonly failures: {
-    response: NodeRpcResponse;
-    endpoint: NodeEndpoint;
-  }[];
+  public readonly failures: EndpointResponseFailurePair[];
 
   constructor(params: {
     chain: Chain;
     request: RpcRequestPayloadType;
-    failures: {
-      response: NodeRpcResponse;
-      endpoint: NodeEndpoint;
-    }[];
+    failures: EndpointResponseFailurePair[];
   }) {
     super(params);
     this.failures = params.failures;
@@ -67,6 +59,5 @@ export class NodeEndpointPoolAllFailedResponse extends NodeEndpointPoolResponseB
 }
 
 export type NodeEndpointPoolResponse =
-  | NodeEndpointPoolProviderNotFoundResponse
   | NodeEndpointPoolSuccessResponse
   | NodeEndpointPoolAllFailedResponse;
