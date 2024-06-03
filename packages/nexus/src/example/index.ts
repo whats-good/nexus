@@ -33,6 +33,7 @@ const nexus = Nexus.create({
   port: 3000,
 });
 
-createServer(nexus as any).listen(nexus.port, () => {
+// eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
+createServer(nexus).listen(nexus.port, () => {
   console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

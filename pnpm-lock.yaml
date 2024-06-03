@@ -43,7 +43,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../../packages/nexus
+        version: link:../../packages/nexus-old
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -62,7 +62,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../../packages/nexus
+        version: link:../../packages/nexus-old
       '@whatwg-node/server':
         specifier: 0.9.22
         version: 0.9.22
@@ -81,7 +81,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../../packages/nexus
+        version: link:../../packages/nexus-old
       express:
         specifier: 4.18.2
         version: 4.18.2
@@ -103,7 +103,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../../packages/nexus
+        version: link:../../packages/nexus-old
       fastify:
         specifier: 4.25.1
         version: 4.25.1
@@ -122,7 +122,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../../packages/nexus
+        version: link:../../packages/nexus-old
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -138,7 +138,7 @@ importers:
     dependencies:
       '@whatsgood/nexus':
         specifier: workspace:*
-        version: link:../nexus
+        version: link:../nexus-old
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -204,8 +204,63 @@ importers:
         specifier: ^5.7.0
         version: 5.7.0
       '@whatwg-node/fetch':
+        specifier: 0.9.18
+        version: 0.9.18
+      '@whatwg-node/server':
+        specifier: 0.9.34
+        version: 0.9.34
+      path-to-regexp:
+        specifier: ^6.2.1
+        version: 6.2.1
+      pino:
+        specifier: ^8.17.0
+        version: 8.17.0
+      pino-pretty:
+        specifier: ^10.2.3
+        version: 10.2.3
+      vitest:
+        specifier: 0.34.5
+        version: 0.34.5
+      zod:
+        specifier: ^3.22.2
+        version: 3.22.2
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^0.34.6
+        version: 0.34.6(vitest@0.34.5)
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      express:
+        specifier: ^4.18.2
+        version: 4.18.2
+      msw:
+        specifier: ^1.3.2
+        version: 1.3.2(typescript@5.2.2)
+      ts-node:
+        specifier: 10.9.1
+        version: 10.9.1(@types/node@20.10.4)(typescript@5.2.2)
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      tsup:
+        specifier: ^6.1.3
+        version: 6.1.3(ts-node@10.9.1)(typescript@5.2.2)
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+
+  packages/nexus-old:
+    dependencies:
+      '@ethersproject/bignumber':
+        specifier: ^5.7.0
+        version: 5.7.0
+      '@whatwg-node/fetch':
         specifier: ^0.9.14
-        version: 0.9.14
+        version: 0.9.18
       '@whatwg-node/server':
         specifier: 0.9.22
         version: 0.9.22
@@ -1336,6 +1391,10 @@ packages:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
     dev: true
 
+  /@kamilkisiela/fast-url-parser@1.1.4:
+    resolution: {integrity: sha512-gbkePEBupNydxCelHCESvFSFM8XPh1Zs/OAVRW/rKpEqPAl5PbOM90Si8mv9bvnR53uPD2s/FiRxdvSejpRJew==}
+    dev: false
+
   /@leichtgewicht/ip-codec@2.0.4:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
     dev: true
@@ -2347,6 +2406,14 @@ packages:
       urlpattern-polyfill: 9.0.0
     dev: false
 
+  /@whatwg-node/fetch@0.9.18:
+    resolution: {integrity: sha512-hqoz6StCW+AjV/3N+vg0s1ah82ptdVUb9nH2ttj3UbySOXUvytWw2yqy8c1cKzyRk6mDD00G47qS3fZI9/gMjg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/node-fetch': 0.5.11
+      urlpattern-polyfill: 10.0.0
+    dev: false
+
   /@whatwg-node/node-fetch@0.5.0:
     resolution: {integrity: sha512-q76lDAafvHNGWedNAVHrz/EyYTS8qwRLcwne8SJQdRN5P3HydxU6XROFvJfTML6KZXQX2FDdGY4/SnaNyd7M0Q==}
     engines: {node: '>=16.0.0'}
@@ -2358,11 +2425,30 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /@whatwg-node/node-fetch@0.5.11:
+    resolution: {integrity: sha512-LS8tSomZa3YHnntpWt3PP43iFEEl6YeIsvDakczHBKlay5LdkXFr8w7v8H6akpG5nRrzydyB0k1iE2eoL6aKIQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@kamilkisiela/fast-url-parser': 1.1.4
+      '@whatwg-node/events': 0.1.1
+      busboy: 1.6.0
+      fast-querystring: 1.1.2
+      tslib: 2.6.2
+    dev: false
+
   /@whatwg-node/server@0.9.22:
     resolution: {integrity: sha512-DDzJtPnQj+HzxseHcSqA/u6TwqNCDB90chrabN1UznpIGOkeA4mpR1LF/zDzqcgjBA/TjFkSeHItwOyl+6FfWw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.14
+      tslib: 2.6.2
+    dev: false
+
+  /@whatwg-node/server@0.9.34:
+    resolution: {integrity: sha512-1sHRjqUtZIyTR2m2dS/dJpzS5OcNDpPuUSVDa2PoEgzYVKr4GsqJaYtRaEXXFohvvyh6PkouYCc1rE7jMDWVCA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/fetch': 0.9.18
       tslib: 2.6.2
     dev: false
 
@@ -9567,6 +9653,10 @@ packages:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
     dependencies:
       punycode: 2.3.0
+
+  /urlpattern-polyfill@10.0.0:
+    resolution: {integrity: sha512-H/A06tKD7sS1O1X2SshBVeA5FLycRpjqiBeqGKmBwBDBy28EnRjORxTNe269KSSr5un5qyWi1iL61wLxpd+ZOg==}
+    dev: false
 
   /urlpattern-polyfill@9.0.0:
     resolution: {integrity: sha512-WHN8KDQblxd32odxeIgo83rdVDE2bvdkb86it7bMhYZwWKJz0+O0RK/eZiHYnM+zgt/U7hAHOlCQGfjjvSkw2g==}

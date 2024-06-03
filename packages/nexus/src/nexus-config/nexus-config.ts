@@ -2,13 +2,13 @@ import type { Chain } from "@src/chain";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 
-export interface NexusConfigOptions {
+export interface NexusConfigOptions<TServerContext = unknown> {
   nodeProviders: [NodeProvider, ...NodeProvider[]];
   relay: RelayConfig;
   port: number;
 }
 
-export class NexusConfig {
+export class NexusConfig<TServerContext = unknown> {
   public readonly nodeProviders: NodeProvider[];
   public readonly chains: Map<number, Chain>;
   public readonly relay: RelayConfig;
@@ -26,12 +26,14 @@ export class NexusConfig {
     this.port = params.port;
   }
 
-  public static init(params: NexusConfigOptions) {
+  public static init<TServerContext>(
+    params: NexusConfigOptions<TServerContext>
+  ) {
     const uniqueChains = Array.from(
       new Set(params.nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
-    return new NexusConfig({
+    return new NexusConfig<TServerContext>({
       nodeProviders: params.nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: params.relay,

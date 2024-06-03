@@ -7,7 +7,10 @@ import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 
-export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
+export type NexusServerInstance<TServerContext> = ServerAdapter<
+  TServerContext,
+  Nexus<TServerContext>
+>;
 
 export class Nexus<TServerContext = unknown>
   implements ServerAdapterBaseObject<TServerContext>
@@ -21,24 +24,24 @@ export class Nexus<TServerContext = unknown>
     this.controller = new Controller(staticContainer);
     this.port = staticContainer.config.port;
   }
-
-  public handle = async (
+  public async handle(
     request: Request,
-    serverContext: TServerContext
-  ): Promise<Response> => {
-    return (
-      await this.controller.handleRequest(request, serverContext)
-    ).buildResponse();
-  };
+    ctx: TServerContext
+  ): Promise<Response> {
+    // TODO: wrap this with a try-catch for final error handling
+    return (await this.controller.handleRequest(request, ctx)).buildResponse();
+  }
 
-  public static create(options: NexusConfigOptions) {
+  public static create<TServerContext = unknown>(
+    options: NexusConfigOptions<TServerContext>
+  ) {
     const staticContainer = new StaticContainer({
       config: NexusConfig.init(options),
     });
     const server = new Nexus(staticContainer);
 
-    return createServerAdapter<unknown, Nexus>(
+    return createServerAdapter<TServerContext, Nexus<TServerContext>>(
       server
-    ) as unknown as NexusServerInstance;
+    ) as unknown as NexusServerInstance<TServerContext>;
   }
 }
