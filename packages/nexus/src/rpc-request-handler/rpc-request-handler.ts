@@ -1,4 +1,4 @@
-import type { RequestContainer } from "@src/dependency-injection/request-container";
+import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import {
@@ -14,12 +14,12 @@ export class RpcRequestHandler {
   private readonly rpcRequestPayload: RpcRequestPayloadType;
   private readonly requestId: string | number | null;
 
-  constructor(container: RequestContainer) {
-    this.nodeEndpointPool = container.nodeEndpointPool;
-    this.rpcRequestPayload = container.rpcRequestPayload;
-    this.requestId = container.requestId;
+  constructor(ctx: NexusRpcContext) {
+    this.nodeEndpointPool = ctx.nodeEndpointPool;
+    this.rpcRequestPayload = ctx.rpcRequestPayload;
+    this.requestId = ctx.requestId;
 
-    console.log(container.platformContext);
+    console.log(ctx.platformContext);
   }
 
   public async handle(): Promise<RpcResponse> {

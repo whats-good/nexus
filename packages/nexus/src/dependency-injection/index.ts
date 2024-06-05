@@ -1,2 +1,2 @@
 export * from "./static-container";
-export * from "./request-container";
+export * from "./nexus-rpc-context";

@@ -3,7 +3,7 @@ import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
-import { RequestContainer } from "@src/dependency-injection";
+import { NexusRpcContext } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-request-handler/rpc-response";
 import {
   ChainNotFoundErrorResponse,
@@ -93,7 +93,7 @@ export class Controller<TPlatformContext = unknown> {
       );
     }
 
-    const container = new RequestContainer({
+    const nexusRpcContext = new NexusRpcContext({
       parent: this.container,
       platformContext,
       chain,
@@ -101,7 +101,7 @@ export class Controller<TPlatformContext = unknown> {
       rpcRequestPayload: rpcRequestPayload.data,
     });
 
-    const rpcRequestHandler = new RpcRequestHandler(container);
+    const rpcRequestHandler = new RpcRequestHandler(nexusRpcContext);
 
     return rpcRequestHandler.handle();
   }

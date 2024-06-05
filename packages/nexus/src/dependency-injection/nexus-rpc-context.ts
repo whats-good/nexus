@@ -3,7 +3,7 @@ import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import type { StaticContainer } from "./static-container";
 
-export class RequestContainer<TPlatformContext = unknown> {
+export class NexusRpcContext<TPlatformContext = unknown> {
   public readonly parent: StaticContainer;
   public readonly platformContext: TPlatformContext;
   public readonly chain: Chain;
