@@ -132,26 +132,9 @@ abstract class NexusCustomErrorResponse extends RpcErrorResponse {
   public readonly isCustomNexusErrorResponse = true;
 }
 
-export class NodeProviderReturnedNon200ErrorResponse extends NexusCustomErrorResponse {
-  public readonly httpStatusCode = 500;
-  public readonly errorCode = -32010;
-  // public readonly message = "Node provider returned non-200 response";
-
-  constructor(
-    public readonly id: string | number | null,
-    public readonly nodeProvider: NodeProvider
-  ) {
-    super();
-  }
-
-  public get message(): string {
-    return `Node provider returned non-200 response: ${this.nodeProvider.name}`;
-  }
-}
-
 export class ChainNotFoundErrorResponse extends NexusCustomErrorResponse {
   public readonly httpStatusCode = 404;
-  public readonly errorCode = -32011;
+  public readonly errorCode = -32010;
 
   constructor(
     public readonly id: string | number | null,
@@ -167,7 +150,7 @@ export class ChainNotFoundErrorResponse extends NexusCustomErrorResponse {
 
 export class ProviderNotConfiguredErrorResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 400;
-  public readonly errorCode = -32012;
+  public readonly errorCode = -32011;
 
   constructor(
     public readonly id: string | number | null,
@@ -178,6 +161,38 @@ export class ProviderNotConfiguredErrorResponse extends NexusJsonResponse {
 
   public body(): string {
     return `Provider not configured for chain id: ${this.chain.chainId}`;
+  }
+}
+
+export class NodeProviderReturnedNon200ErrorResponse extends NexusCustomErrorResponse {
+  public readonly httpStatusCode = 500;
+  public readonly errorCode = -32020;
+
+  constructor(
+    public readonly id: string | number | null,
+    public readonly nodeProvider: NodeProvider
+  ) {
+    super();
+  }
+
+  public get message(): string {
+    return `Node provider (${this.nodeProvider.name}) returned non-200 response.`;
+  }
+}
+
+export class NodeProviderReturnedInvalidResponse extends NexusCustomErrorResponse {
+  public readonly httpStatusCode = 500;
+  public readonly errorCode = -32021;
+
+  constructor(
+    public readonly id: string | number | null,
+    public readonly nodeProvider: NodeProvider
+  ) {
+    super();
+  }
+
+  public get message(): string {
+    return `Node provider (${this.nodeProvider.name}) returned invalid response.`;
   }
 }
 
