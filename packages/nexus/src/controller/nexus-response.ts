@@ -1,5 +1,4 @@
 import { Response } from "@whatwg-node/fetch";
-import type { Chain } from "@src/chain";
 
 export abstract class NexusResponse<T = unknown> {
   public abstract readonly httpStatusCode: number;

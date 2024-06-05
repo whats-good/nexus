@@ -3,6 +3,7 @@ import type {
   ServerAdapterBaseObject,
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
+import type { Logger } from "pino";
 import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
@@ -18,11 +19,13 @@ export class Nexus<TPlatformContext = unknown>
   private readonly staticContainer: StaticContainer;
   private readonly controller: Controller;
   public readonly port?: number;
+  public readonly logger: Logger;
 
   private constructor(staticContainer: StaticContainer) {
     this.staticContainer = staticContainer;
     this.controller = new Controller(staticContainer);
     this.port = staticContainer.config.port;
+    this.logger = staticContainer.logger.child({ name: this.constructor.name });
   }
 
   public handle = async (

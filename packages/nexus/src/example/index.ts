@@ -31,9 +31,13 @@ const nexus = Nexus.create({
     order: "random",
   },
   port: 3000,
+  // TODO: add env var support for log config.
+  log: {
+    level: "debug",
+  },
 });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
 createServer(nexus).listen(nexus.port, () => {
-  console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
+  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

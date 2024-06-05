@@ -2,28 +2,36 @@ import type { Chain } from "@src/chain";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 
+export interface LogConfig {
+  level: string;
+}
+
 export interface NexusConfigOptions<TPlatformContext = unknown> {
   nodeProviders: [NodeProvider, ...NodeProvider[]];
   relay: RelayConfig;
-  port: number;
+  port?: number;
+  log?: LogConfig;
 }
 
 export class NexusConfig<TPlatformContext = unknown> {
   public readonly nodeProviders: NodeProvider[];
   public readonly chains: Map<number, Chain>;
   public readonly relay: RelayConfig;
-  public readonly port: number;
+  public readonly log: LogConfig;
+  public readonly port?: number;
 
   private constructor(params: {
     nodeProviders: [NodeProvider, ...NodeProvider[]];
     chains: Map<number, Chain>;
     relay: RelayConfig;
-    port: number;
+    log: LogConfig;
+    port?: number;
   }) {
     this.nodeProviders = params.nodeProviders;
     this.chains = params.chains;
     this.relay = params.relay;
     this.port = params.port;
+    this.log = params.log;
   }
 
   public static init<TPlatformContext>(
@@ -38,6 +46,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: params.relay,
       port: params.port,
+      log: params.log || { level: "info" },
     });
   }
 }

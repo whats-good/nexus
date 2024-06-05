@@ -1,3 +1,4 @@
+import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
@@ -13,13 +14,15 @@ export class RpcRequestHandler {
   private readonly nodeEndpointPool: NodeEndpointPool;
   private readonly rpcRequestPayload: RpcRequestPayloadType;
   private readonly requestId: string | number | null;
+  private readonly logger: Logger;
 
   constructor(ctx: NexusRpcContext) {
     this.nodeEndpointPool = ctx.nodeEndpointPool;
     this.rpcRequestPayload = ctx.rpcRequestPayload;
     this.requestId = ctx.requestId;
+    this.logger = ctx.parent.logger.child({ name: this.constructor.name });
 
-    console.log(ctx.platformContext);
+    this.logger.debug(ctx.rpcRequestPayload);
   }
 
   public async handle(): Promise<RpcResponse> {

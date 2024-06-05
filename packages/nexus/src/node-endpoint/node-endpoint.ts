@@ -35,9 +35,6 @@ export class NodeEndpoint {
 
       relayResponse = await fetch(cleanedRequest);
     } catch (error) {
-      // TODO: use logger library
-      console.error("Error fetching", error);
-
       return new NodeRpcResponseInternalFetchError({
         request,
       });
