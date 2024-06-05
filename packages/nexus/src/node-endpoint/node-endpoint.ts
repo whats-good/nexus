@@ -22,19 +22,22 @@ export class NodeEndpoint {
   }
 
   public async relay(request: RpcRequestPayloadType): Promise<NodeRpcResponse> {
-    const cleanedRequest = new Request(this.nodeProvider.url, {
-      body: JSON.stringify(request),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
     let relayResponse: Response;
 
     try {
+      const cleanedRequest = new Request(this.nodeProvider.url, {
+        body: JSON.stringify(request),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
       relayResponse = await fetch(cleanedRequest);
     } catch (error) {
+      // TODO: use logger library
+      console.error("Error fetching", error);
+
       return new NodeRpcResponseInternalFetchError({
         request,
       });

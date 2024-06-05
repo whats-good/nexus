@@ -24,13 +24,14 @@ export class Nexus<TPlatformContext = unknown>
     this.controller = new Controller(staticContainer);
     this.port = staticContainer.config.port;
   }
-  public async handle(
+
+  public handle = async (
     request: Request,
     ctx: TPlatformContext
-  ): Promise<Response> {
+  ): Promise<Response> => {
     // TODO: wrap this with a try-catch for final error handling
     return (await this.controller.handleRequest(request, ctx)).buildResponse();
-  }
+  };
 
   public static create<TPlatformContext = unknown>(
     options: NexusConfigOptions<TPlatformContext>
