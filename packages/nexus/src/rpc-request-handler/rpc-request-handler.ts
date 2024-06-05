@@ -19,7 +19,7 @@ export class RpcRequestHandler {
     this.rpcRequestPayload = container.rpcRequestPayload;
     this.requestId = container.requestId;
 
-    console.log(container.serverContext);
+    console.log(container.platformContext);
   }
 
   public async handle(): Promise<RpcResponse> {

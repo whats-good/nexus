@@ -3,9 +3,9 @@ import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import type { StaticContainer } from "./static-container";
 
-export class RequestContainer<TServerContext = unknown> {
+export class RequestContainer<TPlatformContext = unknown> {
   public readonly parent: StaticContainer;
-  public readonly serverContext: TServerContext;
+  public readonly platformContext: TPlatformContext;
   public readonly chain: Chain;
   public readonly nodeEndpointPool: NodeEndpointPool;
   public readonly rpcRequestPayload: RpcRequestPayloadType;
@@ -13,13 +13,13 @@ export class RequestContainer<TServerContext = unknown> {
 
   constructor(params: {
     parent: StaticContainer;
-    serverContext: TServerContext;
+    platformContext: TPlatformContext;
     chain: Chain;
     nodeEndpointPool: NodeEndpointPool;
     rpcRequestPayload: RpcRequestPayloadType;
   }) {
     this.parent = params.parent;
-    this.serverContext = params.serverContext;
+    this.platformContext = params.platformContext;
     this.chain = params.chain;
     this.nodeEndpointPool = params.nodeEndpointPool;
     this.rpcRequestPayload = params.rpcRequestPayload;

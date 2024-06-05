@@ -7,13 +7,13 @@ import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 
-export type NexusServerInstance<TServerContext> = ServerAdapter<
-  TServerContext,
-  Nexus<TServerContext>
+export type NexusServerInstance<TPlatformContext> = ServerAdapter<
+  TPlatformContext,
+  Nexus<TPlatformContext>
 >;
 
-export class Nexus<TServerContext = unknown>
-  implements ServerAdapterBaseObject<TServerContext>
+export class Nexus<TPlatformContext = unknown>
+  implements ServerAdapterBaseObject<TPlatformContext>
 {
   private readonly staticContainer: StaticContainer;
   private readonly controller: Controller;
@@ -26,22 +26,22 @@ export class Nexus<TServerContext = unknown>
   }
   public async handle(
     request: Request,
-    ctx: TServerContext
+    ctx: TPlatformContext
   ): Promise<Response> {
     // TODO: wrap this with a try-catch for final error handling
     return (await this.controller.handleRequest(request, ctx)).buildResponse();
   }
 
-  public static create<TServerContext = unknown>(
-    options: NexusConfigOptions<TServerContext>
+  public static create<TPlatformContext = unknown>(
+    options: NexusConfigOptions<TPlatformContext>
   ) {
     const staticContainer = new StaticContainer({
       config: NexusConfig.init(options),
     });
     const server = new Nexus(staticContainer);
 
-    return createServerAdapter<TServerContext, Nexus<TServerContext>>(
+    return createServerAdapter<TPlatformContext, Nexus<TPlatformContext>>(
       server
-    ) as unknown as NexusServerInstance<TServerContext>;
+    ) as unknown as NexusServerInstance<TPlatformContext>;
   }
 }
