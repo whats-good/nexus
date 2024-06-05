@@ -15,13 +15,27 @@ export const randomizeArray = <T>(arr: T[]): T[] => {
 };
 
 export function safeJsonStringify(
-  value: any,
-  replacer?: (number | string)[] | null,
-  space?: string | number
+  value: unknown,
+  replacer: (number | string)[] | null = null,
+  space: string | number = 2
 ): string {
   try {
     return JSON.stringify(value, replacer, space);
   } catch (error) {
     return `[Error: Could not stringify value]`;
   }
+}
+
+export function safeErrorStringify(err: unknown) {
+  if (!(err instanceof Error)) {
+    return safeJsonStringify(err);
+  }
+
+  const plainObject: Record<string, any> = {};
+
+  Object.getOwnPropertyNames(err).forEach((key) => {
+    plainObject[key] = err[key as keyof Error];
+  });
+
+  return safeJsonStringify(plainObject);
 }

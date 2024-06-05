@@ -3,13 +3,16 @@ import type { NodeProvider } from "@src/node-provider";
 import type { StaticContainer } from "@src/dependency-injection/static-container";
 import { NodeEndpointPool } from "./node-endpoint-pool";
 import type { RelayConfig } from "./relay-config";
+import { NodeEndpoint } from "./node-endpoint";
 
 export class NodeEndpointPoolFactory {
   private readonly nodeProviders: NodeProvider[];
   private readonly relayConfig: RelayConfig;
   private readonly chainIdToEndpointPoolMap: Map<number, NodeEndpointPool>;
+  private readonly container: StaticContainer;
 
   constructor(container: StaticContainer) {
+    this.container = container;
     this.nodeProviders = container.config.nodeProviders;
     this.relayConfig = container.config.relay;
     this.chainIdToEndpointPoolMap = this.getChainToEndpointPoolMap();
@@ -51,9 +54,14 @@ export class NodeEndpointPoolFactory {
         chain.chainId,
         new NodeEndpointPool({
           chain,
-          nodeEndpoints: nodeProviders.map(
-            (nodeProvider) => nodeProvider.nodeEndpoint
-          ),
+          nodeEndpoints: nodeProviders.map((nodeProvider) => {
+            const endpoint = new NodeEndpoint({
+              nodeProvider,
+              container: this.container,
+            });
+
+            return endpoint;
+          }),
           config: this.relayConfig,
         })
       );

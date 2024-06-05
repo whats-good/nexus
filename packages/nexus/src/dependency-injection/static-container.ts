@@ -4,12 +4,11 @@ import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 
 export class StaticContainer<TPlatformContext = unknown> {
   public readonly config: NexusConfig<TPlatformContext>;
-  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   public readonly logger: Logger;
+  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
 
   constructor(params: { config: NexusConfig<TPlatformContext> }) {
     this.config = params.config;
-    this.nodeEndpointPoolFactory = new NodeEndpointPoolFactory(this);
     this.logger = pino({
       transport: {
         target: "pino-pretty",
@@ -20,5 +19,6 @@ export class StaticContainer<TPlatformContext = unknown> {
       },
       level: this.config.log.level,
     });
+    this.nodeEndpointPoolFactory = new NodeEndpointPoolFactory(this);
   }
 }
