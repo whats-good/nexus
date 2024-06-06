@@ -4,6 +4,8 @@ import { safeErrorStringify } from "@src/utils";
 import type { AnyEventHandler } from "./event-handler";
 import type { NexusEvent } from "./nexus-event";
 
+// TODO: settle on a naming convention: NexusEventBus vs EventBus etc
+
 export class EventBus<TPlatformContext = unknown> {
   // eslint-disable-next-line @typescript-eslint/ban-types -- We're using Function as a key, which is the most viable way to ensure a unique identifier without overburdening the user, forcing them to supply unique strings etc.
   private readonly handlers = new Map<Function, AnyEventHandler[]>();
