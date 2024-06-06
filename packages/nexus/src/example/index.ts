@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
+import type { NexusRpcContext } from "@src/dependency-injection";
+import { RpcResponseSuccessEvent } from "@src/rpc-request-handler/events/rpc-response-success-event";
 
 const ethMainnet = new Chain({
   chainId: 1,
@@ -35,6 +37,21 @@ const nexus = Nexus.create({
   log: {
     level: "debug",
   },
+  eventHandlers: [
+    {
+      event: RpcResponseSuccessEvent,
+      handle: async (
+        event: RpcResponseSuccessEvent,
+        ctx: NexusRpcContext
+      ): Promise<void> => {
+        const logger = ctx.parent.logger.child({
+          name: "rpc-response-success",
+        });
+
+        logger.info(event.payload);
+      },
+    },
+  ],
 });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe

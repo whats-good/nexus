@@ -2,6 +2,7 @@ import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
+import { safeErrorStringify } from "@src/utils";
 import {
   InternalErrorResponse,
   NodeProviderReturnedInvalidResponse,
@@ -10,14 +11,17 @@ import {
   RpcSuccessResponse,
   type RpcResponse,
 } from "./rpc-response";
+import { RpcResponseSuccessEvent } from "./events/rpc-response-success-event";
 
-export class RpcRequestHandler {
+export class RpcRequestHandler<TPlatformContext = unknown> {
   private readonly nodeEndpointPool: NodeEndpointPool;
   private readonly rpcRequestPayload: RpcRequestPayloadType;
   private readonly requestId: string | number | null;
   private readonly logger: Logger;
+  private readonly ctx: NexusRpcContext<TPlatformContext>;
 
-  constructor(ctx: NexusRpcContext) {
+  constructor(ctx: NexusRpcContext<TPlatformContext>) {
+    this.ctx = ctx;
     this.nodeEndpointPool = ctx.nodeEndpointPool;
     this.rpcRequestPayload = ctx.rpcRequestPayload;
     this.requestId = ctx.requestId;
@@ -26,12 +30,16 @@ export class RpcRequestHandler {
     this.logger.debug(ctx.rpcRequestPayload);
   }
 
-  public async handle(): Promise<RpcResponse> {
+  private async handleRelay(): Promise<RpcResponse> {
     const poolResponse = await this.nodeEndpointPool.relay(
       this.rpcRequestPayload
     );
 
     if (poolResponse.kind === "success") {
+      this.ctx.eventBus.dispatch(
+        new RpcResponseSuccessEvent(poolResponse.success.response)
+      );
+
       return new RpcSuccessResponse(
         this.requestId,
         poolResponse.success.response.result
@@ -70,5 +78,21 @@ export class RpcRequestHandler {
     }
 
     return new InternalErrorResponse(this.rpcRequestPayload.id || null);
+  }
+
+  public async handle(): Promise<RpcResponse> {
+    const response = await this.handleRelay();
+
+    process.nextTick(() => {
+      this.ctx.eventBus.processAllEvents().catch((e: unknown) => {
+        this.logger.error(
+          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
+            e
+          )}`
+        );
+      });
+    });
+
+    return response;
   }
 }

@@ -39,3 +39,5 @@ export function safeErrorStringify(err: unknown) {
 
   return safeJsonStringify(plainObject);
 }
+
+export type Constructor<T> = new (...args: any[]) => T;
