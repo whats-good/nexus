@@ -13,7 +13,7 @@ import {
 } from "@src/rpc-response";
 import { RpcResponseSuccessEvent } from "./events/rpc-response-success-event";
 
-export class RpcRequestHandler<TPlatformContext = unknown> {
+export class NodeRelayHandler<TPlatformContext = unknown> {
   private readonly nodeEndpointPool: NodeEndpointPool;
   private readonly rpcRequestPayload: RpcRequestPayloadType;
   private readonly requestId: string | number | null;

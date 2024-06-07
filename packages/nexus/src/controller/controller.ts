@@ -10,7 +10,7 @@ import {
   ParseErrorResponse,
   ProviderNotConfiguredErrorResponse,
 } from "@src/rpc-response";
-import { RpcRequestHandler } from "../rpc-request-handler";
+import { NodeRelayHandler } from "../node-relay-handler";
 import type { PathParamsOf } from "./route";
 import { Route } from "./route";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
@@ -101,8 +101,8 @@ export class Controller<TPlatformContext = unknown> {
       rpcRequestPayload: rpcRequestPayload.data,
     });
 
-    const rpcRequestHandler = new RpcRequestHandler(nexusRpcContext);
+    const nodeRelayHandler = new NodeRelayHandler(nexusRpcContext);
 
-    return rpcRequestHandler.handle();
+    return nodeRelayHandler.handle();
   }
 }

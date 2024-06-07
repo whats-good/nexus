@@ -3,7 +3,7 @@ import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import type { NexusRpcContext } from "@src/dependency-injection";
-import { RpcResponseSuccessEvent } from "@src/rpc-request-handler/events/rpc-response-success-event";
+import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events/rpc-response-success-event";
 
 const ethMainnet = new Chain({
   chainId: 1,
