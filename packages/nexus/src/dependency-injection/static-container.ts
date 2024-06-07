@@ -5,7 +5,7 @@ import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 export class StaticContainer<TPlatformContext = unknown> {
   public readonly config: NexusConfig<TPlatformContext>;
   public readonly logger: Logger;
-  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
+  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
 
   constructor(params: { config: NexusConfig<TPlatformContext> }) {
     this.config = params.config;

@@ -14,7 +14,9 @@ export class NexusMiddlewareHandler<TPlatformContext = unknown> {
   }) {
     this.middleware = params.middleware;
     this.ctx = params.ctx;
-    this.logger = this.ctx.parent.logger.child({ name: this.constructor.name });
+    this.logger = this.ctx.container.logger.child({
+      name: this.constructor.name,
+    });
   }
 
   public async handle() {

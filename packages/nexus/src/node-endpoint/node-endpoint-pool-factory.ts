@@ -5,13 +5,13 @@ import { NodeEndpointPool } from "./node-endpoint-pool";
 import type { RelayConfig } from "./relay-config";
 import { NodeEndpoint } from "./node-endpoint";
 
-export class NodeEndpointPoolFactory {
+export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
   private readonly nodeProviders: NodeProvider[];
   private readonly relayConfig: RelayConfig;
   private readonly chainIdToEndpointPoolMap: Map<number, NodeEndpointPool>;
-  private readonly container: StaticContainer;
+  private readonly container: StaticContainer<TPlatformContext>;
 
-  constructor(container: StaticContainer) {
+  constructor(container: StaticContainer<TPlatformContext>) {
     this.container = container;
     this.nodeProviders = container.config.nodeProviders;
     this.relayConfig = container.config.relay;

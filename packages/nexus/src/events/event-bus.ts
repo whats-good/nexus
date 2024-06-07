@@ -1,14 +1,17 @@
 import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
 import { safeErrorStringify } from "@src/utils";
-import type { AnyEventHandler } from "./event-handler";
+import type { AnyEventHandlerOf } from "./event-handler";
 import type { NexusEvent } from "./nexus-event";
 
 // TODO: settle on a naming convention: NexusEventBus vs EventBus etc
 
 export class EventBus<TPlatformContext = unknown> {
-  // eslint-disable-next-line @typescript-eslint/ban-types -- We're using Function as a key, which is the most viable way to ensure a unique identifier without overburdening the user, forcing them to supply unique strings etc.
-  private readonly handlers = new Map<Function, AnyEventHandler[]>();
+  private readonly handlers = new Map<
+    // eslint-disable-next-line @typescript-eslint/ban-types -- We're using Function as a key, which is the most viable way to ensure a unique identifier without overburdening the user, forcing them to supply unique strings etc.
+    Function,
+    AnyEventHandlerOf<TPlatformContext>[]
+  >();
   private readonly ctx: NexusRpcContext<TPlatformContext>;
   private readonly eventQueue: NexusEvent[] = [];
   private readonly logger: Logger;
@@ -17,11 +20,13 @@ export class EventBus<TPlatformContext = unknown> {
   // TODO: but also make sure that static container logs can be tied back to the request too. maybe this is a reason not to spawn loggers from the ctx.
 
   constructor(params: {
-    handlers: AnyEventHandler[];
+    handlers: AnyEventHandlerOf<TPlatformContext>[];
     ctx: NexusRpcContext<TPlatformContext>;
   }) {
     this.ctx = params.ctx;
-    this.logger = this.ctx.parent.logger.child({ name: this.constructor.name });
+    this.logger = this.ctx.container.logger.child({
+      name: this.constructor.name,
+    });
 
     for (const handler of params.handlers) {
       const currentHandlers = this.handlers.get(handler.event) || [];
@@ -63,7 +68,7 @@ export class EventBus<TPlatformContext = unknown> {
       return;
     }
 
-    this.logger.debug(`Processing ${this.eventQueue.length} events...`);
+    this.logger.debug(`Processing ${this.eventQueue.length} event(s)...`);
 
     for (const event of this.eventQueue) {
       await this.processEvent(event);

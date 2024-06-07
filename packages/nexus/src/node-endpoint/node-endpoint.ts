@@ -17,13 +17,13 @@ import {
 } from "./node-rpc-response";
 import type { NodeRpcResponse } from "./node-rpc-response";
 
-export class NodeEndpoint {
+export class NodeEndpoint<TPlatformContext = unknown> {
   public readonly nodeProvider: NodeProvider;
   private readonly logger: Logger;
 
   constructor(params: {
     nodeProvider: NodeProvider;
-    container: StaticContainer;
+    container: StaticContainer<TPlatformContext>;
   }) {
     this.nodeProvider = params.nodeProvider;
     this.logger = params.container.logger.child({

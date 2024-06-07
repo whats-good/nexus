@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Logger } from "pino";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
@@ -7,10 +8,12 @@ import { NexusRpcContext } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
+  InternalErrorResponse,
   ParseErrorResponse,
   ProviderNotConfiguredErrorResponse,
 } from "@src/rpc-response";
-import { NodeRelayHandler } from "../node-relay-handler";
+import { NexusMiddlewareHandler } from "@src/middleware";
+import { safeErrorStringify, safeJsonStringify } from "@src/utils";
 import type { PathParamsOf } from "./route";
 import { Route } from "./route";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
@@ -29,12 +32,14 @@ const chainIdRoute = new Route(
 );
 
 export class Controller<TPlatformContext = unknown> {
-  private readonly container: StaticContainer;
-  private readonly config: NexusConfig;
-  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
+  private readonly container: StaticContainer<TPlatformContext>;
+  private readonly config: NexusConfig<TPlatformContext>;
+  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
+  private readonly logger: Logger;
 
-  constructor(container: StaticContainer) {
+  constructor(container: StaticContainer<TPlatformContext>) {
     this.container = container;
+    this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
     this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
   }
@@ -93,16 +98,51 @@ export class Controller<TPlatformContext = unknown> {
       );
     }
 
-    const nexusRpcContext = new NexusRpcContext({
-      parent: this.container,
+    const ctx = new NexusRpcContext({
+      container: this.container,
       platformContext,
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
     });
 
-    const nodeRelayHandler = new NodeRelayHandler(nexusRpcContext);
+    const middlewareHandler = new NexusMiddlewareHandler({
+      ctx,
+      middleware: this.config.middleware,
+    });
 
-    return nodeRelayHandler.handle();
+    try {
+      await middlewareHandler.handle();
+    } catch (e) {
+      this.logger.error(
+        `Error in rpc middleware. Error: ${safeErrorStringify(e)}`
+      );
+
+      return new InternalErrorResponse(ctx.requestId);
+    }
+
+    process.nextTick(() => {
+      ctx.eventBus.processAllEvents().catch((e: unknown) => {
+        this.logger.error(
+          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
+            e
+          )}`
+        );
+      });
+    });
+
+    const response = ctx.getResponse();
+
+    if (!response) {
+      this.logger.error(
+        `No response set in context for request: ${safeJsonStringify(
+          rpcRequestPayload.data
+        )}`
+      );
+
+      return new InternalErrorResponse(ctx.requestId);
+    }
+
+    return response;
   }
 }

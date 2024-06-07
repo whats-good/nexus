@@ -16,12 +16,12 @@ export type NexusServerInstance<TPlatformContext> = ServerAdapter<
 export class Nexus<TPlatformContext = unknown>
   implements ServerAdapterBaseObject<TPlatformContext>
 {
-  private readonly staticContainer: StaticContainer;
-  private readonly controller: Controller;
+  private readonly staticContainer: StaticContainer<TPlatformContext>;
+  private readonly controller: Controller<TPlatformContext>;
   public readonly port?: number;
   public readonly logger: Logger;
 
-  private constructor(staticContainer: StaticContainer) {
+  private constructor(staticContainer: StaticContainer<TPlatformContext>) {
     this.staticContainer = staticContainer;
     this.controller = new Controller(staticContainer);
     this.port = staticContainer.config.port;

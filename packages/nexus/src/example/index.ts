@@ -44,7 +44,7 @@ const nexus = Nexus.create({
         event: RpcResponseSuccessEvent,
         ctx: NexusRpcContext
       ): Promise<void> => {
-        const logger = ctx.parent.logger.child({
+        const logger = ctx.container.logger.child({
           name: "rpc-response-success",
         });
 

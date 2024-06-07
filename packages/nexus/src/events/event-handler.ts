@@ -2,10 +2,7 @@ import { type Constructor } from "@src/utils";
 import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NexusEvent } from "./nexus-event";
 
-export interface EventHandler<
-  E extends NexusEvent,
-  TPlatformContext = unknown,
-> {
+export interface EventHandler<E extends NexusEvent, TPlatformContext> {
   event: Constructor<E>;
   handle: (
     event: E,
@@ -13,4 +10,7 @@ export interface EventHandler<
   ) => Promise<void>;
 }
 
-export type AnyEventHandler = EventHandler<any>;
+export type AnyEventHandlerOf<TPlatformContext> = EventHandler<
+  any,
+  TPlatformContext
+>;

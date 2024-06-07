@@ -2,7 +2,6 @@ import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import { safeErrorStringify } from "@src/utils";
 import {
   InternalErrorResponse,
   NodeProviderReturnedInvalidResponse,
@@ -25,12 +24,12 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     this.nodeEndpointPool = ctx.nodeEndpointPool;
     this.rpcRequestPayload = ctx.rpcRequestPayload;
     this.requestId = ctx.requestId;
-    this.logger = ctx.parent.logger.child({ name: this.constructor.name });
+    this.logger = ctx.container.logger.child({ name: this.constructor.name });
 
     this.logger.debug(ctx.rpcRequestPayload);
   }
 
-  private async handleRelay(): Promise<RpcResponse> {
+  public async handle(): Promise<RpcResponse> {
     const poolResponse = await this.nodeEndpointPool.relay(
       this.rpcRequestPayload
     );
@@ -78,21 +77,5 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     }
 
     return new InternalErrorResponse(this.rpcRequestPayload.id || null);
-  }
-
-  public async handle(): Promise<RpcResponse> {
-    const response = await this.handleRelay();
-
-    process.nextTick(() => {
-      this.ctx.eventBus.processAllEvents().catch((e: unknown) => {
-        this.logger.error(
-          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
-            e
-          )}`
-        );
-      });
-    });
-
-    return response;
   }
 }

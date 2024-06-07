@@ -1,7 +1,10 @@
 import type { Chain } from "@src/chain";
-import type { AnyEventHandler } from "@src/events";
+import type { NexusRpcContext } from "@src/dependency-injection/nexus-rpc-context";
+import type { AnyEventHandlerOf } from "@src/events";
+import type { NexusMiddleware, NexusMiddlewareNextFn } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
+import { NodeRelayHandler } from "@src/node-relay-handler";
 
 export interface LogConfig {
   level: string;
@@ -12,7 +15,8 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   relay: RelayConfig;
   port?: number;
   log?: LogConfig;
-  eventHandlers?: AnyEventHandler[];
+  eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
+  middleware?: NexusMiddleware<TPlatformContext>[];
 }
 
 export class NexusConfig<TPlatformContext = unknown> {
@@ -21,7 +25,8 @@ export class NexusConfig<TPlatformContext = unknown> {
   public readonly relay: RelayConfig;
   public readonly log: LogConfig;
   public readonly port?: number;
-  public readonly eventHandlers: AnyEventHandler[];
+  public readonly eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
+  public readonly middleware: NexusMiddleware<TPlatformContext>[];
 
   private constructor(params: {
     nodeProviders: [NodeProvider, ...NodeProvider[]];
@@ -29,7 +34,8 @@ export class NexusConfig<TPlatformContext = unknown> {
     relay: RelayConfig;
     log: LogConfig;
     port?: number;
-    eventHandlers: AnyEventHandler[];
+    eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
+    middleware: NexusMiddleware<TPlatformContext>[];
   }) {
     this.nodeProviders = params.nodeProviders;
     this.chains = params.chains;
@@ -37,6 +43,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     this.port = params.port;
     this.log = params.log;
     this.eventHandlers = params.eventHandlers;
+    this.middleware = params.middleware;
   }
 
   public static init<TPlatformContext>(
@@ -46,6 +53,23 @@ export class NexusConfig<TPlatformContext = unknown> {
       new Set(params.nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
+    const givenMiddleare = params.middleware || [];
+
+    // we create the relay middleware on the spot, and append it to the given middleware
+    const middleware = givenMiddleare.concat([
+      async (
+        ctx: NexusRpcContext<TPlatformContext>,
+        next: NexusMiddlewareNextFn
+      ): Promise<void> => {
+        const nodeRelayHandler = new NodeRelayHandler(ctx);
+        const response = await nodeRelayHandler.handle();
+
+        ctx.setResponse(response);
+
+        return next();
+      },
+    ]);
+
     return new NexusConfig<TPlatformContext>({
       nodeProviders: params.nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
@@ -53,6 +77,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       port: params.port,
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],
+      middleware,
     });
   }
 }
