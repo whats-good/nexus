@@ -10,7 +10,7 @@ import {
   RpcErrorResponse,
   RpcSuccessResponse,
   type RpcResponse,
-} from "./rpc-response";
+} from "@src/rpc-response";
 import { RpcResponseSuccessEvent } from "./events/rpc-response-success-event";
 
 export class RpcRequestHandler<TPlatformContext = unknown> {

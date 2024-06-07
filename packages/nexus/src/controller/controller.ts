@@ -4,12 +4,12 @@ import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 import { NexusRpcContext } from "@src/dependency-injection";
-import type { RpcResponse } from "@src/rpc-request-handler/rpc-response";
+import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
   ParseErrorResponse,
   ProviderNotConfiguredErrorResponse,
-} from "@src/rpc-request-handler/rpc-response";
+} from "@src/rpc-response";
 import { RpcRequestHandler } from "../rpc-request-handler";
 import type { PathParamsOf } from "./route";
 import { Route } from "./route";
