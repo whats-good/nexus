@@ -10,7 +10,6 @@ import {
   RpcSuccessResponse,
   type RpcResponse,
 } from "@src/rpc-response";
-import { RpcResponseSuccessEvent } from "./events";
 
 export class NodeRelayHandler<TPlatformContext = unknown> {
   private readonly nodeEndpointPool: NodeEndpointPool;
@@ -35,10 +34,6 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     );
 
     if (poolResponse.kind === "success") {
-      this.ctx.eventBus.dispatch(
-        new RpcResponseSuccessEvent(poolResponse.success.response)
-      );
-
       return new RpcSuccessResponse(
         this.requestId,
         poolResponse.success.response.result

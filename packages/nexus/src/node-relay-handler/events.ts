@@ -1,8 +1,14 @@
 import { NexusEvent } from "@src/events";
-import type { RpcResponseSuccessPayloadType } from "@src/rpc-schema";
+import type { RpcErrorResponse, RpcSuccessResponse } from "@src/rpc-response";
 
 export class RpcResponseSuccessEvent extends NexusEvent {
-  constructor(public readonly payload: RpcResponseSuccessPayloadType) {
+  constructor(public readonly payload: RpcSuccessResponse) {
+    super();
+  }
+}
+
+export class RpcResponseErrorEvent extends NexusEvent {
+  constructor(public readonly payload: RpcErrorResponse) {
     super();
   }
 }

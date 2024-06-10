@@ -11,9 +11,15 @@ import {
   InternalErrorResponse,
   ParseErrorResponse,
   ProviderNotConfiguredErrorResponse,
+  RpcErrorResponse,
+  RpcSuccessResponse,
 } from "@src/rpc-response";
 import { NexusMiddlewareHandler } from "@src/middleware";
 import { safeErrorStringify, safeJsonStringify } from "@src/utils";
+import {
+  RpcResponseErrorEvent,
+  RpcResponseSuccessEvent,
+} from "@src/node-relay-handler/events";
 import type { PathParamsOf } from "./route";
 import { Route } from "./route";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
@@ -122,6 +128,31 @@ export class Controller<TPlatformContext = unknown> {
       return new InternalErrorResponse(ctx.requestId);
     }
 
+    let response = ctx.getResponse();
+
+    if (!response) {
+      this.logger.error(
+        `No response set in context for request: ${safeJsonStringify(
+          rpcRequestPayload.data
+        )}`
+      );
+
+      response = new InternalErrorResponse(ctx.requestId);
+      ctx.setResponse(response);
+    }
+
+    if (response instanceof RpcSuccessResponse) {
+      ctx.eventBus.dispatch(new RpcResponseSuccessEvent(response));
+    } else if (response instanceof RpcErrorResponse) {
+      ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
+    } else {
+      // this should never happen
+      this.logger.error(
+        `Invalid response type in context: ${safeJsonStringify(response)}`
+      );
+      throw new Error("Invalid response type in context");
+    }
+
     process.nextTick(() => {
       ctx.eventBus.processAllEvents().catch((e: unknown) => {
         this.logger.error(
@@ -131,18 +162,6 @@ export class Controller<TPlatformContext = unknown> {
         );
       });
     });
-
-    const response = ctx.getResponse();
-
-    if (!response) {
-      this.logger.error(
-        `No response set in context for request: ${safeJsonStringify(
-          rpcRequestPayload.data
-        )}`
-      );
-
-      return new InternalErrorResponse(ctx.requestId);
-    }
 
     return response;
   }
