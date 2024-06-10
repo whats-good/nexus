@@ -104,6 +104,7 @@ export class Controller<TPlatformContext = unknown> {
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
+      request,
     });
 
     const middlewareHandler = new NexusMiddlewareHandler({

@@ -3,7 +3,8 @@ import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import type { NexusRpcContext } from "@src/dependency-injection";
-import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events/rpc-response-success-event";
+import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events";
+import { authenticationMiddleware } from "@src/authentication";
 
 const ethMainnet = new Chain({
   chainId: 1,
@@ -32,6 +33,7 @@ const nexus = Nexus.create({
     },
     order: "random",
   },
+  middleware: [authenticationMiddleware({ authKey: "my-secret-key" })],
   port: 3000,
   // TODO: add env var support for log config.
   log: {

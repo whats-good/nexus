@@ -10,6 +10,7 @@ export class NexusRpcContext<TPlatformContext = unknown> {
   public readonly platformContext: TPlatformContext;
   public readonly chain: Chain;
   public readonly nodeEndpointPool: NodeEndpointPool;
+  public readonly request: Request;
   public readonly rpcRequestPayload: RpcRequestPayloadType;
   public readonly requestId: string | number | null;
   public readonly eventBus: EventBus<TPlatformContext>;
@@ -20,12 +21,14 @@ export class NexusRpcContext<TPlatformContext = unknown> {
     platformContext: TPlatformContext;
     chain: Chain;
     nodeEndpointPool: NodeEndpointPool;
+    request: Request;
     rpcRequestPayload: RpcRequestPayloadType;
   }) {
     this.container = params.container;
     this.platformContext = params.platformContext;
     this.chain = params.chain;
     this.nodeEndpointPool = params.nodeEndpointPool;
+    this.request = params.request;
     this.rpcRequestPayload = params.rpcRequestPayload;
     this.requestId = params.rpcRequestPayload.id || null;
     this.eventBus = new EventBus({

@@ -196,19 +196,19 @@ export class NodeProviderReturnedInvalidResponse extends NexusCustomErrorRespons
   }
 }
 
+export class UnauthorizedCustomErrorResponse extends NexusCustomErrorResponse {
+  public readonly httpStatusCode = 401;
+  public readonly errorCode = -32022;
+  public readonly message = "Unauthorized";
+  constructor(public readonly id: string | number | null) {
+    super();
+  }
+}
+
 // export class MethodDeniedCustomErrorResponse extends NexusCustomErrorResponse {
 //   public readonly httpStatusCode = 403;
-//   public readonly errorCode = -32020;
+//   public readonly errorCode = -32023;
 //   public readonly message = "Method denied";
-//   constructor(public readonly id: string | number | null) {
-//     super();
-//   }
-// }
-
-// export class UnauthorizedCustomErrorResponse extends NexusCustomErrorResponse {
-//   public readonly httpStatusCode = 401;
-//   public readonly errorCode = -32024;
-//   public readonly message = "Unauthorized";
 //   constructor(public readonly id: string | number | null) {
 //     super();
 //   }

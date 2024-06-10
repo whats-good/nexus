@@ -10,7 +10,7 @@ import {
   RpcSuccessResponse,
   type RpcResponse,
 } from "@src/rpc-response";
-import { RpcResponseSuccessEvent } from "./events/rpc-response-success-event";
+import { RpcResponseSuccessEvent } from "./events";
 
 export class NodeRelayHandler<TPlatformContext = unknown> {
   private readonly nodeEndpointPool: NodeEndpointPool;
