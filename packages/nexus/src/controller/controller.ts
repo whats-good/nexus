@@ -64,6 +64,62 @@ export class Controller<TPlatformContext = unknown> {
     return new NexusNotFoundResponse();
   }
 
+  private async handleRpcContext(
+    ctx: NexusRpcContext<TPlatformContext>
+  ): Promise<RpcResponse> {
+    const middlewareHandler = new NexusMiddlewareHandler({
+      ctx,
+      middleware: this.config.middleware,
+    });
+
+    try {
+      await middlewareHandler.handle();
+    } catch (e) {
+      this.logger.error(
+        `Error in rpc middleware. Error: ${safeErrorStringify(e)}`
+      );
+
+      ctx.setResponse(new InternalErrorResponse(ctx.requestId));
+    }
+
+    let response = ctx.getResponse();
+
+    if (!response) {
+      this.logger.error(
+        `No response set in context for request: ${safeJsonStringify(
+          ctx.rpcRequestPayload
+        )}`
+      );
+
+      response = new InternalErrorResponse(ctx.requestId);
+      ctx.setResponse(response);
+    }
+
+    if (response instanceof RpcSuccessResponse) {
+      ctx.eventBus.dispatch(new RpcResponseSuccessEvent(response));
+    } else if (response instanceof RpcErrorResponse) {
+      ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
+    } else {
+      // this should never happen
+      this.logger.error(
+        `Invalid response type in context: ${safeJsonStringify(response)}`
+      );
+      throw new Error("Invalid response type in context");
+    }
+
+    process.nextTick(() => {
+      ctx.eventBus.processAllEvents().catch((e: unknown) => {
+        this.logger.error(
+          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
+            e
+          )}`
+        );
+      });
+    });
+
+    return response;
+  }
+
   private async handleChainIdRoute(
     params: PathParamsOf<typeof chainIdRoute>,
     request: Request,
@@ -113,56 +169,6 @@ export class Controller<TPlatformContext = unknown> {
       request,
     });
 
-    const middlewareHandler = new NexusMiddlewareHandler({
-      ctx,
-      middleware: this.config.middleware,
-    });
-
-    try {
-      await middlewareHandler.handle();
-    } catch (e) {
-      this.logger.error(
-        `Error in rpc middleware. Error: ${safeErrorStringify(e)}`
-      );
-
-      return new InternalErrorResponse(ctx.requestId);
-    }
-
-    let response = ctx.getResponse();
-
-    if (!response) {
-      this.logger.error(
-        `No response set in context for request: ${safeJsonStringify(
-          rpcRequestPayload.data
-        )}`
-      );
-
-      response = new InternalErrorResponse(ctx.requestId);
-      ctx.setResponse(response);
-    }
-
-    if (response instanceof RpcSuccessResponse) {
-      ctx.eventBus.dispatch(new RpcResponseSuccessEvent(response));
-    } else if (response instanceof RpcErrorResponse) {
-      ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
-    } else {
-      // this should never happen
-      this.logger.error(
-        `Invalid response type in context: ${safeJsonStringify(response)}`
-      );
-      throw new Error("Invalid response type in context");
-    }
-
-    process.nextTick(() => {
-      ctx.eventBus.processAllEvents().catch((e: unknown) => {
-        this.logger.error(
-          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
-            e
-          )}`
-        );
-      });
-    });
-
-    return response;
+    return this.handleRpcContext(ctx);
   }
 }
