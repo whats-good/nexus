@@ -12,7 +12,7 @@ export interface LogConfig {
 
 export interface NexusConfigOptions<TPlatformContext = unknown> {
   nodeProviders: [NodeProvider, ...NodeProvider[]];
-  relay: RelayConfig;
+  relay?: RelayConfig;
   port?: number;
   log?: LogConfig;
   eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
@@ -73,7 +73,10 @@ export class NexusConfig<TPlatformContext = unknown> {
     return new NexusConfig<TPlatformContext>({
       nodeProviders: params.nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
-      relay: params.relay,
+      relay: params.relay || {
+        order: "sequential",
+        failure: { kind: "cycle-requests", maxAttempts: 3 },
+      },
       port: params.port,
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],

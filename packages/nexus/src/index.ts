@@ -2,6 +2,7 @@ export * from "./authentication";
 export * from "./chain";
 export * from "./controller";
 export * from "./default-events";
+export * from "./default-chains";
 export * from "./dependency-injection";
 export * from "./events";
 export * from "./middleware";
