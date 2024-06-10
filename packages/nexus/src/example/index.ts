@@ -14,7 +14,7 @@ const ethMainnet = new Chain({
 
 const alchemy1 = new NodeProvider({
   name: "alchemy1",
-  url: process.env.ALCHEMY_1_URL!,
+  url: process.env.ALCHEMY_URL!,
   chain: ethMainnet,
 });
 
