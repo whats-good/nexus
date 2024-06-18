@@ -49,7 +49,7 @@
           "pages": [
             "features/node-providers",
             "features/failure-recovery",
-            "features/middlewares",
+            "features/middleware",
             "features/authorization",
             "features/caching",
             "features/event-handlers",
