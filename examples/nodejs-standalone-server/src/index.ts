@@ -32,7 +32,6 @@ const onUnauthorizedAccess: EventHandler<UnauthorizedAccessEvent> = {
 };
 
 // Step 3: Initialize a node provider
-
 const alchemyNodeProvider = new NodeProvider({
   name: "alchemy",
   chain: CHAIN.ETHEREUM_MAINNET,
@@ -40,12 +39,6 @@ const alchemyNodeProvider = new NodeProvider({
 });
 
 // Step 4: Create a Nexus instance by putting it all together
-// - If run as is, this server will only support Ethereum mainnet, and will use Alchemy as the only node provider.
-// - You can add more node providers and chains to the nodeProviders and chains arrays.
-// - Pay attention to the middlewares and eventHandlers arrays.
-// - Nexus ships with a query param auth middleware, which you can use to gate access to your server.
-// - If you don't need authorization, you can remove the queryParamKeyAuthMiddleware from the middlewares array.
-// - You can also create your own middlewares and event handlers.
 const nexus = Nexus.create({
   nodeProviders: [alchemyNodeProvider],
   port: 4005,
