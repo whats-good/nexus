@@ -17,6 +17,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   log?: LogConfig;
   eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
   middleware?: NexusMiddleware<TPlatformContext>[];
+  nextTick?: typeof process.nextTick;
 }
 
 export class NexusConfig<TPlatformContext = unknown> {
@@ -27,6 +28,7 @@ export class NexusConfig<TPlatformContext = unknown> {
   public readonly port?: number;
   public readonly eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
   public readonly middleware: NexusMiddleware<TPlatformContext>[];
+  public readonly nextTick: typeof process.nextTick;
 
   private constructor(params: {
     nodeProviders: [NodeProvider, ...NodeProvider[]];
@@ -36,6 +38,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     port?: number;
     eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
     middleware: NexusMiddleware<TPlatformContext>[];
+    nextTick: typeof process.nextTick;
   }) {
     this.nodeProviders = params.nodeProviders;
     this.chains = params.chains;
@@ -44,6 +47,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     this.log = params.log;
     this.eventHandlers = params.eventHandlers;
     this.middleware = params.middleware;
+    this.nextTick = params.nextTick;
   }
 
   public static init<TPlatformContext>(
@@ -81,6 +85,8 @@ export class NexusConfig<TPlatformContext = unknown> {
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],
       middleware,
+      // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
+      nextTick: params.nextTick || process.nextTick,
     });
   }
 }

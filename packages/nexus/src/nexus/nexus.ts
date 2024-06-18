@@ -8,7 +8,7 @@ import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 
-export type NexusServerInstance<TPlatformContext> = ServerAdapter<
+export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
   TPlatformContext,
   Nexus<TPlatformContext>
 >;
