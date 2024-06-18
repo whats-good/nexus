@@ -47,7 +47,6 @@ function createNexus(params: {
   // Step 4: Create a Nexus instance by putting it all together
   const nexus = Nexus.create({
     nodeProviders: [alchemyNodeProvider],
-    port: 4005,
     eventHandlers: [onUnauthorizedAccess],
     middleware: [
       authenticationMiddleware({ authKey: params.queryParamAuthKey }),
