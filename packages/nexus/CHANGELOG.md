@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.13.0
+
+### Minor Changes
+
+- b3f0396: Complete rewrite and overhaul
+
 ## 0.12.0
 
 ### Minor Changes
