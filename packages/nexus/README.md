@@ -68,14 +68,6 @@ const infuraNodeProvider = new NodeProvider({
 const nexus = Nexus.create({
   nodeProviders: [alchemyNodeProvider, infuraNodeProvider],
   port: 4005,
-  log: { level: "debug" },
-  relay: {
-    failure: {
-      kind: "cycle-requests",
-      maxAttempts: 3,
-    },
-    order: "random",
-  },
 });
 
 createServer(nexus).listen(nexus.port, () => {
