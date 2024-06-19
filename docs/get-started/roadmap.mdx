@@ -1,0 +1,42 @@
+---
+title: "Roadmap"
+description: "See what we have in store for the future of Nexus"
+---
+
+## The future of Nexus
+
+The long term vision for Nexus is to provide a robust, scalable, and secure rpc infrastructure for blockchain applications. Here are some of the features we're currently working on
+
+
+<Steps>
+  <Step title="Middleware">
+    We're working on improving the stability and performance of our middleware layer. This will allow developers to build more complex and feature rich applications on Nexus. You will be able to use middleware to add custom functionality to your rpc server, such as logging, error handling, rate-limiting, caching, custom authentication, custom rpc responses and more.
+  </Step>
+  <Step title="Evant Handlers">
+    We're working on improving our event handler layer. Once done, you will be able to execute custom code against specific events that take place inside your rpc server. For example, you will be able to react to a failed request, or a particualar contract call from a particular signer, and so on.
+  </Step>
+  <Step title="Caching">
+    Once middleware and event handler layers are stabilized, we will begin polishing our caching layer. This is something we originally had, and then elected to remove as it was not up to par with where we wanted it to be. Once done, you will be able to cache responses from your rpc server, and configure the cache to expire after a certain time, or based on certain conditions such as a given chain's block time, the caller, the method name, the parameters and so on. You will be able to bring in your own caching layer, or use the built-in memory cache.
+  </Step>
+  <Step title="Web Socket Support">
+    Nexus currently only works with HTTP requests. We're working on adding support for websockets. This will allow you to use Nexus in real-time applications, such as trading bots, games, and other applications that require real-time data.
+  </Step>
+  <Step title="SSE Support">
+    We're working on adding support for Server Sent Events. This will allow you to stream data from your rpc server to your clients in real-time. There is no current standard for this in the blockchain space, so we're excited to be one of the first to offer this feature. Our goal is to overcome the inherent limitations of websocket support in the ecosystem, which have proven to be unreliable and brittle in many cases.
+  </Step>
+  <Step title="JWT Authentication">
+    We believe that the current status quo on how dApp developers authenticate to their rpc servers does not provide enough security or protection. Exposing access keys to the client is a security risk, and we believe that JWT authentication is a better solution.
+  </Step>
+  <Step title="Custom Authorization">
+    We're working on standardizing differentiated access to your rpc server. This will allow you to define custom roles and permissions for your rpc server, and to authenticate your users based on these roles and permissions. You will be able to gate access to certain rpc methods, contracts, contract functions, and so on.
+  </Step>
+  <Step title="Playground">
+    A graphical user interface (just like [GraphiQL](https://github.com/graphql/graphiql)) that will allow you to interact with your rpc server. You will be able to see the available methods, their parameters, and their responses. 
+  </Step>
+  <Step title="Observability and Monitoring">
+    We're working on adding support for observability and monitoring tools. This will allow you to monitor the health of your rpc server, and to track the performance of your rpc server. You will be able to see the number of requests, the response times, the error rates, and so on.
+  </Step>
+  <Step title="Expanding Platform Integrations">
+    Nexus currently works with NodeJS, express, fastify, bun and cloudflare workers. We're working on expanding our platform integrations to include more platforms, such as AWS Lambda, Google Cloud Functions, Azure Functions, and more.
+  </Step>
+</Steps>

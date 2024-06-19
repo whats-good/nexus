@@ -1,0 +1,27 @@
+---
+title: "Node Providers"
+description: "Learn how to configure and use node providers in Nexus"
+---
+
+## Creating a Node Provider
+
+Node Providers form the backbone of Nexus. All blockchain access eventually needs to go through a Node Provider. Node providers can be created and configured as seen below.
+
+```typescript
+import {
+  NodeProvider,
+  CHAIN,
+} from "@whatsgood/nexus";
+
+const alchemyEthMainnetProvider = new NodeProvider({
+  name: "alchemy",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_URL,
+});
+
+const infuraEthMainnetProvider = new NodeProvider({
+  name: "infura",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.INFURA_URL,
+});
+```

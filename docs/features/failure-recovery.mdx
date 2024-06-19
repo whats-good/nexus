@@ -5,29 +5,60 @@ description: "Learn how to configure failure recorvery in Nexus"
 
 ## Request cycling
 
-If you configure Nexus with multiple providers that support the same chain, Nexus will by default cycle requests between them. If a request to one provider fails, Nexus will try the next provider in the list. This is useful for load balancing and failover. You can configure this behavior through the `relayFailureConfig` parameter:
+If you configure Nexus with multiple providers that support the same chain, Nexus will by default cycle requests between them. If a request to one provider fails, Nexus will try the next provider in the list. This is useful for load balancing and failover. You can configure this behavior through the `relay` parameter.
 
 ```typescript
 const nexus = Nexus.create({
-  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
-  chains: [CHAIN.EthMainnet],
-  relayFailureConfig: {
-    kind: 'cycle-requests',
-    maxAttempts: 3,
+  nodeProviders: [alchemyProvider, infuraProvider],
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "random",
   },
+  //...
+});
+```
+
+## Default behavior
+
+If you omit the `relay` parameter, Nexus will default to cycling requests between providers. The default `maxAttempts` is 3, and the default `order` is `sequential`. This means that Nexus will send requests to the first provider in the list, and if it fails, it will try the next provider, and so on. If all providers fail, Nexus will return an error response.
+
+```typescript
+
+// this first example is equivalent to the second example below
+const nexus = Nexus.create({
+  nodeProviders: [alchemyProvider, infuraProvider],
+  //...
+});
+
+// this second example is equivalent to the first example above
+const nexus = Nexus.create({
+  nodeProviders: [alchemyProvider, infuraProvider],
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "sequential",
+  },
+  //...
 });
 ```
 
 ## Disabling request cycling
 
-If you don't want Nexus to cycle requests between providers, you can disable this behavior by setting `relayFailureConfig` to `failImmediately`:
+If you want to disable request cycling, you can set the `failure.kind` parameter to `fail-immediately`. This will cause Nexus to send requests to the first provider in the list, and if it fails, Nexus will return an error response.
 
 ```typescript
 const nexus = Nexus.create({
-  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
-  chains: [CHAIN.EthMainnet],
-  relayFailureConfig: {
-    kind: 'fail-immediately',
+  nodeProviders: [alchemyProvider, infuraProvider],
+  relay: {
+    failure: {
+      kind: "fail-immediately",
+    },
   },
+  //...
 });
 ```

@@ -1,0 +1,46 @@
+---
+title: Multi Chain
+description: Learn how to configure Nexus to support multiple chains
+---
+
+## Multi chain setup
+
+`Nexus` supports multiple chains out of the box. You can configure your `NodeProvider` instances to connect to different chains, and `Nexus` will automatically route requests to the appropriate chain based on the endpoint.
+
+```typescript
+import {
+  Nexus,
+  NodeProvider,
+  CHAIN,
+} from "@whatsgood/nexus";
+
+const alchemyEthMainnetProvider = new NodeProvider({
+  name: "alchemy-eth-mainnet",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_ETH_MAINNET_URL,
+});
+
+const alchemyEthSepoliaProvider = new NodeProvider({
+  name: "alchemy-eth-sepolia",
+  chain: CHAIN.ETHEREUM_SEPOLIA,
+  url: process.env.ALCHEMY_ETH_SEPOLIA_URL,
+});
+
+const nexus = Nexus.create({
+  nodeProviders: [alchemyEthMainnetProvider, alchemyEthSepoliaProvider],
+  //...
+});
+```
+
+## Using multiple chains
+
+Once you've set up your `NodeProvider` instances, you can use them in your requests by specifying the chain in the endpoint. For example, to make a request to the `Ethereum Sepolia` chain, you would use the following endpoint:
+
+
+```bash
+curl \
+    -X POST http://localhost:4005/11155111 \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+
+```

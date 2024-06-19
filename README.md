@@ -58,18 +58,18 @@ const nexus = Nexus.create<Env>({
   providers: (ctx) => [
     {
       name: "alchemy",
-      key: ctx.ALCHEMY_KEY,
+      key: ctx.ALCHEMY_URL,
     },
     {
       name: "infura",
-      key: ctx.INFURA_KEY,
+      key: ctx.INFURA_URL,
     },
     {
       name: "ankr",
-      key: ctx.ANKR_KEY,
+      key: ctx.ANKR_URL,
     },
   ],
-  globalAccessKey: (ctx) => ctx.NEXUS_GLOBAL_ACCESS_KEY,
+  globalAccessKey: (ctx) => ctx.QUERY_PARAM_AUTH_KEY,
   chains: [1],
 });
 
