@@ -5,13 +5,14 @@ description: "Learn how to protect your Nexus server with authentication"
 
 ## Setup
 
-Nexus comes with a query-parameter based authentication middleware. It is disabled by default. To enable it, you need to register the middleware into the `Nexus Server` instance.
+Nexus comes with a query-parameter based authentication [middleware](/features/middleware). It is disabled by default. To enable it, you need to register the middleware into the `Nexus Server` instance.
 
 ```typescript
 import {
   Nexus,
   NodeProvider,
   CHAIN,
+  authenticationMiddleware,
 } from "@whatsgood/nexus";
 
 const alchemyNodeProvider = new NodeProvider({
@@ -33,6 +34,6 @@ const nexus = Nexus.create({
 
 ## Usage
 
-Once the middleware is registered, you can start the server and access it with the `?key` query parameter.
+Once the [middleware](/features/middleware) is registered, you can start the server and access it with the `?key` query parameter.
 
 <Snippet file="send-a-request.mdx" />

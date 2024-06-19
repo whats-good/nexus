@@ -59,11 +59,11 @@
             "features/multi-chain",
             "features/failure-recovery",
             "features/authentication",
-            "features/authorization",
             "features/middleware",
-            "features/caching",
             "features/event-handlers",
-            "features/rate-limiting"
+            "features/rate-limiting",
+            "features/authorization",
+            "features/caching"
           ]
         },
         {
