@@ -1,5 +1,16 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.4.0
+
+### Minor Changes
+
+- b3f0396: Complete rewrite and overhaul
+
+### Patch Changes
+
+- Updated dependencies [b3f0396]
+  - @whatsgood/nexus@0.13.0
+
 ## 0.3.0
 
 ### Minor Changes

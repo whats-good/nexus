@@ -1,5 +1,16 @@
 # @whatsgood/example-nodejs-standalone-server
 
+## 0.3.0
+
+### Minor Changes
+
+- b3f0396: Complete rewrite and overhaul
+
+### Patch Changes
+
+- Updated dependencies [b3f0396]
+  - @whatsgood/nexus@0.13.0
+
 ## 0.2.0
 
 ### Minor Changes
