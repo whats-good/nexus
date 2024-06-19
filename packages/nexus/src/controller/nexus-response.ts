@@ -2,7 +2,6 @@ import { Response } from "@whatwg-node/fetch";
 
 export abstract class NexusResponse<T = unknown> {
   public abstract readonly httpStatusCode: number;
-  public abstract readonly id: string | number | null;
   public abstract body(): T;
 
   public abstract buildResponse(): Response;
@@ -19,40 +18,35 @@ export abstract class NexusJsonResponse<T = unknown> extends NexusResponse<T> {
   }
 }
 
-export abstract class NexusTextResponse extends NexusResponse<string> {
-  public buildResponse(): Response {
-    return new Response(this.body(), {
-      status: this.httpStatusCode,
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    });
-  }
-}
-
-export class NexusNotFoundResponse extends NexusTextResponse {
+export class NexusNotFoundResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 404;
-  public readonly id = null;
 
   public body(): string {
     return "Not Found";
   }
 }
 
-export class NexusInternalServerErrorResponse extends NexusTextResponse {
+export class NexusInternalServerErrorResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 500;
-  public readonly id = null;
 
   public body(): string {
     return "Internal Server Error";
   }
 }
 
-export class NexusBadRequestResponse extends NexusTextResponse {
+export class NexusBadRequestResponse extends NexusJsonResponse {
   public readonly httpStatusCode = 400;
-  public readonly id = null;
 
   public body(): string {
     return "Bad Request";
   }
 }
+
+// export class ChainDeniedCustomErrorResponse extends NexusCustomErrorResponse {
+//   public readonly httpStatusCode = 403;
+//   public readonly errorCode = -32021;
+//   public readonly message = "Chain denied";
+//   constructor(public readonly id: string | number | null) {
+//     super();
+//   }
+// }

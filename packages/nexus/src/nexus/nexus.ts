@@ -3,109 +3,49 @@ import type {
   ServerAdapterBaseObject,
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
-import { z } from "zod";
-import type { NexusConfigOptions } from "@src/config";
-import type { PathParamsOf } from "@src/controller";
-import { IntString, NexusNotFoundResponse, Route } from "@src/controller";
-import type { RunEvents } from "@src/events";
-import type { NexusContext } from "@src/rpc";
-import { NexusContextFactory } from "@src/rpc/nexus-context-factory";
-import { InternalErrorResponse } from "@src/rpc/rpc-response";
-import { safeJsonStringify } from "@src/utils";
-import { Container } from "@src/dependency-injection";
+import type { Logger } from "pino";
+import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
+import { Controller } from "@src/controller";
+import { StaticContainer } from "@src/dependency-injection";
 
-export type NexusServerInstance<TServerContext> = ServerAdapter<
-  TServerContext,
-  Nexus<TServerContext>
+export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
+  TPlatformContext,
+  Nexus<TPlatformContext>
 >;
 
-const chainIdRoute = new Route(
-  "(.*)/:chainId",
-  z.object({
-    chainId: IntString,
-  })
-);
-
-export class Nexus<TServerContext>
-  implements ServerAdapterBaseObject<TServerContext>
+export class Nexus<TPlatformContext = unknown>
+  implements ServerAdapterBaseObject<TPlatformContext>
 {
+  private readonly staticContainer: StaticContainer<TPlatformContext>;
+  private readonly controller: Controller<TPlatformContext>;
   public readonly port?: number;
-  private constructor(
-    private readonly options: NexusConfigOptions<TServerContext>
-  ) {
-    this.port = options.port;
-  }
+  public readonly logger: Logger;
 
-  private async handleNexusContext(context: NexusContext<TServerContext>) {
-    const bus = context.container
-      .eventBus as unknown as RunEvents<TServerContext>;
-    const { logger } = context.container;
-    const { middlewareManager } = context.container;
-
-    await middlewareManager.run(context);
-
-    if (!context.response) {
-      return new InternalErrorResponse(
-        context.request.getResponseId()
-      ).buildResponse();
-    }
-
-    context.container.deferAsync(async () => {
-      logger.debug("running events");
-
-      try {
-        await bus.runEvents(context.container);
-      } catch (error) {
-        logger.error(`Error while running events: ${safeJsonStringify(error)}`);
-      }
-    });
-
-    logger.debug("sending response");
-
-    return context.response.buildResponse();
-  }
-
-  private async handleChainIdRoute(
-    container: Container<TServerContext>,
-    params: PathParamsOf<typeof chainIdRoute>
-  ) {
-    const nexusContextFactory = new NexusContextFactory(container);
-
-    const result = await nexusContextFactory.from(container.request, params);
-
-    if (result.kind === "success") {
-      return this.handleNexusContext(result.context);
-    }
-
-    return result.response.buildResponse();
+  private constructor(staticContainer: StaticContainer<TPlatformContext>) {
+    this.staticContainer = staticContainer;
+    this.controller = new Controller(staticContainer);
+    this.port = staticContainer.config.port;
+    this.logger = staticContainer.logger.child({ name: this.constructor.name });
   }
 
   public handle = async (
     request: Request,
-    serverContext: TServerContext
+    ctx: TPlatformContext
   ): Promise<Response> => {
-    const container = Container.fromOptionsAndRequest(this.options, {
-      context: serverContext,
-      request,
-    });
-
-    const url = new URL(request.url);
-    const chainIdParams = chainIdRoute.match(url.pathname);
-
-    if (chainIdParams) {
-      return this.handleChainIdRoute(container, chainIdParams);
-    }
-
-    return new NexusNotFoundResponse().buildResponse();
+    // TODO: wrap this with a try-catch for final error handling
+    return (await this.controller.handleRequest(request, ctx)).buildResponse();
   };
 
-  public static create<TServerContext>(
-    options: NexusConfigOptions<TServerContext>
+  public static create<TPlatformContext = unknown>(
+    options: NexusConfigOptions<TPlatformContext>
   ) {
-    const server = new Nexus(options);
+    const staticContainer = new StaticContainer({
+      config: NexusConfig.init(options),
+    });
+    const server = new Nexus(staticContainer);
 
-    return createServerAdapter<TServerContext, Nexus<TServerContext>>(
+    return createServerAdapter<TPlatformContext, Nexus<TPlatformContext>>(
       server
-    ) as unknown as NexusServerInstance<TServerContext>;
+    ) as unknown as NexusServerInstance<TPlatformContext>;
   }
 }

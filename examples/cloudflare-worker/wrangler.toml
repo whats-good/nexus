@@ -1,11 +1,4 @@
 name = "nexus-worker"
 main = "src/index.ts"
 compatibility_date = "2023-09-22"
-
-[env.production]
-name = "my-worker-production"
-vars = { NODE_ENV = "production" }
-
-[env.development]
-name = "my-worker-development"
-vars = { NODE_ENV = "development" }
+compatibility_flags = ["nodejs_compat"]

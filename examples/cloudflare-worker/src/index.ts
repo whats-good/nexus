@@ -1,108 +1,76 @@
 import {
   Nexus,
+  UnauthorizedAccessEvent,
+  EventHandler,
+  NexusRpcContext,
+  authenticationMiddleware,
+  NodeProvider,
   CHAIN,
-  NODE_PROVIDER,
-  queryParamKeyAuthMiddleware,
-  EVENT,
-  Container,
-  DeferAsyncFn,
   NexusServerInstance,
 } from "@whatsgood/nexus";
 
-// Step 1: Set up environment variables and server context.
-// - Try putting your Alchemy key and a query param auth key in your .dev.vars file.
-// - You can use the Cloudflare Workers dashboard to set environment variables on production.
+import { nextTick } from "node:process";
 
-// if (!self["ALCHEMY_KEY"]) {
-//   throw new Error("ALCHEMY_KEY not set in environment");
-// }
+function createNexus(params: {
+  alchemyUrl: string;
+  queryParamAuthKey: string;
+}) {
+  // Step 1: Set up environment variables
+  // - Try putting your Alchemy key and a query param auth key in a .dev.vars file.
 
-// if (!self["QUERY_PARAM_AUTH_KEY"]) {
-//   throw new Error("QUERY_PARAM_AUTH_KEY not set in environment");
-// }
+  if (params.alchemyUrl === undefined) {
+    throw new Error("ALCHEMY_URL is required");
+  }
 
-// Step 2: Create ServerContext for CloudflareWorker runtime-specific dependencies.
-// - Cloudflare will inject a waitUntil function into nexus ServerContext.
-// - We then use this function to construct a deferAsync function, which is used to schedule async work. We need this workaround in cloudflare workers, because we can't use process.nextTick in the same way we can in node.js.
+  if (params.queryParamAuthKey === undefined) {
+    throw new Error("QUERY_PARAM_AUTH_KEY is required");
+  }
 
-type CloudflareServerContext<TServerContext> = TServerContext & {
-  waitUntil: ExecutionContext["waitUntil"];
-};
-
-type ServerContext = CloudflareServerContext<{
-  ALCHEMY_KEY: string;
-  QUERY_PARAM_AUTH_KEY: string;
-}>;
-
-const getDeferAsync = ({
-  context,
-}: {
-  context: ServerContext;
-}): DeferAsyncFn => {
-  const fn = (task: () => Promise<void>) => {
-    context.waitUntil(task());
-  };
-  fn.bind(context);
-  return fn;
-};
-
-// Step 3: Create an example event handler.
-// - Feel free to remove this example or add your own event handlers.
-const onUnauthorizedAccess = async (
-  event: EVENT.UnauthorizedAccessEvent,
-  container: Container
-) => {
-  console.log("starting the onUnauthorizedAccess function");
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      container.logger.info(`Unauthorized access at: ${event.createdAt}`);
-      resolve();
-    }, 2000);
-  });
-};
-
-// Step 4: Create a Nexus instance by putting it all together
-// - If run as is, this server will only support Ethereum mainnet, and will use Alchemy as the only node provider.
-// - You can add more node providers and chains to the nodeProviders and chains arrays.
-// - Pay attention to the middlewares and eventHandlers arrays.
-// - Nexus ships with a query param auth middleware, which you can use to gate access to your server.
-// - If you don't neet authorization, you can remove the queryParamKeyAuthMiddleware from the middlewares array.
-// - You can also create your own middlewares and event handlers.
-
-const nexus = Nexus.create<ServerContext>({
-  nodeProviders: ({ context }) => [
-    NODE_PROVIDER.alchemy.build(context.ALCHEMY_KEY),
-  ],
-  chains: [CHAIN.EthMainnet],
-  middlewares: ({ context }) => [
-    queryParamKeyAuthMiddleware(context.QUERY_PARAM_AUTH_KEY),
-  ],
-  eventHandlers: [
-    {
-      event: EVENT.UnauthorizedAccessEvent,
-      handler: onUnauthorizedAccess,
+  // Step 2: Create an example event handler.
+  // - Feel free to remove this example or add your own event handlers.
+  const onUnauthorizedAccess: EventHandler<UnauthorizedAccessEvent> = {
+    event: UnauthorizedAccessEvent,
+    handle: async (event: UnauthorizedAccessEvent, ctx: NexusRpcContext) => {
+      ctx.container.logger.info(
+        `Unauthorized access detected at: ${event.createdAt}.`
+      );
     },
-  ],
-  deferAsync: getDeferAsync,
-});
-
-const cloudflareFetchOf =
-  (nexus: NexusServerInstance<ServerContext>) =>
-  (
-    request: Request,
-    env: Record<string, string>,
-    executionContext: ExecutionContext
-  ) => {
-    return nexus.fetch(request, {
-      ...env,
-      waitUntil: executionContext.waitUntil.bind(executionContext),
-    });
   };
+
+  // Step 3: Initialize a node provider
+  const alchemyNodeProvider = new NodeProvider({
+    name: "alchemy",
+    chain: CHAIN.ETHEREUM_MAINNET,
+    url: params.alchemyUrl,
+  });
+
+  // Step 4: Create a Nexus instance by putting it all together
+  const nexus = Nexus.create({
+    nodeProviders: [alchemyNodeProvider],
+    eventHandlers: [onUnauthorizedAccess],
+    middleware: [
+      authenticationMiddleware({ authKey: params.queryParamAuthKey }),
+    ],
+    log: { level: "debug" },
+    nextTick, // pay attention to how we're passing nextTick via nodejs compat mode
+  });
+
+  return nexus;
+}
+
+let nexus: NexusServerInstance;
 
 // Step 5: Set the fetch handler
-
 export default {
-  fetch: cloudflareFetchOf(nexus),
+  fetch: (request: Request, env: any) => {
+    if (!nexus) {
+      nexus = createNexus({
+        alchemyUrl: env.ALCHEMY_URL,
+        queryParamAuthKey: env.QUERY_PARAM_AUTH_KEY,
+      });
+    }
+    return nexus(request);
+  },
 };
 
 // Step 6: Send a request to the server

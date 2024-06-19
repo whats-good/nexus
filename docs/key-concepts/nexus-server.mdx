@@ -1,0 +1,83 @@
+---
+title: "Nexus Server"
+description: "Learn how to configure and launch a Nexus server"
+---
+
+## Initializing a Nexus Server
+
+`Nexus` is the entrypoint for your proxy. It can be configured in many different ways, on many different platforms. Let's take a look at the anatomy of a simple `Nexus` server instance. 
+
+```typescript
+import {
+  Nexus,
+  NodeProvider,
+  CHAIN,
+} from "@whatsgood/nexus";
+
+const alchemyNodeProvider = new NodeProvider({
+  name: "alchemy",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_URL,
+});
+
+const infuraNodeProvider = new NodeProvider({
+  name: "infura",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.INFURA_URL,
+});
+
+const nexus = Nexus.create({
+  nodeProviders: [alchemyNodeProvider, infuraNodeProvider],
+  port: 4005,
+  log: { level: "debug" },
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "random",
+  },
+});
+```
+
+In this example, we first create two `NodeProvider` instances, which we'll use to connect to `Ethereum Mainnet` via `Alchemy` and `Infura`. We then create a `Nexus` instance, passing in the `NodeProvider` instances, the port we want to run the server on, and some logging and relay configuration. In this particular example, we configure the relay to retry failed requests up to 3 times, and to randomize the order of requests.
+
+## Setting up Environment Variables
+
+Make sure you create a .env file to store `process.env.ALCHEMY_URL` and `process.env.INFURA_URL` variables. You can use the following template:
+
+```bash
+# Add your service provider urls here
+ALCHEMY_URL=my-alchemy-key
+#           ^ replace this with your own url
+INFURA_URL=my-infura-key
+#           ^ replace this with your own url
+```
+
+## Running a Nexus Server
+
+Nexus servers are designed to run on many different platforms. See [Integrations](/integrations/introduction) for more information on how to run Nexus on your platform of choice. In this example, let's set up a [NodeJs](/integrations/node-js) standalone server.
+
+```typescript
+// ... continue from the previous example
+
+import { createServer } from "node:http";
+
+createServer(nexus).listen(nexus.port, () => {
+  console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
+});
+
+```
+
+
+## Interacting with a Nexus Server
+
+Once you have a Nexus server running, you can interact with is using any JSON-RPC client. Here's an example using `curl`. Pay attention to the endpoint. Nexus servers are designed to handle multiple chains, so you need to specify the chain ID in the endpoint. In this example, since we have configured the server to connect to `Ethereum Mainnet`, we use the chain ID `1`.
+
+```bash
+curl \
+    -X POST http://localhost:4005/1 \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+
+```

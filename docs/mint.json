@@ -37,20 +37,30 @@
       "group": "Get Started",
       "pages": [
         "get-started/introduction",
+        "get-started/quickstart",
         "get-started/use-cases",
-        "get-started/quickstart"
+        "get-started/roadmap"
       ]
     },
     {
       "group": "Development",
       "pages": [
         {
+          "group": "Key Concepts",
+          "pages": [
+            "key-concepts/nexus-server",
+            "key-concepts/node-providers",
+            "key-concepts/chains"
+          ]
+        },
+        {
           "group": "Features",
           "pages": [
-            "features/node-providers",
+            "features/multi-chain",
             "features/failure-recovery",
-            "features/middlewares",
+            "features/authentication",
             "features/authorization",
+            "features/middleware",
             "features/caching",
             "features/event-handlers",
             "features/rate-limiting"
@@ -59,6 +69,7 @@
         {
           "group": "Integrations",
           "pages": [
+            "integrations/introduction",
             "integrations/cloudflare-worker",
             "integrations/node-js",
             "integrations/express",

@@ -259,12 +259,12 @@ async function generateEnvFiles(config: ProjectConfig) {
 
   const envVars = [
     "# Set your global access key here",
-    "NEXUS_GLOBAL_ACCESS_KEY=",
+    "QUERY_PARAM_AUTH_KEY=",
     "",
-    "# Add your service provider keys here",
-    "ALCHEMY_KEY=",
-    "INFURA_KEY=",
-    "ANKR_KEY=",
+    "# Add your service provider urls here. Provide at least one.",
+    "ALCHEMY_URL=",
+    "INFURA_URL=",
+    "ANKR_URL=",
   ];
 
   fs.writeFileSync(path.join(config.projectPath, file), envVars.join("\n"));

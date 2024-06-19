@@ -1,72 +1,62 @@
 import { createServer } from "node:http";
-import pino from "pino";
-import { SimpleMemoryCache } from "@src/cache/simple-memory-cache";
-import { CHAIN } from "@src/chain";
-import { NexusEvent } from "@src/events";
+import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
-import { NODE_PROVIDER } from "@src/node-provider";
-import type { Container } from "@src/dependency-injection";
-import { queryParamKeyAuthMiddleware } from "@src/auth";
+import { NodeProvider } from "@src/node-provider";
+import type { NexusRpcContext } from "@src/dependency-injection";
+import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events";
+import { authenticationMiddleware } from "@src/authentication";
 
-const logger = pino({
-  transport: {
-    target: "pino-pretty",
-  },
-  level: "debug",
+const ethMainnet = new Chain({
+  chainId: 1,
+  name: "eth_mainnet",
+  blockTime: 12,
 });
 
-class SomeEvent extends NexusEvent {
-  constructor(public readonly kerem: string) {
-    super();
-  }
-}
+const alchemy1 = new NodeProvider({
+  name: "alchemy1",
+  url: process.env.ALCHEMY_URL!,
+  chain: ethMainnet,
+});
 
-const myEventHandler = async (event: SomeEvent, container: Container) => {
-  setTimeout(() => {
-    container.logger.info(`Handling event: ${event.kerem}`);
-  }, 1000);
-};
-
-const myOtherEventHandler = async (event: SomeEvent, container: Container) => {
-  setTimeout(() => {
-    container.logger.info(`Handling event again: ${event.kerem}`);
-  }, 1000);
-};
-
-if (process.env.ALCHEMY_KEY === undefined) {
-  throw new Error("ALCHEMY_KEY env var is required");
-}
-
-if (process.env.QUERY_PARAM_AUTH_KEY === undefined) {
-  throw new Error("QUERY_PARAM_AUTH_KEY env var is required");
-}
+// const alchemy2 = new NodeProvider({
+//   name: "alchemy2",
+//   url: "https://eth-mainnet.alchemyapi.io/v2/5678",
+//   chain: ethMainnet,
+// });
 
 const nexus = Nexus.create({
-  nodeProviders: [NODE_PROVIDER.alchemy.build(process.env.ALCHEMY_KEY)],
-  chains: [CHAIN.EthMainnet],
-  logger,
-  cache: new SimpleMemoryCache(),
-  middlewares: [
-    queryParamKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "key"),
-    // httpHeaderKeyAuthMiddleware(process.env.QUERY_PARAM_AUTH_KEY, "X-Auth-Key"),
-  ],
+  nodeProviders: [alchemy1],
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "random",
+  },
+  middleware: [authenticationMiddleware({ authKey: "my-secret-key" })],
+  port: 3000,
+  // TODO: add env var support for log config.
+  log: {
+    level: "debug",
+  },
   eventHandlers: [
     {
-      event: SomeEvent,
-      handler: myEventHandler,
-    },
-    {
-      event: SomeEvent,
-      handler: myOtherEventHandler,
+      event: RpcResponseSuccessEvent,
+      handle: async (
+        event: RpcResponseSuccessEvent,
+        ctx: NexusRpcContext
+      ): Promise<void> => {
+        const logger = ctx.container.logger.child({
+          name: "rpc-response-success",
+        });
+
+        logger.info(event.payload);
+      },
     },
   ],
 });
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises -- library type issue
-createServer(nexus).listen(4005, () => {
-  // TODO: separate config into 2 parts:
-  // first, a static config that doesn't depend on the server context.
-  // put the logger in there.
-  // and then use nexus.staticConfig.logger to log the message below.
-  logger.info(`🚀 Server ready at http://localhost:4005`);
+// eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
+createServer(nexus).listen(nexus.port, () => {
+  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

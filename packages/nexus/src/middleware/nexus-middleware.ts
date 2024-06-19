@@ -1,12 +1,8 @@
-import type { NexusContext } from "@src/rpc";
+import type { NexusRpcContext } from "@src/dependency-injection";
 
-export type NextFn = () => Promise<void>;
+export type NexusMiddlewareNextFn = () => Promise<void>;
 
-export type NexusMiddleware<TServerContext = unknown> = (
-  context: NexusContext<TServerContext>,
-  next: NextFn
+export type NexusMiddleware<TPlatformContext = unknown> = (
+  ctx: NexusRpcContext<TPlatformContext>,
+  next: NexusMiddlewareNextFn
 ) => Promise<void>;
-
-export type NexusMiddlewareArgs<TServerContext> = Parameters<
-  NexusMiddleware<TServerContext>
->;

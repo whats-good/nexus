@@ -41,8 +41,8 @@
   },
   "dependencies": {
     "@ethersproject/bignumber": "^5.7.0",
-    "@whatwg-node/fetch": "^0.9.14",
-    "@whatwg-node/server": "0.9.22",
+    "@whatwg-node/fetch": "0.9.18",
+    "@whatwg-node/server": "0.9.34",
     "path-to-regexp": "^6.2.1",
     "pino": "^8.17.0",
     "pino-pretty": "^10.2.3",

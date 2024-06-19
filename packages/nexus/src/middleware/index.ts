@@ -1,2 +1,2 @@
 export * from "./nexus-middleware";
-export * from "./nexus-middleware-manager";
+export * from "./nexus-middleware-handler";

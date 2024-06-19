@@ -1,23 +1,11 @@
 export class Chain {
   public readonly name: string;
   public readonly chainId: number;
-  public blockTime: number;
+  public readonly blockTime: number; // in seconds
 
-  constructor({
-    name,
-    chainId,
-    blockTime,
-  }: {
-    name: string;
-    chainId: number;
-    blockTime: number;
-  }) {
-    this.name = name;
-    this.chainId = chainId;
-    this.blockTime = blockTime;
-  }
-
-  public setBlockTime(blockTime: number) {
-    this.blockTime = blockTime;
+  constructor(params: { name: string; chainId: number; blockTime: number }) {
+    this.name = params.name;
+    this.chainId = params.chainId;
+    this.blockTime = params.blockTime;
   }
 }
