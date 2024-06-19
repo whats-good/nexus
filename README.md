@@ -48,34 +48,51 @@ yarn add @whatsgood/nexus
 ## Quickstart
 
 ```ts
-// Cloudflare worker example
+// node.js standalone server example
 
-import { Nexus } from "@whatsgood/nexus";
+import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
+import { createServer } from "node:http";
 
-type Env = Record<string, string>;
-
-const nexus = Nexus.create<Env>({
-  providers: (ctx) => [
-    {
-      name: "alchemy",
-      key: ctx.ALCHEMY_URL,
-    },
-    {
-      name: "infura",
-      key: ctx.INFURA_URL,
-    },
-    {
-      name: "ankr",
-      key: ctx.ANKR_URL,
-    },
-  ],
-  globalAccessKey: (ctx) => ctx.QUERY_PARAM_AUTH_KEY,
-  chains: [1],
+const alchemyNodeProvider = new NodeProvider({
+  name: "alchemy",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_URL,
 });
 
-export default {
-  fetch: nexus.fetch,
-};
+const infuraNodeProvider = new NodeProvider({
+  name: "infura",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.INFURA_URL,
+});
+
+const nexus = Nexus.create({
+  nodeProviders: [alchemyNodeProvider, infuraNodeProvider],
+  port: 4005,
+  log: { level: "debug" },
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "random",
+  },
+});
+
+createServer(nexus).listen(nexus.port, () => {
+  console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
+});
+```
+
+## Interaction
+
+In this example, since we have configured the server to connect to `Ethereum Mainnet`, we supply the chain id = `1` as the endpoint.
+
+```bash
+curl \
+    -X POST http://localhost:4005/1 \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+
 ```
 
 <!-- TODO: remove the nexus/README.md from version control, and only generate it pre npm publish -->
