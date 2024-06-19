@@ -3,6 +3,36 @@ title: "Authentication"
 description: "Learn how to protect your Nexus server with authentication"
 ---
 
-<Warning>
-  This page is currently under construction. Please check back later.
-</Warning>
+## Setup
+
+Nexus comes with a query-parameter based authentication middleware. It is disabled by default. To enable it, you need to register the middleware into the `Nexus Server` instance.
+
+```typescript
+import {
+  Nexus,
+  NodeProvider,
+  CHAIN,
+} from "@whatsgood/nexus";
+
+const alchemyNodeProvider = new NodeProvider({
+  name: "alchemy",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_URL,
+});
+
+
+const nexus = Nexus.create({
+  // ...
+  port: 4005,
+  nodeProviders: [alchemyNodeProvider],
+  middleware: [
+    authenticationMiddleware({ authKey: process.env.QUERY_PARAM_AUTH_KEY }),
+  ],
+});
+```
+
+## Usage
+
+Once the middleware is registered, you can start the server and access it with the `?key` query parameter.
+
+<Snippet file="send-a-request.mdx" />
