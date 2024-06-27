@@ -5,9 +5,13 @@ services:
     # build:
     #   context: .
     #   dockerfile: ./packages/nexus-nodejs-docker/Dockerfile
-    image: "whatsgood/nexus:0.13.0"
+    image: "whatsgood/nexus:latest"
     container_name: nexus
     ports:
       - "4000:4000"
     environment:
-      - NODE_PROVIDERS=$NODE_PROVIDERS
+      - 'NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
+      - 'CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
+      - RELAY_ORDER=random
+      - RELAY_FAILURE=["cycle-requests", 5]
+      - AUTH_KEY=my-secret-key
