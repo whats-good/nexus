@@ -5,7 +5,7 @@ import {
   NumberFromIntStringSchema,
   mapTuple,
 } from "./utils";
-import { NodeProvider, CHAIN, RelayConfig } from "@whatsgood/nexus";
+import { NodeProvider, CHAIN, RelayConfig, Chain } from "@whatsgood/nexus";
 
 const ENV_CHAIN_SCHEMA = z.object({
   name: z.string(),
@@ -57,8 +57,7 @@ export const EnvSchema = z.object({
   NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA,
   RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
   RELAY_FAILURE: ENV_RELAY_FAILURE.optional(),
-  // TODO: relay config
-  // TODO: auth config
+  AUTH_KEY: z.string().optional(),
 });
 
 export type EnvType = z.infer<typeof EnvSchema>;
@@ -71,14 +70,19 @@ export function getEnvConfig() {
     PORT,
     RELAY_FAILURE,
     RELAY_ORDER,
+    AUTH_KEY,
   } = EnvSchema.parse(process.env);
   const defaultChains = Object.values(CHAIN);
   const chainsMap = new Map(
     defaultChains.map((chain) => [chain.chainId, chain])
   );
 
+  const overwrittenChainsMap = new Map<number, Chain>();
+
   CHAINS?.forEach((chain) => {
-    // TODO: add warning logs for overwriting default chains
+    if (chainsMap.has(chain.chainId)) {
+      overwrittenChainsMap.set(chain.chainId, chain);
+    }
     chainsMap.set(chain.chainId, chain);
   });
 
@@ -117,5 +121,7 @@ export function getEnvConfig() {
     port: PORT,
     logLevel: LOG_LEVEL,
     relay,
+    authKey: AUTH_KEY,
+    overwrittenChains: Array.from(overwrittenChainsMap.values()),
   };
 }

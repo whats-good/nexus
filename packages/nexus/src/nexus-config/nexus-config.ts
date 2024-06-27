@@ -60,7 +60,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       relay: this.relay,
       port: this.port,
       log: this.log,
-      eventHandlers: `Found ${this.eventHandlers.length} event handlers`,
+      eventHandlers: `Found ${this.eventHandlers.length} event handler(s)`,
       middleware: `Found ${this.middleware.length} middleware`,
     };
   }
