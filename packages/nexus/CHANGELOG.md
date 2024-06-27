@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.14.0
+
+### Minor Changes
+
+- b7fd417: Allowing a partial config for RelayConfig
+
 ## 0.13.0
 
 ### Minor Changes
