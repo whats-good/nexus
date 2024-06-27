@@ -24,39 +24,47 @@ const alchemy1 = new NodeProvider({
 //   chain: ethMainnet,
 // });
 
-const nexus = Nexus.create({
-  nodeProviders: [alchemy1],
-  relay: {
-    failure: {
-      kind: "cycle-requests",
-      maxAttempts: 3,
-    },
-    order: "random",
-  },
-  middleware: [authenticationMiddleware({ authKey: "my-secret-key" })],
-  port: 3000,
-  // TODO: add env var support for log config.
-  log: {
-    level: "debug",
-  },
-  eventHandlers: [
-    {
-      event: RpcResponseSuccessEvent,
-      handle: async (
-        event: RpcResponseSuccessEvent,
-        ctx: NexusRpcContext
-      ): Promise<void> => {
-        const logger = ctx.container.logger.child({
-          name: "rpc-response-success",
-        });
+// const nexus = Nexus.create({
+//   nodeProviders: [alchemy1],
+//   relay: {
+//     failure: {
+//       kind: "cycle-requests",
+//       maxAttempts: 3,
+//     },
+//     order: "random",
+//   },
+//   middleware: [authenticationMiddleware({ authKey: "my-secret-key" })],
+//   port: 3000,
+//   // TODO: add env var support for log config.
+//   log: {
+//     level: "debug",
+//   },
+//   eventHandlers: [
+//     {
+//       event: RpcResponseSuccessEvent,
+//       handle: async (
+//         event: RpcResponseSuccessEvent,
+//         ctx: NexusRpcContext
+//       ): Promise<void> => {
+//         const logger = ctx.container.logger.child({
+//           name: "rpc-response-success",
+//         });
 
-        logger.info(event.payload);
-      },
-    },
-  ],
-});
+//         logger.info(event.payload);
+//       },
+//     },
+//   ],
+// });
+
+const nexus = Nexus.create({});
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
 createServer(nexus).listen(nexus.port, () => {
-  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
+  if (!nexus.port) {
+    nexus.logger.warn(
+      "No port configured. Server is running but port is unknown."
+    );
+  } else {
+    nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
+  }
 });
