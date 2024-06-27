@@ -1,7 +1,9 @@
 import { z } from "zod";
-import { IntSchema, IntStringSchema, requiredUnknown } from "@src/utils";
+import { requiredUnknown } from "@src/utils";
 
 /*************** Common ***************/
+const IntSchema = z.number().int();
+const IntStringSchema = z.string().regex(/^[0-9]+$/);
 
 export const RpcRequestIdSchema = IntSchema.or(IntStringSchema).nullish();
 export type RpcRequestId = z.infer<typeof RpcRequestIdSchema>;
