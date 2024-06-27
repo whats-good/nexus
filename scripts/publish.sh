@@ -9,4 +9,7 @@ set -x
 pnpm publish --access public -r
 # pnpm changeset tag 
 
+# Publish the docker image
+exec packages/nexus-nodejs-docker/scripts/build-and-publish-docker.sh
+
 echo "Done!"

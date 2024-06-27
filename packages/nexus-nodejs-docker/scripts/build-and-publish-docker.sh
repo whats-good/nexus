@@ -6,9 +6,14 @@
 VERSION=$(jq -r '.version' ./packages/nexus/package.json)
 REPO_NAME="whatsgood/nexus"
 
+echo "Logging into dockerhub"
+echo $DOCKERHUB_TOKEN | docker login -u whatsgood --password-stdin
+
 echo "Building docker image whatsgood/nexus:$VERSION"
 
 docker build -t $REPO_NAME . -f ./packages/nexus-nodejs-docker/Dockerfile
+
+echo "Pushing docker images"
 
 tags=("$VERSION" "latest")
 
