@@ -1,0 +1,26 @@
+{
+  "name": "@whatsgood/nexus-nodejs-docker",
+  "version": "0.0.1",
+  "private": true,
+  "author": {
+    "name": "Kerem Kazan",
+    "email": "kerem@whatsgood.dog"
+  },
+  "scripts": {
+    "build": "pnpm typecheck && pnpm compile",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "compile": "node ./esbuild.mjs",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@whatsgood/nexus": "workspace:*",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "esbuild": "^0.21.5",
+    "esbuild-plugin-pino": "2.2.0",
+    "typescript": "5.2.2"
+  }
+}
