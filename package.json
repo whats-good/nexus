@@ -15,7 +15,8 @@
     "ci:version": "./scripts/version.sh",
     "test:unit": "turbo test:unit",
     "docs:generate": "./scripts/docs.sh",
-    "docs:broken-links": "turbo docs:broken-links"
+    "docs:broken-links": "turbo docs:broken-links",
+    "changeset:status": "changeset status"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",

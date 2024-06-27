@@ -12,7 +12,7 @@ export interface LogConfig {
 
 export interface NexusConfigOptions<TPlatformContext = unknown> {
   nodeProviders: [NodeProvider, ...NodeProvider[]];
-  relay?: RelayConfig;
+  relay?: Partial<RelayConfig>;
   port?: number;
   log?: LogConfig;
   eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
@@ -50,6 +50,40 @@ export class NexusConfig<TPlatformContext = unknown> {
     this.nextTick = params.nextTick;
   }
 
+  // a summary object that removes potentially sensitive information
+  public summary() {
+    return {
+      nodeProviders: this.nodeProviders.map(
+        (nodeProvider) => nodeProvider.name
+      ),
+      chains: Array.from(this.chains.values()),
+      relay: this.relay,
+      port: this.port,
+      log: this.log,
+      eventHandlers: `Found ${this.eventHandlers.length} event handler(s)`,
+      middleware: `Found ${this.middleware.length} middleware`,
+    };
+  }
+
+  private static getRelayConfig<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>
+  ): RelayConfig {
+    const relayConfig: RelayConfig = {
+      failure: { kind: "cycle-requests", maxAttempts: 3 },
+      order: "sequential",
+    };
+
+    if (params.relay?.failure) {
+      relayConfig.failure = params.relay.failure;
+    }
+
+    if (params.relay?.order) {
+      relayConfig.order = params.relay.order;
+    }
+
+    return relayConfig;
+  }
+
   public static init<TPlatformContext>(
     params: NexusConfigOptions<TPlatformContext>
   ) {
@@ -77,10 +111,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     return new NexusConfig<TPlatformContext>({
       nodeProviders: params.nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
-      relay: params.relay || {
-        order: "sequential",
-        failure: { kind: "cycle-requests", maxAttempts: 3 },
-      },
+      relay: NexusConfig.getRelayConfig(params),
       port: params.port,
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],

@@ -1,0 +1,6 @@
+**/node_modules
+**/.envrc
+**/.env
+**/dist
+**/.turbo
+**/scripts

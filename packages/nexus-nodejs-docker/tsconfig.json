@@ -1,0 +1,26 @@
+{
+  "extends": "tsconfig/base.json",
+  "exclude": ["dist", "build", "node_modules"],
+  "include": [
+    "./src/**/*.ts",
+    "./vitest.config.ts",
+    "test/**/*.ts",
+    "tsup.config.ts"
+  ],
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": null,
+    "lib": ["es2017"],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "target": "ES2015",
+    "outDir": "dist",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@test/*": ["./test/*"],
+      "@package.json": ["./package.json"]
+    }
+  }
+}
