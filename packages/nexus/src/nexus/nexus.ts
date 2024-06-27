@@ -39,9 +39,15 @@ export class Nexus<TPlatformContext = unknown>
   public static create<TPlatformContext = unknown>(
     options: NexusConfigOptions<TPlatformContext>
   ) {
+    const config = NexusConfig.init(options);
     const staticContainer = new StaticContainer({
-      config: NexusConfig.init(options),
+      config,
     });
+
+    staticContainer.logger.info(
+      "Nexus created with the following config: %o",
+      config.summary()
+    );
     const server = new Nexus(staticContainer);
 
     return createServerAdapter<TPlatformContext, Nexus<TPlatformContext>>(

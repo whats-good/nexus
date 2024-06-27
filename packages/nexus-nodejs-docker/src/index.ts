@@ -14,6 +14,7 @@ const nexus = Nexus.create({
       }
     : undefined,
   port: envConfig.port || DEFAULT_PORT,
+  relay: envConfig.relay,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
