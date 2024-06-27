@@ -4,6 +4,8 @@ import { getEnvConfig } from "./env-config";
 
 const envConfig = getEnvConfig();
 
+const DEFAULT_PORT = 4000;
+
 const nexus = Nexus.create({
   nodeProviders: envConfig.nodeProviders,
   log: envConfig.logLevel
@@ -11,16 +13,15 @@ const nexus = Nexus.create({
         level: envConfig.logLevel,
       }
     : undefined,
-  port: envConfig.port,
+  port: envConfig.port || DEFAULT_PORT,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
 createServer(nexus).listen(nexus.port, () => {
-  if (!nexus.port) {
+  if (!envConfig.port) {
     nexus.logger.warn(
-      "No port configured. Server is running but port is unknown."
+      `⚠️  PORT environment variable not set. Defaulting to ${DEFAULT_PORT}`
     );
-  } else {
-    nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
   }
+  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

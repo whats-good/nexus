@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "pnpm typecheck && pnpm compile",
+    "build:turbo": "turbo build --filter @whatsgood/nexus-nodejs-docker",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "compile": "node ./esbuild.mjs",
