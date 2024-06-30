@@ -5,7 +5,7 @@ import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { nodeRelayMiddleware } from "@src/node-relay-handler";
 import { isNonEmptyArray } from "@src/utils";
-import { authenticationMiddleware } from "@src/authentication/authentication-middleware";
+import { getAuthenticationMiddleware } from "@src/authentication/authentication-middleware";
 import { getEnvConfig, type EnvConfig } from "./env-config";
 
 export interface LogConfig {
@@ -20,6 +20,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
   middleware?: NexusMiddleware<TPlatformContext>[];
   nextTick?: typeof process.nextTick;
+  rpcAuthKey?: string;
 }
 
 export class NexusConfig<TPlatformContext = unknown> {
@@ -114,18 +115,15 @@ export class NexusConfig<TPlatformContext = unknown> {
     const middleware: NexusMiddleware<TPlatformContext>[] =
       params.middleware || [];
 
-    const hasAuthenticationMiddleware = middleware.some(
-      (m) => m.name === authenticationMiddleware.name
+    const rpcAuthMiddleware = NexusConfig.getRpcAuthMiddleware(
+      params,
+      envConfig
     );
 
-    if (!hasAuthenticationMiddleware && envConfig.authKey) {
-      // we check if the auth middleware is already present in the middleware chain.
-      // if not, we prepend it to the middleware chain so that it's the
-      // first middleware to be executed
-
-      middleware.unshift(
-        authenticationMiddleware({ authKey: envConfig.authKey })
-      );
+    if (rpcAuthMiddleware) {
+      // we prepend the rpc auth middleware to the given middleware
+      // so that it is the first middleware to run
+      middleware.unshift(rpcAuthMiddleware);
     }
 
     // we create the relay middleware on the spot, and append it to the given middleware
@@ -154,6 +152,21 @@ export class NexusConfig<TPlatformContext = unknown> {
     envConfig: EnvConfig
   ): number {
     return params.port || envConfig.port || 4000;
+  }
+
+  private static getRpcAuthMiddleware<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
+  ): NexusMiddleware<TPlatformContext> | undefined {
+    const rpcAuthKey = params.rpcAuthKey || envConfig.rpcAuthKey;
+
+    if (rpcAuthKey) {
+      return getAuthenticationMiddleware<TPlatformContext>({
+        authKey: rpcAuthKey,
+      });
+    }
+
+    return undefined;
   }
 
   public static init<TPlatformContext>(
