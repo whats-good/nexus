@@ -9,7 +9,7 @@
   "type": "module",
   "module": "src/index.ts",
   "scripts": {
-    "dev": "bun run -r dotenv/config src/index.ts",
+    "dev": "bun run src/index.ts",
     "build": "tsc"
   },
   "dependencies": {

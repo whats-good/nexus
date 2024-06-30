@@ -7,7 +7,7 @@
     "email": "kerem@whatsgood.dog"
   },
   "scripts": {
-    "dev": "ts-node -r dotenv/config src/index.ts",
+    "dev": "ts-node src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
