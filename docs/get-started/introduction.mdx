@@ -1,6 +1,6 @@
 ---
 title: Introduction
-description: "Welcome to Nexus - a TypeScript blockchain RPC proxy server"
+description: "Welcome to Nexus - a load balancing blockchain RPC reverse proxy, written in TypeScript"
 ---
 
 <img
@@ -11,7 +11,7 @@ description: "Welcome to Nexus - a TypeScript blockchain RPC proxy server"
 
 {/* TODO: Add support for non-ethereum blockchains */}
 
-`Nexus` is a simple, RPC proxy server for any [Ethereum JSON RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/) compliant blockchain. Instead of connecting your dApps to a blockchain node, you can connect them to `Nexus` and `Nexus` serves the requests for you. `Nexus` is open source and free to use.
+`Nexus` is a simple, load balancing RPC reverse proxy for any [Ethereum JSON RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/) compliant blockchain. 
 
 ## Installation
 
@@ -20,8 +20,6 @@ The fastest way to get started with [@whatsgood/nexus](https://npmjs.org/package
 ```bash 
 npm create @whatsgood/nexus@latest
 ```
-
-
 
 ## Features
 
@@ -39,12 +37,12 @@ npm create @whatsgood/nexus@latest
     Implement fine-grained access control to your RPC endpoints
   </Card>
   <Card
-    title="Failure Recovery"
+    title="Load Balancing"
     icon="arrows-spin"
     iconType="solid"
-    href="/features/failure-recovery"
+    href="/key-concepts/load-balancing"
   >
-    Recover from errors by cycling requests to multiple providers
+    Configure load balancing and failure recovery behavior in Nexus
   </Card>
   <Card
     title="Rate Limiting"
