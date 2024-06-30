@@ -1,22 +1,22 @@
 import { createServer } from "node:http";
-import { Chain } from "@src/chain";
+// import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
-import { NodeProvider } from "@src/node-provider";
-import type { NexusRpcContext } from "@src/dependency-injection";
-import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events";
-import { getAuthenticationMiddleware } from "@src/authentication";
+// import { NodeProvider } from "@src/node-provider";
+// import type { NexusRpcContext } from "@src/dependency-injection";
+// import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events";
+// import { getAuthenticationMiddleware } from "@src/authentication";
 
-const ethMainnet = new Chain({
-  chainId: 1,
-  name: "eth_mainnet",
-  blockTime: 12,
-});
+// const ethMainnet = new Chain({
+//   chainId: 1,
+//   name: "eth_mainnet",
+//   blockTime: 12,
+// });
 
-const alchemy1 = new NodeProvider({
-  name: "alchemy1",
-  url: process.env.ALCHEMY_URL!,
-  chain: ethMainnet,
-});
+// const alchemy1 = new NodeProvider({
+//   name: "alchemy1",
+//   url: process.env.ALCHEMY_URL!,
+//   chain: ethMainnet,
+// });
 
 // const alchemy2 = new NodeProvider({
 //   name: "alchemy2",

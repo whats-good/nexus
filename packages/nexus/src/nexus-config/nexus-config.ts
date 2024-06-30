@@ -1,4 +1,4 @@
-import { pino, type Logger } from "pino";
+import { type Logger } from "pino";
 import type { Chain } from "@src/chain";
 import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware } from "@src/middleware";
