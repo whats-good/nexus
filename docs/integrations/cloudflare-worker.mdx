@@ -67,6 +67,12 @@ export default {
   },
 };
 ```
+```toml wrangler.toml
+name = "nexus-worker"
+main = "src/index.ts"
+compatibility_date = "2023-09-22"
+compatibility_flags = ["nodejs_compat"]
+```
 </CodeGroup>
 ## Usage
 <Snippet file="send-a-request-no-auth.mdx" />

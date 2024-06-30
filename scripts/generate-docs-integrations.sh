@@ -31,6 +31,7 @@ function docker_integration() {
 
 function cloudflare_integration() {
     local primary_source_path="./examples/cloudflare-worker/src/index.ts" 
+    local secondary_source_path="./examples/cloudflare-worker/wrangler.toml"
     local destination_path="./docs/integrations/cloudflare-worker.mdx"
     local title="Cloudflare"
     local description="Learn how to use Nexus as a Cloudflare Worker"
