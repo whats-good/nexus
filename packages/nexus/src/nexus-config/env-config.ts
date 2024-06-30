@@ -3,9 +3,11 @@ import {
   IntSchema,
   JSONStringSchema,
   NumberFromIntStringSchema,
-  mapTuple,
-} from "./utils";
-import { NodeProvider, CHAIN, RelayConfig, Chain } from "@whatsgood/nexus";
+} from "@src/utils";
+import type { Chain } from "@src/chain";
+import { NodeProvider } from "@src/node-provider";
+import type { RelayConfig } from "@src/node-endpoint";
+import { CHAIN } from "@src/default-chains";
 
 const ENV_CHAIN_SCHEMA = z.object({
   name: z.string(),
@@ -42,8 +44,8 @@ const ENV_RELAY_FAILURE = z.union([
 ]);
 
 export const EnvSchema = z.object({
-  PORT: NumberFromIntStringSchema.optional(),
-  LOG_LEVEL: z
+  NEXUS_PORT: NumberFromIntStringSchema.optional(),
+  NEXUS_LOG_LEVEL: z
     .union([
       z.literal("trace"),
       z.literal("debug"),
@@ -53,25 +55,25 @@ export const EnvSchema = z.object({
       z.literal("fatal"),
     ])
     .optional(),
-  CHAINS: ENV_CHAINS_ARRAY_SCHEMA.optional(),
-  NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA,
-  RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
-  RELAY_FAILURE: ENV_RELAY_FAILURE.optional(),
-  AUTH_KEY: z.string().optional(),
+  NEXUS_CHAINS: ENV_CHAINS_ARRAY_SCHEMA.optional(),
+  NEXUS_NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA.optional(),
+  NEXUS_RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
+  NEXUS_RELAY_FAILURE: ENV_RELAY_FAILURE.optional(),
+  NEXUS_RPC_AUTH_KEY: z.string().optional(),
 });
 
-export type EnvType = z.infer<typeof EnvSchema>;
+export type EnvConfig = ReturnType<typeof getEnvConfig>;
 
-export function getEnvConfig() {
+export function getEnvConfig(env: Record<string, string | undefined>) {
   const {
-    NODE_PROVIDERS,
-    CHAINS,
-    LOG_LEVEL,
-    PORT,
-    RELAY_FAILURE,
-    RELAY_ORDER,
-    AUTH_KEY,
-  } = EnvSchema.parse(process.env);
+    NEXUS_NODE_PROVIDERS,
+    NEXUS_CHAINS,
+    NEXUS_LOG_LEVEL,
+    NEXUS_PORT,
+    NEXUS_RELAY_FAILURE,
+    NEXUS_RELAY_ORDER,
+    NEXUS_RPC_AUTH_KEY,
+  } = EnvSchema.parse(env);
   const defaultChains = Object.values(CHAIN);
   const chainsMap = new Map(
     defaultChains.map((chain) => [chain.chainId, chain])
@@ -79,14 +81,15 @@ export function getEnvConfig() {
 
   const overwrittenChainsMap = new Map<number, Chain>();
 
-  CHAINS?.forEach((chain) => {
+  NEXUS_CHAINS?.forEach((chain) => {
     if (chainsMap.has(chain.chainId)) {
       overwrittenChainsMap.set(chain.chainId, chain);
     }
+
     chainsMap.set(chain.chainId, chain);
   });
 
-  const nodeProviders = mapTuple(NODE_PROVIDERS, (nodeProvider) => {
+  const nodeProviders = NEXUS_NODE_PROVIDERS?.map((nodeProvider) => {
     const chain = chainsMap.get(nodeProvider.chainId);
 
     if (!chain) {
@@ -103,25 +106,27 @@ export function getEnvConfig() {
   });
 
   const relay: Partial<RelayConfig> = {};
-  if (RELAY_ORDER) {
-    relay.order = RELAY_ORDER;
+
+  if (NEXUS_RELAY_ORDER) {
+    relay.order = NEXUS_RELAY_ORDER;
   }
 
-  if (RELAY_FAILURE) {
-    if (RELAY_FAILURE === "fail-immediately") {
+  if (NEXUS_RELAY_FAILURE) {
+    if (NEXUS_RELAY_FAILURE === "fail-immediately") {
       relay.failure = { kind: "fail-immediately" };
     } else {
-      const [kind, maxAttempts] = RELAY_FAILURE;
+      const [kind, maxAttempts] = NEXUS_RELAY_FAILURE;
+
       relay.failure = { kind, maxAttempts };
     }
   }
 
   return {
-    nodeProviders,
-    port: PORT,
-    logLevel: LOG_LEVEL,
+    nodeProviders: nodeProviders ?? [],
+    port: NEXUS_PORT,
+    logLevel: NEXUS_LOG_LEVEL,
     relay,
-    authKey: AUTH_KEY,
+    rpcAuthKey: NEXUS_RPC_AUTH_KEY,
     overwrittenChains: Array.from(overwrittenChainsMap.values()),
   };
 }

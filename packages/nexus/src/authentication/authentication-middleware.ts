@@ -5,9 +5,15 @@ import { UnauthorizedAccessEvent } from "./events";
 
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
 
-export const authenticationMiddleware =
-  (params: { authKey: string }): NexusMiddleware =>
-  async (ctx: NexusRpcContext, next: NexusMiddlewareNextFn) => {
+export const getAuthenticationMiddleware = <
+  TPlatformContext = unknown,
+>(params: {
+  authKey: string;
+}): NexusMiddleware<TPlatformContext> =>
+  async function authenticationMiddleware(
+    ctx: NexusRpcContext<TPlatformContext>,
+    next: NexusMiddlewareNextFn
+  ) {
     const requestUrl = new URL(ctx.request.url);
     const clientAccessKey = requestUrl.searchParams.get(
       AUTH_KEY_QUERY_PARAM_NAME

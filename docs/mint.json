@@ -49,6 +49,7 @@
           "group": "Key Concepts",
           "pages": [
             "key-concepts/nexus-server",
+            "key-concepts/environment-variables",
             "key-concepts/node-providers",
             "key-concepts/chains"
           ]
@@ -70,6 +71,7 @@
           "group": "Integrations",
           "pages": [
             "integrations/introduction",
+            "integrations/docker",
             "integrations/cloudflare-worker",
             "integrations/node-js",
             "integrations/express",

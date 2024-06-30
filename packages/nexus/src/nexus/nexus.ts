@@ -4,7 +4,7 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { NexusConfig, type NexusConfigOptions } from "@src/nexus-config";
+import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 
@@ -37,9 +37,11 @@ export class Nexus<TPlatformContext = unknown>
   };
 
   public static create<TPlatformContext = unknown>(
-    options: NexusConfigOptions<TPlatformContext>
+    options?: NexusConfigOptions<TPlatformContext>
   ) {
-    const config = NexusConfig.init(options);
+    const nexusConfigFactory = new NexusConfigFactory(options);
+    const config = nexusConfigFactory.getNexusConfig(options || {});
+
     const staticContainer = new StaticContainer({
       config,
     });

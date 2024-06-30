@@ -252,24 +252,6 @@ async function updatePackageJson(config: ProjectConfig) {
   );
 }
 
-async function generateEnvFiles(config: ProjectConfig) {
-  console.log(`${chalk.green("Generating environment files...")}`);
-  const { platform } = config;
-  const file = platform === "cloudflare" ? ".dev.vars" : ".env";
-
-  const envVars = [
-    "# Set your global access key here",
-    "QUERY_PARAM_AUTH_KEY=",
-    "",
-    "# Add your service provider urls here. Provide at least one.",
-    "ALCHEMY_URL=",
-    "INFURA_URL=",
-    "ANKR_URL=",
-  ];
-
-  fs.writeFileSync(path.join(config.projectPath, file), envVars.join("\n"));
-}
-
 async function configGit(config: ProjectConfig) {
   console.log(`${chalk.green("Generating .gitignore...")}`);
 
@@ -332,7 +314,6 @@ async function createProject(config: ProjectConfig) {
   );
   // TODO: add a setting to allow users to choose their version
   await updatePackageJson(config);
-  await generateEnvFiles(config);
   await installDependencies(config);
   await configGit(config);
 }
