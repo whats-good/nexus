@@ -37,10 +37,10 @@ export class Nexus<TPlatformContext = unknown>
   };
 
   public static create<TPlatformContext = unknown>(
-    options: NexusConfigOptions<TPlatformContext>
+    options?: NexusConfigOptions<TPlatformContext>
   ) {
     const nexusConfigFactory = new NexusConfigFactory(options);
-    const config = nexusConfigFactory.getNexusConfig(options);
+    const config = nexusConfigFactory.getNexusConfig(options || {});
 
     const staticContainer = new StaticContainer({
       config,

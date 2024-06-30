@@ -1,3 +1,4 @@
+import { type Logger, pino } from "pino";
 import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
@@ -7,8 +8,13 @@ import { getAuthenticationMiddleware } from "@src/authentication/authentication-
 import { isNonEmptyArray } from "@src/utils";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
-import type { LogConfig } from "./nexus-config";
 import { NexusConfig } from "./nexus-config";
+
+export interface LogConfig {
+  level: string;
+}
+
+const DEFAULT_PORT = 4000;
 
 export interface NexusConfigOptions<TPlatformContext = unknown> {
   nodeProviders?: NodeProvider[];
@@ -24,10 +30,12 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
 export class NexusConfigFactory<TPlatformContext = unknown> {
   private readonly options: NexusConfigOptions<TPlatformContext>;
   private readonly envConfig: EnvConfig;
+  private readonly logger: Logger;
 
   constructor(options?: NexusConfigOptions<TPlatformContext>) {
     this.options = options || {};
     this.envConfig = getEnvConfig();
+    this.logger = this.getLogger();
   }
 
   public getNexusConfig(params: NexusConfigOptions<TPlatformContext>) {
@@ -41,7 +49,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: this.getRelayConfig(),
       port: this.getPort(),
-      log: this.getLogConfig(),
+      logger: this.logger,
       eventHandlers: this.options.eventHandlers || [],
       middleware: this.getMiddleware(),
       // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
@@ -76,6 +84,16 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
       this.envConfig.nodeProviders
     );
 
+    if (this.envConfig.overwrittenChains.length > 0) {
+      this.logger.warn(
+        `⚠️ Overwritten chain configs detected: ${JSON.stringify(
+          this.envConfig.overwrittenChains,
+          null,
+          2
+        )}`
+      );
+    }
+
     if (!isNonEmptyArray(combinedNodeProviders)) {
       throw new Error("No node providers configured");
     }
@@ -101,6 +119,19 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     return middleware;
   }
 
+  private getLogger(): Logger {
+    return pino({
+      transport: {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          colorizeObjects: true,
+        },
+      },
+      level: this.getLogConfig().level,
+    });
+  }
+
   private getLogConfig(): LogConfig {
     const logConfig: LogConfig = { level: "info" };
 
@@ -114,7 +145,15 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
   }
 
   private getPort(): number {
-    return this.options.port || this.envConfig.port || 4000;
+    const portConfig = this.options.port || this.envConfig.port;
+
+    if (!portConfig) {
+      this.logger.warn(
+        `️⚠️️ port is not set. Defaulting to ${DEFAULT_PORT}. Set the NEXUS_PORT environment variable, or the port option in the Nexus config to change.`
+      );
+    }
+
+    return this.options.port || this.envConfig.port || DEFAULT_PORT;
   }
 
   private getRpcAuthMiddleware():
@@ -122,7 +161,13 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     | undefined {
     const rpcAuthKey = this.options.rpcAuthKey || this.envConfig.rpcAuthKey;
 
-    if (rpcAuthKey) {
+    if (!rpcAuthKey) {
+      this.logger.warn(
+        "⚠️ rpcAuthKey not set. Authentication middleware inactive. Set the NEXUS_RPC_AUTH_KEY environment variable, or the rpcAuthKey option in the Nexus config to enable."
+      );
+    } else {
+      this.logger.info("🔒 Authentication middleware active");
+
       return getAuthenticationMiddleware<TPlatformContext>({
         authKey: rpcAuthKey,
       });

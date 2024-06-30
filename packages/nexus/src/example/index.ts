@@ -24,37 +24,39 @@ const alchemy1 = new NodeProvider({
 //   chain: ethMainnet,
 // });
 
-const nexus = Nexus.create({
-  // nodeProviders: [alchemy1],
-  // relay: {
-  //   failure: {
-  //     kind: "cycle-requests",
-  //     maxAttempts: 3,
-  //   },
-  //   order: "random",
-  // },
-  // rpcAuthKey: "my-secret-key-1",
-  // middleware: [getAuthenticationMiddleware({ authKey: "my-secret-key-2" })],
-  // port: 3000,
-  // // TODO: add env var support for log config.
-  // log: {
-  //   level: "debug",
-  // },
-  // eventHandlers: [
-  //   {
-  //     event: RpcResponseSuccessEvent,
-  //     handle: async (
-  //       event: RpcResponseSuccessEvent,
-  //       ctx: NexusRpcContext
-  //     ): Promise<void> => {
-  //       const logger = ctx.container.logger.child({
-  //         name: "rpc-response-success",
-  //       });
-  //       logger.info(event.payload);
-  //     },
-  //   },
-  // ],
-});
+// const nexus = Nexus.create({
+// nodeProviders: [alchemy1],
+// relay: {
+//   failure: {
+//     kind: "cycle-requests",
+//     maxAttempts: 3,
+//   },
+//   order: "random",
+// },
+// rpcAuthKey: "my-secret-key-1",
+// middleware: [getAuthenticationMiddleware({ authKey: "my-secret-key-2" })],
+// port: 3000,
+// // TODO: add env var support for log config.
+// log: {
+//   level: "debug",
+// },
+// eventHandlers: [
+//   {
+//     event: RpcResponseSuccessEvent,
+//     handle: async (
+//       event: RpcResponseSuccessEvent,
+//       ctx: NexusRpcContext
+//     ): Promise<void> => {
+//       const logger = ctx.container.logger.child({
+//         name: "rpc-response-success",
+//       });
+//       logger.info(event.payload);
+//     },
+//   },
+// ],
+// });
+
+const nexus = Nexus.create();
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
 createServer(nexus).listen(nexus.port, () => {

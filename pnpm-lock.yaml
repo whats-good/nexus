@@ -258,9 +258,6 @@ importers:
       '@whatsgood/nexus':
         specifier: workspace:*
         version: link:../nexus
-      zod:
-        specifier: ^3.22.2
-        version: 3.22.2
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
