@@ -99,7 +99,7 @@ function generate_docs() {
         echo "## Introduction" >> $destination_path
         echo $introduction >> $destination_path
     fi
-    echo "## Setup" >> $destination_path
+    echo "## Manual setup" >> $destination_path
     echo "<CodeGroup>" >> $destination_path
     generate_code_group_entry $primary_source_path $destination_path
     if [ -n "$secondary_source_path" ]; then
