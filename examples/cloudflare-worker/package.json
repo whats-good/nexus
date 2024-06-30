@@ -8,7 +8,7 @@
   },
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --port 4005",
+    "dev": "wrangler dev --port 4000",
     "build": "tsc"
   },
   "dependencies": {

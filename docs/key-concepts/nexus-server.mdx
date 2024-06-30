@@ -14,21 +14,21 @@ import {
   CHAIN,
 } from "@whatsgood/nexus";
 
-const alchemyNodeProvider = new NodeProvider({
-  name: "alchemy",
+const llamaRpcNodeProvider = new NodeProvider({
+  name: "llama-rpc",
   chain: CHAIN.ETHEREUM_MAINNET,
-  url: process.env.ALCHEMY_URL,
+  url: "https://eth.llamarpc.com",
 });
 
-const infuraNodeProvider = new NodeProvider({
-  name: "infura",
+const tenderlyNodeProvider = new NodeProvider({
+  name: "tenderly",
   chain: CHAIN.ETHEREUM_MAINNET,
-  url: process.env.INFURA_URL,
+  url: "https://gateway.tenderly.co/public/mainnet",
 });
 
 const nexus = Nexus.create({
-  nodeProviders: [alchemyNodeProvider, infuraNodeProvider],
-  port: 4005,
+  nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
+  port: 4000,
   log: { level: "debug" },
   relay: {
     failure: {
@@ -41,18 +41,6 @@ const nexus = Nexus.create({
 ```
 
 In this example, we first create two `NodeProvider` instances, which we'll use to connect to `Ethereum Mainnet` via `Alchemy` and `Infura`. We then create a `Nexus` instance, passing in the `NodeProvider` instances, the port we want to run the server on, and some logging and relay configuration. In this particular example, we configure the relay to retry failed requests up to 3 times, and to randomize the order of requests.
-
-## Setting up Environment Variables
-
-Make sure you create a .env file to store `process.env.ALCHEMY_URL` and `process.env.INFURA_URL` variables. You can use the following template:
-
-```bash
-# Add your service provider urls here
-ALCHEMY_URL=my-alchemy-key
-#           ^ replace this with your own url
-INFURA_URL=my-infura-key
-#           ^ replace this with your own url
-```
 
 ## Running a Nexus Server
 
@@ -74,10 +62,5 @@ createServer(nexus).listen(nexus.port, () => {
 
 Once you have a Nexus server running, you can interact with is using any JSON-RPC client. Here's an example using `curl`. Pay attention to the endpoint. Nexus servers are designed to handle multiple chains, so you need to specify the chain ID in the endpoint. In this example, since we have configured the server to connect to `Ethereum Mainnet`, we use the chain ID `1`.
 
-```bash
-curl \
-    -X POST http://localhost:4005/1 \
-    -H "Content-Type: application/json" \
-    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 
-```
+<Snippet file="send-a-request-no-auth.mdx" />
