@@ -4,7 +4,7 @@ import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware, NexusMiddlewareNextFn } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
-import { NodeRelayHandler } from "@src/node-relay-handler";
+import { NodeRelayHandler, nodeRelayMiddleware } from "@src/node-relay-handler";
 import { isNonEmptyArray } from "@src/utils";
 import { getEnvConfig, type EnvConfig } from "./env-config";
 
@@ -111,22 +111,10 @@ export class NexusConfig<TPlatformContext = unknown> {
       new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
-    const givenMiddleare = params.middleware || [];
+    const givenMiddleware = params.middleware || [];
 
     // we create the relay middleware on the spot, and append it to the given middleware
-    const middleware = givenMiddleare.concat([
-      async (
-        ctx: NexusRpcContext<TPlatformContext>,
-        next: NexusMiddlewareNextFn
-      ): Promise<void> => {
-        const nodeRelayHandler = new NodeRelayHandler(ctx);
-        const response = await nodeRelayHandler.handle();
-
-        ctx.setResponse(response);
-
-        return next();
-      },
-    ]);
+    const middleware = givenMiddleware.concat(nodeRelayMiddleware);
 
     return new NexusConfig<TPlatformContext>({
       nodeProviders,
