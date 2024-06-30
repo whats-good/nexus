@@ -1,5 +1,16 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.7.0
+
+### Minor Changes
+
+- 811fc4b: Introducing standard environment variables
+
+### Patch Changes
+
+- Updated dependencies [811fc4b]
+  - @whatsgood/nexus@0.15.0
+
 ## 0.6.1
 
 ### Patch Changes

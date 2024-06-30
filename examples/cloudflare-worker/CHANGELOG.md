@@ -1,5 +1,16 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.5.0
+
+### Minor Changes
+
+- 811fc4b: Introducing standard environment variables
+
+### Patch Changes
+
+- Updated dependencies [811fc4b]
+  - @whatsgood/nexus@0.15.0
+
 ## 0.4.1
 
 ### Patch Changes

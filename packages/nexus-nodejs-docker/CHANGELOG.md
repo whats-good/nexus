@@ -1,5 +1,16 @@
 # @whatsgood/nexus-nodejs-docker
 
+## 0.2.0
+
+### Minor Changes
+
+- 811fc4b: Introducing standard environment variables
+
+### Patch Changes
+
+- Updated dependencies [811fc4b]
+  - @whatsgood/nexus@0.15.0
+
 ## 0.1.0
 
 ### Minor Changes
