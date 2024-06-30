@@ -2,17 +2,38 @@ import { z } from "zod";
 
 export const requiredUnknown = () => z.custom((x) => x !== undefined);
 
-export const randomizeArray = <T>(arr: T[]): T[] => {
+export function weightedShuffle<T extends { weight: number }>(arr: T[]): T[] {
+  // Copy the items to avoid mutating the original array
   const copy = [...arr];
 
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+  // Create a new array to store the shuffled items
+  const shuffled: T[] = [];
 
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+  // Calculate the total weight
+  let totalWeight = copy.reduce((sum, item) => sum + item.weight, 0);
+
+  while (copy.length > 0) {
+    // Generate a random number between 0 and the total weight
+    let random = Math.random() * totalWeight;
+
+    // Find the item that corresponds to the random number
+    for (let i = 0; i < copy.length; i++) {
+      random -= copy[i].weight;
+
+      if (random <= 0) {
+        // Add the selected item to the shuffled array
+        shuffled.push(copy[i]);
+
+        // Remove the selected item from the itemsCopy array
+        totalWeight -= copy[i].weight;
+        copy.splice(i, 1);
+        break;
+      }
+    }
   }
 
-  return copy;
-};
+  return shuffled;
+}
 
 export function safeJsonStringify(
   value: unknown,

@@ -31,6 +31,10 @@ export class NodeEndpoint<TPlatformContext = unknown> {
     });
   }
 
+  public get weight(): number {
+    return this.nodeProvider.weight;
+  }
+
   public async relay(request: RpcRequestPayloadType): Promise<NodeRpcResponse> {
     let relayResponse: Response;
 

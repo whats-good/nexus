@@ -1,64 +1,57 @@
 import { createServer } from "node:http";
-// import { Chain } from "@src/chain";
 import { Nexus } from "@src/nexus";
-// import { NodeProvider } from "@src/node-provider";
-// import type { NexusRpcContext } from "@src/dependency-injection";
-// import { RpcResponseSuccessEvent } from "@src/node-relay-handler/events";
-// import { getAuthenticationMiddleware } from "@src/authentication";
+import { NodeProvider } from "@src/node-provider";
+import { CHAIN } from "@src/default-chains";
+// import { weightedShuffle } from "..";
 
-// const ethMainnet = new Chain({
-//   chainId: 1,
-//   name: "eth_mainnet",
-//   blockTime: 12,
-// });
+const llamaRpcNodeProvider = new NodeProvider({
+  name: "llama-rpc",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: "https://eth.llamarpc.com",
+  weight: 3,
+});
 
-// const alchemy1 = new NodeProvider({
-//   name: "alchemy1",
-//   url: process.env.ALCHEMY_URL!,
-//   chain: ethMainnet,
-// });
+const tenderlyNodeProvider = new NodeProvider({
+  name: "tenderly",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: "https://gateway.tenderly.co/public/mainnet",
+  weight: 11,
+});
 
-// const alchemy2 = new NodeProvider({
-//   name: "alchemy2",
-//   url: "https://eth-mainnet.alchemyapi.io/v2/5678",
-//   chain: ethMainnet,
-// });
+// const providers = [llamaRpcNodeProvider, tenderlyNodeProvider];
 
-// const nexus = Nexus.create({
-// nodeProviders: [alchemy1],
-// relay: {
-//   failure: {
-//     kind: "cycle-requests",
-//     maxAttempts: 3,
-//   },
-//   order: "random",
-// },
-// rpcAuthKey: "my-secret-key-1",
-// middleware: [getAuthenticationMiddleware({ authKey: "my-secret-key-2" })],
-// port: 3000,
-// // TODO: add env var support for log config.
-// log: {
-//   level: "debug",
-// },
-// eventHandlers: [
-//   {
-//     event: RpcResponseSuccessEvent,
-//     handle: async (
-//       event: RpcResponseSuccessEvent,
-//       ctx: NexusRpcContext
-//     ): Promise<void> => {
-//       const logger = ctx.container.logger.child({
-//         name: "rpc-response-success",
-//       });
-//       logger.info(event.payload);
-//     },
-//   },
-// ],
-// });
+// const picks = new Map<string, number>();
 
-const nexus = Nexus.create();
+// for (let i = 0; i < 100000; i++) {
+//   const shuffled = weightedShuffle(providers);
+//   const first = shuffled[0];
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises -- this promise is safe
+//   picks.set(first.name, (picks.get(first.name) || 0) + 1);
+// }
+
+// console.log(picks);
+// console.log("actual ratio", picks.get("llama-rpc")! / picks.get("tenderly")!);
+// console.log(
+//   "expected ratio",
+//   llamaRpcNodeProvider.weight / tenderlyNodeProvider.weight
+// );
+
+const nexus = Nexus.create({
+  nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
+  relay: {
+    failure: {
+      kind: "cycle-requests",
+      maxAttempts: 3,
+    },
+    order: "random",
+  },
+  rpcAuthKey: "my-secret-key",
+  log: {
+    level: "debug",
+  },
+});
+
+// eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 createServer(nexus).listen(nexus.port, () => {
   nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

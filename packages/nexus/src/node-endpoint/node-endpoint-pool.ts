@@ -1,6 +1,6 @@
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import { randomizeArray } from "@src/utils";
+import { weightedShuffle } from "@src/utils";
 import type { RelayConfig } from "./relay-config";
 import {
   NodeEndpointPoolAllFailedResponse,
@@ -31,7 +31,7 @@ export class NodeEndpointPool {
     let nodeEndpoints = this.nodeEndpoints;
 
     if (this.config.order === "random") {
-      nodeEndpoints = randomizeArray(nodeEndpoints);
+      nodeEndpoints = weightedShuffle(nodeEndpoints);
     }
 
     if (this.config.failure.kind === "fail-immediately") {
