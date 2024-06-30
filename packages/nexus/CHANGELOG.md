@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.15.0
+
+### Minor Changes
+
+- 811fc4b: Introducing standard environment variables
+
 ## 0.14.0
 
 ### Minor Changes
