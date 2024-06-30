@@ -10,8 +10,8 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - 'NEXUS_NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
-      - 'NEXUS_CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
-      - 'NEXUS_RELAY_FAILURE=["cycle-requests", 5]'
-      - NEXUS_RELAY_ORDER=random
-      - NEXUS_AUTH_KEY=my-secret-key
+      - 'NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
+      - 'CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
+      - RELAY_ORDER=random
+      - RELAY_FAILURE=["cycle-requests", 5]
+      - AUTH_KEY=my-secret-key

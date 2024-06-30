@@ -28,7 +28,7 @@ export class NexusConfig<TPlatformContext = unknown> {
   public readonly chains: Map<number, Chain>;
   public readonly relay: RelayConfig;
   public readonly log: LogConfig;
-  public readonly port: number;
+  public readonly port?: number;
   public readonly eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
   public readonly middleware: NexusMiddleware<TPlatformContext>[];
   public readonly nextTick: typeof process.nextTick;
@@ -38,7 +38,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     chains: Map<number, Chain>;
     relay: RelayConfig;
     log: LogConfig;
-    port: number;
+    port?: number;
     eventHandlers: AnyEventHandlerOf<TPlatformContext>[];
     middleware: NexusMiddleware<TPlatformContext>[];
     nextTick: typeof process.nextTick;
@@ -69,7 +69,7 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getRelayConfig<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): RelayConfig {
     const relayConfig: RelayConfig = {
@@ -77,13 +77,13 @@ export class NexusConfig<TPlatformContext = unknown> {
       order: "sequential",
     };
 
-    if (params?.relay?.failure) {
+    if (params.relay?.failure) {
       relayConfig.failure = params.relay.failure;
     } else if (envConfig.relay.failure) {
       relayConfig.failure = envConfig.relay.failure;
     }
 
-    if (params?.relay?.order) {
+    if (params.relay?.order) {
       relayConfig.order = params.relay.order;
     } else if (envConfig.relay.order) {
       relayConfig.order = envConfig.relay.order;
@@ -93,10 +93,10 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getNodeProviders<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): [NodeProvider, ...NodeProvider[]] {
-    const paramNodeProviders = params?.nodeProviders || [];
+    const paramNodeProviders = params.nodeProviders || [];
     const combinedNodeProviders = paramNodeProviders.concat(
       envConfig.nodeProviders
     );
@@ -109,11 +109,11 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getMiddleware<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): NexusMiddleware<TPlatformContext>[] {
     const middleware: NexusMiddleware<TPlatformContext>[] =
-      params?.middleware || [];
+      params.middleware || [];
 
     const rpcAuthMiddleware = NexusConfig.getRpcAuthMiddleware(
       params,
@@ -133,12 +133,12 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getLogConfig<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): LogConfig {
     const logConfig: LogConfig = { level: "info" };
 
-    if (params?.log?.level) {
+    if (params.log?.level) {
       logConfig.level = params.log.level;
     } else if (envConfig.logLevel) {
       logConfig.level = envConfig.logLevel;
@@ -148,17 +148,17 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getPort<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): number {
-    return params?.port || envConfig.port || 4000;
+    return params.port || envConfig.port || 4000;
   }
 
   private static getRpcAuthMiddleware<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext> | undefined,
+    params: NexusConfigOptions<TPlatformContext>,
     envConfig: EnvConfig
   ): NexusMiddleware<TPlatformContext> | undefined {
-    const rpcAuthKey = params?.rpcAuthKey || envConfig.rpcAuthKey;
+    const rpcAuthKey = params.rpcAuthKey || envConfig.rpcAuthKey;
 
     if (rpcAuthKey) {
       return getAuthenticationMiddleware<TPlatformContext>({
@@ -170,7 +170,7 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   public static init<TPlatformContext>(
-    params?: NexusConfigOptions<TPlatformContext>
+    params: NexusConfigOptions<TPlatformContext>
   ) {
     const envConfig = getEnvConfig();
     const nodeProviders = NexusConfig.getNodeProviders(params, envConfig);
@@ -178,36 +178,16 @@ export class NexusConfig<TPlatformContext = unknown> {
       new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
-    // if (!envConfig.port) {
-    //   nexus.logger.warn(
-    //     `️⚠️️ PORT environment variable not set. Defaulting to ${DEFAULT_PORT}`
-    //   );
-    // }
-    // if (!envConfig.authKey) {
-    //   nexus.logger.warn(
-    //     "⚠️ AUTH_KEY environment variable not set. Authentication middleware inactive."
-    //   );
-    // }
-    // if (envConfig.overwrittenChains.length > 0) {
-    //   nexus.logger.warn(
-    //     `⚠️ Overwritten chain configs detected: ${JSON.stringify(
-    //       envConfig.overwrittenChains,
-    //       null,
-    //       2
-    //     )}`
-    //   );
-    // }
-
     return new NexusConfig<TPlatformContext>({
       nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: NexusConfig.getRelayConfig(params, envConfig),
       port: NexusConfig.getPort(params, envConfig),
       log: NexusConfig.getLogConfig(params, envConfig),
-      eventHandlers: params?.eventHandlers || [],
+      eventHandlers: params.eventHandlers || [],
       middleware: NexusConfig.getMiddleware(params, envConfig),
       // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
-      nextTick: params?.nextTick || process.nextTick,
+      nextTick: params.nextTick || process.nextTick,
     });
   }
 }
