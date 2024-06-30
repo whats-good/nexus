@@ -1,5 +1,16 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.8.0
+
+### Minor Changes
+
+- bc2eceb: Updated default port references
+
+### Patch Changes
+
+- Updated dependencies [bc2eceb]
+  - @whatsgood/nexus@0.16.0
+
 ## 0.7.0
 
 ### Minor Changes
