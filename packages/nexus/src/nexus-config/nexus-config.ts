@@ -69,7 +69,8 @@ export class NexusConfig<TPlatformContext = unknown> {
   }
 
   private static getRelayConfig<TPlatformContext>(
-    params: NexusConfigOptions<TPlatformContext>
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
   ): RelayConfig {
     const relayConfig: RelayConfig = {
       failure: { kind: "cycle-requests", maxAttempts: 3 },
@@ -78,10 +79,14 @@ export class NexusConfig<TPlatformContext = unknown> {
 
     if (params.relay?.failure) {
       relayConfig.failure = params.relay.failure;
+    } else if (envConfig.relay.failure) {
+      relayConfig.failure = envConfig.relay.failure;
     }
 
     if (params.relay?.order) {
       relayConfig.order = params.relay.order;
+    } else if (envConfig.relay.order) {
+      relayConfig.order = envConfig.relay.order;
     }
 
     return relayConfig;
@@ -142,7 +147,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     return new NexusConfig<TPlatformContext>({
       nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
-      relay: NexusConfig.getRelayConfig(params),
+      relay: NexusConfig.getRelayConfig(params, envConfig),
       port: params.port,
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],
