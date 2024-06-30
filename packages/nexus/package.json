@@ -1,15 +1,15 @@
 {
   "name": "@whatsgood/nexus",
   "version": "0.16.0",
-  "description": "A simple TypeScript proxy server for any Ethereum JSON RPC compliant blockchain",
+  "description": "A load balancing blockchain RPC reverse proxy, written in TypeScript",
   "private": false,
   "access": "public",
   "keywords": [
     "blockchain",
     "ethereum",
-    "json-rpc",
+    "rpc",
     "proxy",
-    "typescript"
+    "load-balancer"
   ],
   "author": {
     "name": "Kerem Kazan",

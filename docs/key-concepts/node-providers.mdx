@@ -25,3 +25,37 @@ const infuraEthMainnetProvider = new NodeProvider({
   url: process.env.INFURA_URL,
 });
 ```
+
+## Load balancing
+
+If you configure Nexus with multiple providers that support the same chain, Nexus can cycle requests between them. This is useful for load balancing and failovers. You can influence how a node provider gets selected by setting the `weight` property. See [Load Balancing](/key-concepts/load-balancing) for more information.
+
+```typescript
+import {
+  NodeProvider,
+  CHAIN,
+  Nexus,
+} from "@whatsgood/nexus";
+
+const alchemyEthMainnetProvider = new NodeProvider({
+  name: "alchemy",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_URL,
+  weight: 3, // 30% of requests will go to this provider
+});
+
+const infuraEthMainnetProvider = new NodeProvider({
+  name: "infura",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.INFURA_URL,
+  weight: 7, // 70% of requests will go to this provider
+});
+
+const nexus = Nexus.create({
+  //...
+  nodeProviders: [alchemyEthMainnetProvider, infuraEthMainnetProvider],
+  relay: {
+    order: "random",
+  },
+});
+```

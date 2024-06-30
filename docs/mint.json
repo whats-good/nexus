@@ -51,14 +51,14 @@
             "key-concepts/nexus-server",
             "key-concepts/environment-variables",
             "key-concepts/node-providers",
-            "key-concepts/chains"
+            "key-concepts/chains",
+            "key-concepts/load-balancing"
           ]
         },
         {
           "group": "Features",
           "pages": [
             "features/multi-chain",
-            "features/failure-recovery",
             "features/authentication",
             "features/middleware",
             "features/event-handlers",
