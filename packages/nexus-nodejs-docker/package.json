@@ -2,6 +2,7 @@
   "name": "@whatsgood/nexus-nodejs-docker",
   "version": "0.1.0",
   "private": false,
+  "access": "public",
   "author": {
     "name": "Kerem Kazan",
     "email": "kerem@whatsgood.dog"
