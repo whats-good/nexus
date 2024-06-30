@@ -44,10 +44,3 @@ const nexus = Nexus.create({
 
 console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
 Bun.serve(nexus);
-
-// Step 4: Send a request to the server
-
-// curl http://localhost:4000/1 \
-//   -X POST \
-//   -H "Content-Type: application/json" \
-//   -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 5}'

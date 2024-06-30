@@ -59,10 +59,3 @@ export default {
     return nexus(request);
   },
 };
-
-// Step 5: Send a request to the server
-
-// curl http://localhost:4000/1 \
-//   -X POST \
-//   -H "Content-Type: application/json" \
-//   -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 5}'
