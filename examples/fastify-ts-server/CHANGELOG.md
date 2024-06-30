@@ -1,5 +1,11 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.9.0
+
+### Minor Changes
+
+- 8c39989: "Removed all references to dotenv"
+
 ## 0.8.0
 
 ### Minor Changes

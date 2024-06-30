@@ -1,5 +1,11 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.7.0
+
+### Minor Changes
+
+- 8c39989: "Removed all references to dotenv"
+
 ## 0.6.0
 
 ### Minor Changes
