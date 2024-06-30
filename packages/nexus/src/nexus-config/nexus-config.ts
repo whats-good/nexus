@@ -1,10 +1,9 @@
 import type { Chain } from "@src/chain";
-import type { NexusRpcContext } from "@src/dependency-injection/nexus-rpc-context";
 import type { AnyEventHandlerOf } from "@src/events";
-import type { NexusMiddleware, NexusMiddlewareNextFn } from "@src/middleware";
+import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
-import { NodeRelayHandler, nodeRelayMiddleware } from "@src/node-relay-handler";
+import { nodeRelayMiddleware } from "@src/node-relay-handler";
 import { isNonEmptyArray } from "@src/utils";
 import { authenticationMiddleware } from "@src/authentication/authentication-middleware";
 import { getEnvConfig, type EnvConfig } from "./env-config";
