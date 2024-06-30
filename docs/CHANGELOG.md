@@ -1,5 +1,11 @@
 # nexus-docs
 
+## 1.4.0
+
+### Minor Changes
+
+- abb06cd: Introducing weighted load balancing
+
 ## 1.3.0
 
 ### Minor Changes
