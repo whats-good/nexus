@@ -150,6 +150,13 @@ export class NexusConfig<TPlatformContext = unknown> {
     return logConfig;
   }
 
+  private static getPort<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
+  ): number {
+    return params.port || envConfig.port || 4000;
+  }
+
   public static init<TPlatformContext>(
     params: NexusConfigOptions<TPlatformContext>
   ) {
@@ -163,7 +170,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: NexusConfig.getRelayConfig(params, envConfig),
-      port: params.port,
+      port: NexusConfig.getPort(params, envConfig),
       log: NexusConfig.getLogConfig(params, envConfig),
       eventHandlers: params.eventHandlers || [],
       middleware: NexusConfig.getMiddleware(params, envConfig),
