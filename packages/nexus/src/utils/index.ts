@@ -41,3 +41,22 @@ export function safeErrorStringify(err: unknown) {
 }
 
 export type Constructor<T> = new (...args: any[]) => T;
+
+export const IntSchema = z.number().int();
+export const IntStringSchema = z.string().regex(/^[0-9]+$/);
+export const NumberFromIntStringSchema = IntStringSchema.transform((str) =>
+  parseInt(str, 10)
+);
+
+export const JSONStringSchema = z.string().transform((str, ctx): unknown => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: "custom", message: "Invalid JSON" });
+
+    return z.NEVER;
+  }
+});
+
+export const isNonEmptyArray = <T>(arr: T[]): arr is [T, ...T[]] =>
+  arr.length > 0;

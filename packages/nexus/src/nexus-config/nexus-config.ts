@@ -5,13 +5,15 @@ import type { NexusMiddleware, NexusMiddlewareNextFn } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { NodeRelayHandler } from "@src/node-relay-handler";
+import { isNonEmptyArray } from "@src/utils";
+import { getEnvConfig, type EnvConfig } from "./env-config";
 
 export interface LogConfig {
   level: string;
 }
 
 export interface NexusConfigOptions<TPlatformContext = unknown> {
-  nodeProviders: [NodeProvider, ...NodeProvider[]];
+  nodeProviders?: NodeProvider[];
   relay?: Partial<RelayConfig>;
   port?: number;
   log?: LogConfig;
@@ -21,7 +23,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
 }
 
 export class NexusConfig<TPlatformContext = unknown> {
-  public readonly nodeProviders: NodeProvider[];
+  public readonly nodeProviders: [NodeProvider, ...NodeProvider[]];
   public readonly chains: Map<number, Chain>;
   public readonly relay: RelayConfig;
   public readonly log: LogConfig;
@@ -84,11 +86,29 @@ export class NexusConfig<TPlatformContext = unknown> {
     return relayConfig;
   }
 
+  private static getNodeProviders<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
+  ): [NodeProvider, ...NodeProvider[]] {
+    const paramNodeProviders = params.nodeProviders || [];
+    const combinedNodeProviders = paramNodeProviders.concat(
+      envConfig.nodeProviders
+    );
+
+    if (!isNonEmptyArray(combinedNodeProviders)) {
+      throw new Error("No node providers configured");
+    }
+
+    return combinedNodeProviders;
+  }
+
   public static init<TPlatformContext>(
     params: NexusConfigOptions<TPlatformContext>
   ) {
+    const envConfig = getEnvConfig();
+    const nodeProviders = NexusConfig.getNodeProviders(params, envConfig);
     const uniqueChains = Array.from(
-      new Set(params.nodeProviders.map((nodeProvider) => nodeProvider.chain))
+      new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
     const givenMiddleare = params.middleware || [];
@@ -109,7 +129,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     ]);
 
     return new NexusConfig<TPlatformContext>({
-      nodeProviders: params.nodeProviders,
+      nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: NexusConfig.getRelayConfig(params),
       port: params.port,

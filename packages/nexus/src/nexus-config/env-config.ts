@@ -3,9 +3,11 @@ import {
   IntSchema,
   JSONStringSchema,
   NumberFromIntStringSchema,
-  mapTuple,
-} from "./utils";
-import { NodeProvider, CHAIN, RelayConfig, Chain } from "@whatsgood/nexus";
+} from "@src/utils";
+import type { Chain } from "@src/chain";
+import { NodeProvider } from "@src/node-provider";
+import type { RelayConfig } from "@src/node-endpoint";
+import { CHAIN } from "@src/default-chains";
 
 const ENV_CHAIN_SCHEMA = z.object({
   name: z.string(),
@@ -54,13 +56,13 @@ export const EnvSchema = z.object({
     ])
     .optional(),
   CHAINS: ENV_CHAINS_ARRAY_SCHEMA.optional(),
-  NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA,
+  NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA.optional(),
   RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
   RELAY_FAILURE: ENV_RELAY_FAILURE.optional(),
   AUTH_KEY: z.string().optional(),
 });
 
-export type EnvType = z.infer<typeof EnvSchema>;
+export type EnvConfig = ReturnType<typeof getEnvConfig>;
 
 export function getEnvConfig() {
   const {
@@ -83,10 +85,11 @@ export function getEnvConfig() {
     if (chainsMap.has(chain.chainId)) {
       overwrittenChainsMap.set(chain.chainId, chain);
     }
+
     chainsMap.set(chain.chainId, chain);
   });
 
-  const nodeProviders = mapTuple(NODE_PROVIDERS, (nodeProvider) => {
+  const nodeProviders = NODE_PROVIDERS?.map((nodeProvider) => {
     const chain = chainsMap.get(nodeProvider.chainId);
 
     if (!chain) {
@@ -103,6 +106,7 @@ export function getEnvConfig() {
   });
 
   const relay: Partial<RelayConfig> = {};
+
   if (RELAY_ORDER) {
     relay.order = RELAY_ORDER;
   }
@@ -112,12 +116,13 @@ export function getEnvConfig() {
       relay.failure = { kind: "fail-immediately" };
     } else {
       const [kind, maxAttempts] = RELAY_FAILURE;
+
       relay.failure = { kind, maxAttempts };
     }
   }
 
   return {
-    nodeProviders,
+    nodeProviders: nodeProviders ?? [],
     port: PORT,
     logLevel: LOG_LEVEL,
     relay,
