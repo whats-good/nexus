@@ -43,7 +43,7 @@ const nexus = Nexus.create<ExpressContext>({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
   eventHandlers: [onUnauthorizedAccess],
   log: { level: "debug" },
-  port: 4005,
+  port: 4000,
   relay: {
     order: "random",
   },
@@ -62,7 +62,7 @@ app.listen(nexus.port, () => {
 
 // Step 5: Send a request to the server
 
-// curl http://localhost:4005/1 \
+// curl http://localhost:4000/1 \
 //   -X POST \
 //   -H "Content-Type: application/json" \
 //   -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 5}'
