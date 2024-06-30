@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.16.0
+
+### Minor Changes
+
+- bc2eceb: Updated default port references
+
 ## 0.15.0
 
 ### Minor Changes

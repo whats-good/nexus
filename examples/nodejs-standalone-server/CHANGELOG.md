@@ -1,5 +1,16 @@
 # @whatsgood/example-nodejs-standalone-server
 
+## 0.4.0
+
+### Minor Changes
+
+- bc2eceb: Updated default port references
+
+### Patch Changes
+
+- Updated dependencies [bc2eceb]
+  - @whatsgood/nexus@0.16.0
+
 ## 0.3.0
 
 ### Minor Changes
