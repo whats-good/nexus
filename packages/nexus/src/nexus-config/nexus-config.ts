@@ -135,6 +135,21 @@ export class NexusConfig<TPlatformContext = unknown> {
     return middleware;
   }
 
+  private static getLogConfig<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
+  ): LogConfig {
+    const logConfig: LogConfig = { level: "info" };
+
+    if (params.log?.level) {
+      logConfig.level = params.log.level;
+    } else if (envConfig.logLevel) {
+      logConfig.level = envConfig.logLevel;
+    }
+
+    return logConfig;
+  }
+
   public static init<TPlatformContext>(
     params: NexusConfigOptions<TPlatformContext>
   ) {
@@ -149,7 +164,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: NexusConfig.getRelayConfig(params, envConfig),
       port: params.port,
-      log: params.log || { level: "info" },
+      log: NexusConfig.getLogConfig(params, envConfig),
       eventHandlers: params.eventHandlers || [],
       middleware: NexusConfig.getMiddleware(params, envConfig),
       // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
