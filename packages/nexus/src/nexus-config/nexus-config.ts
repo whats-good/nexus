@@ -6,6 +6,7 @@ import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { NodeRelayHandler, nodeRelayMiddleware } from "@src/node-relay-handler";
 import { isNonEmptyArray } from "@src/utils";
+import { authenticationMiddleware } from "@src/authentication/authentication-middleware";
 import { getEnvConfig, type EnvConfig } from "./env-config";
 
 export interface LogConfig {
@@ -102,6 +103,33 @@ export class NexusConfig<TPlatformContext = unknown> {
     return combinedNodeProviders;
   }
 
+  private static getMiddleware<TPlatformContext>(
+    params: NexusConfigOptions<TPlatformContext>,
+    envConfig: EnvConfig
+  ): NexusMiddleware<TPlatformContext>[] {
+    const middleware: NexusMiddleware<TPlatformContext>[] =
+      params.middleware || [];
+
+    const hasAuthenticationMiddleware = middleware.some(
+      (m) => m.name === authenticationMiddleware.name
+    );
+
+    if (!hasAuthenticationMiddleware && envConfig.authKey) {
+      // we check if the auth middleware is already present in the middleware chain.
+      // if not, we prepend it to the middleware chain so that it's the
+      // first middleware to be executed
+
+      middleware.unshift(
+        authenticationMiddleware({ authKey: envConfig.authKey })
+      );
+    }
+
+    // we create the relay middleware on the spot, and append it to the given middleware
+    middleware.push(nodeRelayMiddleware);
+
+    return middleware;
+  }
+
   public static init<TPlatformContext>(
     params: NexusConfigOptions<TPlatformContext>
   ) {
@@ -111,11 +139,6 @@ export class NexusConfig<TPlatformContext = unknown> {
       new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
-    const givenMiddleware = params.middleware || [];
-
-    // we create the relay middleware on the spot, and append it to the given middleware
-    const middleware = givenMiddleware.concat(nodeRelayMiddleware);
-
     return new NexusConfig<TPlatformContext>({
       nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
@@ -123,7 +146,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       port: params.port,
       log: params.log || { level: "info" },
       eventHandlers: params.eventHandlers || [],
-      middleware,
+      middleware: NexusConfig.getMiddleware(params, envConfig),
       // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
       nextTick: params.nextTick || process.nextTick,
     });

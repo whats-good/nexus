@@ -10,12 +10,6 @@ const envConfig = getEnvConfig();
 
 const DEFAULT_PORT = 4000;
 
-const middleware: NexusMiddleware[] = [];
-
-if (envConfig.authKey) {
-  middleware.push(authenticationMiddleware({ authKey: envConfig.authKey }));
-}
-
 const nexus = Nexus.create({
   nodeProviders: envConfig.nodeProviders,
   log: envConfig.logLevel
