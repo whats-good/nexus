@@ -53,20 +53,20 @@ yarn add @whatsgood/nexus
 import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
 import { createServer } from "node:http";
 
-const alchemyNodeProvider = new NodeProvider({
-  name: "alchemy",
+const llamaRpcNodeProvider = new NodeProvider({
+  name: "llama-rpc",
   chain: CHAIN.ETHEREUM_MAINNET,
-  url: process.env.ALCHEMY_URL,
+  url: "https://eth.llamarpc.com",
 });
 
-const infuraNodeProvider = new NodeProvider({
-  name: "infura",
+const tenderlyNodeProvider = new NodeProvider({
+  name: "tenderly",
   chain: CHAIN.ETHEREUM_MAINNET,
-  url: process.env.INFURA_URL,
+  url: "https://gateway.tenderly.co/public/mainnet",
 });
 
 const nexus = Nexus.create({
-  nodeProviders: [alchemyNodeProvider, infuraNodeProvider],
+  nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
   port: 4005,
 });
 

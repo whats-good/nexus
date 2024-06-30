@@ -3,40 +3,46 @@ title: "Quickstart"
 description: "Get up and running with your Nexus RPC server in a few simple steps"
 ---
 
-## Initialize the project
+## Install Nexus
 
 ```bash
-npm create @whatsgood/nexus@latest
+npm install @whatsgood/nexus
 ```
 
-This will prompt you to install the [@whatsgood/create-nexus](https://npmjs.com/package/@whatsgood/create-nexus) CLI tool. Press `y` to install it, and go through the project creation flow:
+## Configure Nexus
 
-1. Name your project (e.g. `my-nexus-rpc`).
-2. For this example, pick `express` as the target platform.
-3. Confirm the project details and press `y` to create the project.
+```typescript
+// node.js standalone server example
 
-## Set environment variables
+import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
+import { createServer } from "node:http";
 
-1. <Snippet file="prerequisite-providers.mdx" />
-2. Open the `.env` file that was created for you. 
-3. Set a random string as the `QUERY_PARAM_AUTH_KEY` variable. This will be used to authenticate your requests to the Nexus RPC server.
-4. Add your service provider keys to the file. We're using [Alchemy](https://alchemy.com) as a placeholder example here, but you pick any provider you want. 
+const llamaRpcNodeProvider = new NodeProvider({
+  name: "llama-rpc",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: "https://eth.llamarpc.com",
+});
 
-```bash .env
-# Set your global access key here
-QUERY_PARAM_AUTH_KEY=my-random-string
-#                       ^ replace this with your own random string
+const tenderlyNodeProvider = new NodeProvider({
+  name: "tenderly",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: "https://gateway.tenderly.co/public/mainnet",
+});
 
-# Add your service provider urls here
-ALCHEMY_URL=my-alchemy-key
-#           ^ replace this with your own url
-INFURA_URL=
-ANKR_URL=
+const nexus = Nexus.create({
+  nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
+  port: 4005,
+});
+
+createServer(nexus).listen(nexus.port, () => {
+  console.log(`🚀 Server ready at http://localhost:${nexus.port}`);
+});
+
 ```
 
 ## Send your first request
 
-First, start the server: ```npm run dev```. And then, open a new terminal window and send a request to the server.  You should see a response like: `{ "jsonrpc": "2.0", "id": 1, "result": "0x11e3b03" }`. Don't forget to use your own query param auth key.
+First, start the server: ```npm run dev```. And then, open a new terminal window and send a request to the server.  You should see a response like: `{ "jsonrpc": "2.0", "id": 1, "result": "0x11e3b03" }`. 
 
 
-<Snippet file="send-a-request.mdx" />
+<Snippet file="send-a-request-no-auth.mdx" />
