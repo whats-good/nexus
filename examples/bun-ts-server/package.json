@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/example-bun-ts-server",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
@@ -9,7 +9,7 @@
   "type": "module",
   "module": "src/index.ts",
   "scripts": {
-    "dev": "bun run -r dotenv/config src/index.ts",
+    "dev": "bun run src/index.ts",
     "build": "tsc"
   },
   "dependencies": {

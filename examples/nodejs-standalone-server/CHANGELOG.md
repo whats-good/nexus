@@ -1,5 +1,11 @@
 # @whatsgood/example-nodejs-standalone-server
 
+## 0.5.0
+
+### Minor Changes
+
+- 8c39989: "Removed all references to dotenv"
+
 ## 0.4.0
 
 ### Minor Changes

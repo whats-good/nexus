@@ -1,14 +1,12 @@
 ---
-title: "Docker"
-description: "Learn how to run Nexus as a Docker container"
+title: Docker
+description: Learn how to run Nexus as a Docker container
 ---
-
 ## Introduction
 It's possible to run Nexus in a [Docker container](https://hub.docker.com/repository/docker/whatsgood/nexus/general), without needing to write a single line of code. This is possible thanks to the Nexus [environment variables](/key-concepts/environment-variables) that allow you to configure the Nexus instance.
-
-## Docker Compose example
-
-```yml
+## Manual setup
+<CodeGroup>
+```yml docker-compose.yml
 version: "3.8"
 
 services:
@@ -21,11 +19,8 @@ services:
       - 'NEXUS_NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
       - 'NEXUS_CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
       - 'NEXUS_RELAY_FAILURE=["cycle-requests", 5]'
-      - 'NEXUS_RELAY_ORDER=random'
+      - "NEXUS_RELAY_ORDER=random"
 ```
-
-## Interacting with the Nexus container
-
-Run `docker-compose up` in the same directory as your `docker-compose.yml` file to start the Nexus container. You can now send requests to the Nexus server running in the container.
-
+</CodeGroup>
+## Usage
 <Snippet file="send-a-request-no-auth.mdx" />

@@ -1,5 +1,11 @@
 # nexus-docs
 
+## 1.3.0
+
+### Minor Changes
+
+- 8c39989: "Removed all references to dotenv"
+
 ## 1.2.0
 
 ### Minor Changes

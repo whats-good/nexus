@@ -1,13 +1,13 @@
 {
   "name": "@whatsgood/example-fastify-ts-server",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
     "email": "kerem@whatsgood.dog"
   },
   "scripts": {
-    "dev": "ts-node -r dotenv/config src/index.ts",
+    "dev": "ts-node src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
