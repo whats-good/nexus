@@ -25,6 +25,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   middleware?: NexusMiddleware<TPlatformContext>[];
   nextTick?: typeof process.nextTick;
   rpcAuthKey?: string;
+  env?: Record<string, string | undefined>;
 }
 
 export class NexusConfigFactory<TPlatformContext = unknown> {
@@ -34,8 +35,19 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
 
   constructor(options?: NexusConfigOptions<TPlatformContext>) {
     this.options = options || {};
-    this.envConfig = getEnvConfig();
+    this.envConfig = getEnvConfig(this.getEnv());
     this.logger = this.getLogger();
+  }
+
+  private getEnv() {
+    if (this.options.env) {
+      return this.options.env;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- process is not always defined. for example, in cloudflare workers
+    } else if (process) {
+      return process.env;
+    }
+
+    return {};
   }
 
   public getNexusConfig(params: NexusConfigOptions<TPlatformContext>) {

@@ -64,7 +64,7 @@ export const EnvSchema = z.object({
 
 export type EnvConfig = ReturnType<typeof getEnvConfig>;
 
-export function getEnvConfig() {
+export function getEnvConfig(env: Record<string, string | undefined>) {
   const {
     NEXUS_NODE_PROVIDERS,
     NEXUS_CHAINS,
@@ -73,7 +73,7 @@ export function getEnvConfig() {
     NEXUS_RELAY_FAILURE,
     NEXUS_RELAY_ORDER,
     NEXUS_RPC_AUTH_KEY,
-  } = EnvSchema.parse(process.env);
+  } = EnvSchema.parse(env);
   const defaultChains = Object.values(CHAIN);
   const chainsMap = new Map(
     defaultChains.map((chain) => [chain.chainId, chain])

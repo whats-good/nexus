@@ -3,30 +3,16 @@ import {
   UnauthorizedAccessEvent,
   EventHandler,
   NexusRpcContext,
-  authenticationMiddleware,
   NodeProvider,
   CHAIN,
   NexusServerInstance,
 } from "@whatsgood/nexus";
+import * as process from "node:process";
 
-import { nextTick } from "node:process";
+let nexus: NexusServerInstance;
 
-function createNexus(params: {
-  alchemyUrl: string;
-  queryParamAuthKey: string;
-}) {
-  // Step 1: Set up environment variables
-  // - Try putting your Alchemy key and a query param auth key in a .dev.vars file.
-
-  if (params.alchemyUrl === undefined) {
-    throw new Error("ALCHEMY_URL is required");
-  }
-
-  if (params.queryParamAuthKey === undefined) {
-    throw new Error("QUERY_PARAM_AUTH_KEY is required");
-  }
-
-  // Step 2: Create an example event handler.
+function createNexus(env: Record<string, string>) {
+  // Step 1: Create an example event handler.
   // - Feel free to remove this example or add your own event handlers.
   const onUnauthorizedAccess: EventHandler<UnauthorizedAccessEvent> = {
     event: UnauthorizedAccessEvent,
@@ -37,46 +23,46 @@ function createNexus(params: {
     },
   };
 
-  // Step 3: Initialize a node provider
-  const alchemyNodeProvider = new NodeProvider({
-    name: "alchemy",
+  // Step 2: Initialize node providers
+  const llamaRpcNodeProvider = new NodeProvider({
+    name: "llama-rpc",
     chain: CHAIN.ETHEREUM_MAINNET,
-    url: params.alchemyUrl,
+    url: "https://eth.llamarpc.com",
   });
 
-  // Step 4: Create a Nexus instance by putting it all together
-  const nexus = Nexus.create({
-    nodeProviders: [alchemyNodeProvider],
+  const tenderlyNodeProvider = new NodeProvider({
+    name: "tenderly",
+    chain: CHAIN.ETHEREUM_MAINNET,
+    url: "https://gateway.tenderly.co/public/mainnet",
+  });
+
+  // Step 3: Create a Nexus instance by putting it all together
+  return Nexus.create({
+    nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
     eventHandlers: [onUnauthorizedAccess],
-    middleware: [
-      authenticationMiddleware({ authKey: params.queryParamAuthKey }),
-    ],
     log: { level: "debug" },
-    nextTick, // pay attention to how we're passing nextTick via nodejs compat mode
+    port: 4005,
+    relay: {
+      order: "random",
+    },
+    env,
+    nextTick: process.nextTick,
   });
-
-  return nexus;
 }
 
-let nexus: NexusServerInstance;
-
-// Step 5: Set the fetch handler
+// Step 4: Set the fetch handler
 export default {
-  fetch: (request: Request, env: any) => {
+  fetch: (request: Request, env: Record<string, string>) => {
     if (!nexus) {
-      nexus = createNexus({
-        alchemyUrl: env.ALCHEMY_URL,
-        queryParamAuthKey: env.QUERY_PARAM_AUTH_KEY,
-      });
+      nexus = createNexus(env);
     }
     return nexus(request);
   },
 };
 
-// Step 6: Send a request to the server
-// - Make sure you replace the query param key with the one you set in the .env file.
+// Step 5: Send a request to the server
 
-// curl http://localhost:4005/1\?key\=YOUR_SECRET_KEY \
+// curl http://localhost:4005/1 \
 //   -X POST \
 //   -H "Content-Type: application/json" \
 //   -d '{"jsonrpc": "2.0", "method": "eth_blockNumber", "params": [], "id": 5}'
