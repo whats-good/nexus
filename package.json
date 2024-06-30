@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter @whatsgood/nexus",
     "lint": "turbo lint",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -15,6 +15,7 @@
     "ci:version": "./scripts/version.sh",
     "test:unit": "turbo test:unit",
     "docs:generate": "./scripts/docs.sh",
+    "docs:dev": "turbo docs:dev",
     "docs:broken-links": "turbo docs:broken-links",
     "changeset:status": "changeset status"
   },
