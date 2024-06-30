@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.17.0
+
+### Minor Changes
+
+- abb06cd: Introducing weighted load balancing
+
 ## 0.16.0
 
 ### Minor Changes

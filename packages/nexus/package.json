@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/nexus",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "A load balancing blockchain RPC reverse proxy, written in TypeScript",
   "private": false,
   "access": "public",
