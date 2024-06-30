@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/example-cloudflare-worker",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --port 4005",
+    "dev": "wrangler dev --port 4000",
     "build": "tsc"
   },
   "dependencies": {

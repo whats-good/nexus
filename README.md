@@ -67,7 +67,7 @@ const tenderlyNodeProvider = new NodeProvider({
 
 const nexus = Nexus.create({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
-  port: 4005,
+  port: 4000,
 });
 
 createServer(nexus).listen(nexus.port, () => {
@@ -81,7 +81,7 @@ In this example, since we have configured the server to connect to `Ethereum Mai
 
 ```bash
 curl \
-    -X POST http://localhost:4005/1 \
+    -X POST http://localhost:4000/1 \
     -H "Content-Type: application/json" \
     -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 

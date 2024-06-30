@@ -31,7 +31,7 @@ const tenderlyNodeProvider = new NodeProvider({
 
 const nexus = Nexus.create({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
-  port: 4005,
+  port: 4000,
 });
 
 createServer(nexus).listen(nexus.port, () => {

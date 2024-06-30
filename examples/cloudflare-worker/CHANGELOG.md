@@ -1,5 +1,16 @@
 # @whatsgood/example-cloudflare-worker
 
+## 0.6.0
+
+### Minor Changes
+
+- bc2eceb: Updated default port references
+
+### Patch Changes
+
+- Updated dependencies [bc2eceb]
+  - @whatsgood/nexus@0.16.0
+
 ## 0.5.0
 
 ### Minor Changes

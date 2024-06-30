@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/nexus",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "A simple TypeScript proxy server for any Ethereum JSON RPC compliant blockchain",
   "private": false,
   "access": "public",
