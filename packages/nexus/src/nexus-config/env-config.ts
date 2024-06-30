@@ -23,6 +23,7 @@ const ENV_NODE_PROVIDER_SCHEMA = z.object({
   name: z.string(),
   url: z.string().url(),
   chainId: IntSchema,
+  weight: NumberFromIntStringSchema.optional(),
 });
 
 const ENV_NODE_PROVIDERS_ARRAY_SCHEMA = JSONStringSchema.pipe(
@@ -102,6 +103,7 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
       name: nodeProvider.name,
       url: nodeProvider.url,
       chain,
+      weight: nodeProvider.weight,
     });
   });
 
