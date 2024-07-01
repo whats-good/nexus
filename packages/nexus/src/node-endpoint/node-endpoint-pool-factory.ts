@@ -53,16 +53,14 @@ export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
       chainToEndpointPoolMap.set(
         chain.chainId,
         new NodeEndpointPool({
+          container: this.container,
           chain,
-          nodeEndpoints: nodeProviders.map((nodeProvider) => {
-            const endpoint = new NodeEndpoint({
-              nodeProvider,
-              container: this.container,
-            });
-
-            return endpoint;
-          }),
-          config: this.relayConfig,
+          nodeEndpoints: nodeProviders.map(
+            (nodeProvider) =>
+              new NodeEndpoint({
+                nodeProvider,
+              })
+          ),
         })
       );
     }

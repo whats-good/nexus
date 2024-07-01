@@ -1,6 +1,5 @@
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import type { NodeEndpoint } from "./node-endpoint";
 import type {
   NodeRpcResponseFailure,
   NodeRpcResponseSuccess,
@@ -17,28 +16,20 @@ abstract class NodeEndpointPoolResponseBase<K extends string> {
   }
 }
 
-export interface EndpointResponseFailurePair {
-  failure: NodeRpcResponseFailure;
-  endpoint: NodeEndpoint;
-}
-
 export class NodeEndpointPoolSuccessResponse extends NodeEndpointPoolResponseBase<"success"> {
   public readonly kind = "success";
 
   public readonly success: NodeRpcResponseSuccess;
-  public readonly endpoint: NodeEndpoint;
-  public readonly failures: EndpointResponseFailurePair[];
+  public readonly failures: NodeRpcResponseFailure[];
 
   constructor(params: {
     chain: Chain;
     request: RpcRequestPayloadType;
     success: NodeRpcResponseSuccess;
-    endpoint: NodeEndpoint;
-    failures: EndpointResponseFailurePair[];
+    failures: NodeRpcResponseFailure[];
   }) {
     super(params);
     this.success = params.success;
-    this.endpoint = params.endpoint;
     this.failures = params.failures;
   }
 }
@@ -46,12 +37,12 @@ export class NodeEndpointPoolSuccessResponse extends NodeEndpointPoolResponseBas
 export class NodeEndpointPoolAllFailedResponse extends NodeEndpointPoolResponseBase<"all-failed"> {
   public readonly kind = "all-failed";
 
-  public readonly failures: EndpointResponseFailurePair[];
+  public readonly failures: NodeRpcResponseFailure[];
 
   constructor(params: {
     chain: Chain;
     request: RpcRequestPayloadType;
-    failures: EndpointResponseFailurePair[];
+    failures: NodeRpcResponseFailure[];
   }) {
     super(params);
     this.failures = params.failures;

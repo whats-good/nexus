@@ -24,8 +24,6 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     this.rpcRequestPayload = ctx.rpcRequestPayload;
     this.requestId = ctx.requestId;
     this.logger = ctx.container.logger.child({ name: this.constructor.name });
-
-    this.logger.debug(ctx.rpcRequestPayload);
   }
 
   public async handle(): Promise<RpcResponse> {
@@ -41,8 +39,8 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     }
 
     // all - failed
-    const lastFailure = poolResponse.failures[poolResponse.failures.length - 1];
-    const failureResponse = lastFailure.failure;
+    const failureResponse =
+      poolResponse.failures[poolResponse.failures.length - 1];
 
     if (failureResponse.kind === "error-rpc-response") {
       // TODO: make this a config: should we relay node provider failures to the client, without any
@@ -54,20 +52,20 @@ export class NodeRelayHandler<TPlatformContext = unknown> {
     } else if (failureResponse.kind === "non-200-response") {
       return new NodeProviderReturnedNon200ErrorResponse(
         this.requestId,
-        lastFailure.endpoint.nodeProvider
+        failureResponse.endpoint.nodeProvider
       );
     } else if (failureResponse.kind === "internal-fetch-error") {
       return new InternalErrorResponse(this.requestId);
     } else if (failureResponse.kind === "non-json-response") {
       return new NodeProviderReturnedInvalidResponse(
         this.requestId,
-        lastFailure.endpoint.nodeProvider
+        failureResponse.endpoint.nodeProvider
       );
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- disabling, because we'll likely introduce additional failure types
     } else if (failureResponse.kind === "unknown-rpc-response") {
       return new NodeProviderReturnedInvalidResponse(
         this.requestId,
-        lastFailure.endpoint.nodeProvider
+        failureResponse.endpoint.nodeProvider
       );
     }
 
