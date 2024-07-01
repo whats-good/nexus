@@ -42,7 +42,7 @@ sh ./scripts/generate-docs-integrations.sh
 # If the --frozen flag was passed, run a git diff to see if the changelog or the readme has changed 
 if [ "$FROZEN" = true ] ; then
     echo "Checking if the changelog has changed"
-    if [[ $(git diff --name-only) == *"docs/changelog.mdx"* ]] ; then
+    if [[ $(git diff --name-only) == *"docs/development/changelog.mdx"* ]] ; then
         echo "Error: The changelog has changed. Please run 'pnpm docs:generate' and commit the changes"
         exit 1
     fi
