@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.18.0
+
+### Minor Changes
+
+- 96454e7: Revamped request and response logging
+
 ## 0.17.0
 
 ### Minor Changes
