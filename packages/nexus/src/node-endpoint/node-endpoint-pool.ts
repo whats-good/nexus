@@ -31,18 +31,23 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     });
   }
 
+  // TODO: turn this into a generator, which should decrease the cost of
+  // the weighted shuffle operation.
   private getAvailableNodeEndpoints(): NodeEndpoint[] {
     let nodeEndpoints = this.nodeEndpoints;
+    let maxAttempts = 1;
+
+    if (this.config.failure.kind === "cycle-requests") {
+      maxAttempts = this.config.failure.maxAttempts;
+    }
 
     if (this.config.order === "random") {
       nodeEndpoints = weightedShuffle(nodeEndpoints);
     }
 
-    if (this.config.failure.kind === "fail-immediately") {
-      return nodeEndpoints.slice(0, 1);
-    }
+    const finalEndpoints = nodeEndpoints.slice(0, maxAttempts);
 
-    return nodeEndpoints.slice(0, this.config.failure.maxAttempts);
+    return finalEndpoints;
   }
 
   public async relay(
@@ -50,13 +55,13 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
   ): Promise<NodeEndpointPoolResponse> {
     const endpoints = this.getAvailableNodeEndpoints();
     const failures: NodeRpcResponseFailure[] = [];
+    let attempt = 0;
 
-    for (let i = 0; i < endpoints.length; i++) {
-      const endpoint = endpoints[i];
-
+    for (const endpoint of endpoints) {
+      attempt += 1;
       this.logger.debug(
         safeJsonStringify({
-          relayAttempt: i + 1,
+          relayAttempt: attempt,
           request,
           provider: `<${endpoint.nodeProvider.name}>`,
         })

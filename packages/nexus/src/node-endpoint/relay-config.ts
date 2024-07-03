@@ -5,6 +5,8 @@ export interface CycleRequests {
   maxAttempts: number;
 }
 
+// TODO: add a retry option (Retry of the same endpoint)
+
 export interface FailImmediately {
   kind: "fail-immediately";
 }
