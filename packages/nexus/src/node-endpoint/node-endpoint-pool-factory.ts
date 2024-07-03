@@ -2,19 +2,16 @@ import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
 import type { StaticContainer } from "@src/dependency-injection/static-container";
 import { NodeEndpointPool } from "./node-endpoint-pool";
-import type { RelayConfig } from "./relay-config";
 import { NodeEndpoint } from "./node-endpoint";
 
 export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
   private readonly nodeProviders: NodeProvider[];
-  private readonly relayConfig: RelayConfig;
   private readonly chainIdToEndpointPoolMap: Map<number, NodeEndpointPool>;
   private readonly container: StaticContainer<TPlatformContext>;
 
   constructor(container: StaticContainer<TPlatformContext>) {
     this.container = container;
     this.nodeProviders = container.config.nodeProviders;
-    this.relayConfig = container.config.relay;
     this.chainIdToEndpointPoolMap = this.getChainToEndpointPoolMap();
   }
 
