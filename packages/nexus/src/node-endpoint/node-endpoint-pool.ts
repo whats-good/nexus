@@ -1,7 +1,12 @@
 import type { Logger } from "pino";
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import { safeJsonStringify, weightedShuffle } from "@src/utils";
+import {
+  generatorOf,
+  safeJsonStringify,
+  take,
+  weightedShuffleGenerator,
+} from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import type { RelayConfig } from "./relay-config";
 import {
@@ -17,6 +22,7 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
   private readonly nodeEndpoints: NodeEndpoint[];
   private readonly config: RelayConfig;
   private readonly logger: Logger;
+  private readonly maxRelayAttempts: number = 1;
 
   constructor(params: {
     chain: Chain;
@@ -29,35 +35,31 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     this.logger = params.container.logger.child({
       name: this.constructor.name,
     });
-  }
-
-  // TODO: turn this into a generator, which should decrease the cost of
-  // the weighted shuffle operation.
-  private getAvailableNodeEndpoints(): NodeEndpoint[] {
-    let nodeEndpoints = this.nodeEndpoints;
-    let maxAttempts = 1;
 
     if (this.config.failure.kind === "cycle-requests") {
-      maxAttempts = this.config.failure.maxAttempts;
+      this.maxRelayAttempts = this.config.failure.maxAttempts;
     }
+  }
+
+  private getNextEndpoint(): Generator<NodeEndpoint> {
+    let innerGenerator: Generator<NodeEndpoint>;
 
     if (this.config.order === "random") {
-      nodeEndpoints = weightedShuffle(nodeEndpoints);
+      innerGenerator = weightedShuffleGenerator(this.nodeEndpoints);
+    } else {
+      innerGenerator = generatorOf(this.nodeEndpoints);
     }
 
-    const finalEndpoints = nodeEndpoints.slice(0, maxAttempts);
-
-    return finalEndpoints;
+    return take(innerGenerator, this.maxRelayAttempts);
   }
 
   public async relay(
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {
-    const endpoints = this.getAvailableNodeEndpoints();
     const failures: NodeRpcResponseFailure[] = [];
     let attempt = 0;
 
-    for (const endpoint of endpoints) {
+    for (const endpoint of this.getNextEndpoint()) {
       attempt += 1;
       this.logger.debug(
         safeJsonStringify({
