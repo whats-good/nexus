@@ -150,8 +150,7 @@ export class Controller<TPlatformContext = unknown> {
       );
     }
 
-    const nodeEndpointPool =
-      this.nodeEndpointPoolFactory.getEndpointPoolForChain(chain);
+    const nodeEndpointPool = this.nodeEndpointPoolFactory.http.get(chain);
 
     if (!nodeEndpointPool) {
       return new ProviderNotConfiguredErrorResponse(

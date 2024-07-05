@@ -4,7 +4,7 @@ const DEFAULT_NODE_PROVIDER_WEIGHT = 1;
 
 export class NodeProvider {
   public readonly name: string;
-  public readonly url: string;
+  public readonly url: URL;
   public readonly chain: Chain;
   public readonly weight: number;
 
@@ -19,8 +19,16 @@ export class NodeProvider {
     }
 
     this.name = params.name;
-    this.url = params.url;
+    this.url = new URL(params.url);
     this.chain = params.chain;
     this.weight = params.weight || DEFAULT_NODE_PROVIDER_WEIGHT;
+  }
+
+  public isHttp(): boolean {
+    return this.url.protocol === "http:" || this.url.protocol === "https:";
+  }
+
+  public isWs(): boolean {
+    return this.url.protocol === "ws:" || this.url.protocol === "wss:";
   }
 }
