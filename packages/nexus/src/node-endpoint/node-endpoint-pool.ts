@@ -41,7 +41,7 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     }
   }
 
-  private getNextEndpoint(): Generator<NodeEndpoint> {
+  public getNextEndpoint(): Generator<NodeEndpoint> {
     let innerGenerator: Generator<NodeEndpoint>;
 
     if (this.config.order === "random") {
