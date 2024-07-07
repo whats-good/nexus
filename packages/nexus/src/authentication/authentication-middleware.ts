@@ -14,6 +14,10 @@ export const getAuthenticationMiddleware = <
     ctx: NexusRpcContext<TPlatformContext>,
     next: NexusMiddlewareNextFn
   ) {
+    // TODO: NexusRpcContext fully assumes that it's an http request. But some functionality
+    // like our middleware have reuse potential for other transports like websockets.
+    // so, we should consider refactoring this to be more generic.
+
     const requestUrl = new URL(ctx.request.url);
     const clientAccessKey = requestUrl.searchParams.get(
       AUTH_KEY_QUERY_PARAM_NAME
