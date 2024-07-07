@@ -1,4 +1,3 @@
-import { z } from "zod";
 import type { Logger } from "pino";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
@@ -20,22 +19,9 @@ import {
   RpcResponseErrorEvent,
   RpcResponseSuccessEvent,
 } from "@src/node-relay-handler/events";
-import type { PathParamsOf } from "./route";
-import { Route } from "./route";
+import type { PathParamsOf } from "@src/routes";
+import { chainIdRoute } from "@src/routes";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
-
-const IntString = z
-  .number({
-    coerce: true,
-  })
-  .int();
-
-const chainIdRoute = new Route(
-  "(.*)/:chainId",
-  z.object({
-    chainId: IntString,
-  })
-);
 
 export class Controller<TPlatformContext = unknown> {
   private readonly container: StaticContainer<TPlatformContext>;
