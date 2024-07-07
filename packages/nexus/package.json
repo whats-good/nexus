@@ -45,6 +45,7 @@
     "@ethersproject/bignumber": "^5.7.0",
     "@whatwg-node/fetch": "0.9.18",
     "@whatwg-node/server": "0.9.34",
+    "http-proxy": "^1.18.1",
     "path-to-regexp": "^6.2.1",
     "pino": "^8.17.0",
     "pino-pretty": "^10.2.3",
@@ -53,6 +54,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@types/http-proxy": "^1.17.14",
     "@types/ws": "^8.5.10",
     "@vitest/coverage-v8": "^0.34.6",
     "eslint-config-custom": "workspace:*",
