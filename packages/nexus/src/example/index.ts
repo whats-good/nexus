@@ -1,10 +1,8 @@
 import * as http from "node:http";
-import * as WebSocket from "ws";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import { CHAIN } from "@src/default-chains";
 import { Chain } from "@src/chain";
-import { WebSocketProxy } from "@src/websockets";
 
 const llamaRpcNodeProvider = new NodeProvider({
   name: "llama-rpc",
@@ -21,7 +19,7 @@ const tenderlyNodeProvider = new NodeProvider({
 });
 
 const harmonyChain = new Chain({
-  name: "1666700000",
+  name: "harmony",
   chainId: 1666600000,
   blockTime: 8,
 });
@@ -33,11 +31,19 @@ const harmonyWsNodeProvider = new NodeProvider({
   weight: 1,
 });
 
+const alchemyWsNodeProvider = new NodeProvider({
+  name: "alchemy-ws",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_WS_URL!,
+  weight: 1,
+});
+
 const nexus = Nexus.create({
   nodeProviders: [
     llamaRpcNodeProvider,
     tenderlyNodeProvider,
     harmonyWsNodeProvider,
+    alchemyWsNodeProvider,
   ],
   relay: {
     failure: {
@@ -52,49 +58,14 @@ const nexus = Nexus.create({
   },
 });
 
-const nexusWs = new WebSocket.Server({ noServer: true });
-
-nexusWs.on("connection", (client: WebSocket) => {
-  const nodeEndpointPool =
-    nexus.container.nodeEndpointPoolFactory.ws.get(harmonyChain);
-
-  if (!nodeEndpointPool) {
-    nexus.logger.error("No node connection found");
-    client.terminate();
-
-    return;
-  }
-
-  nodeEndpointPool
-    .connect()
-    .then((result) => {
-      if (result.kind === "success") {
-        nexus.logger.info("Connected to node");
-        const proxy = new WebSocketProxy(client, result.ws, nexus.logger);
-
-        proxy.start();
-
-        return;
-      }
-
-      nexus.logger.error("Failed to connect to node");
-      client.terminate();
-    })
-    .catch((error) => {
-      nexus.logger.error(`Error: ${error}`);
-      client.terminate();
-    });
-});
-
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
 
-server.on("upgrade", (req, socket, head) => {
-  // TODO: how to generalize the /upgrade?
-  nexusWs.handleUpgrade(req, socket, head, (ws) => {
-    nexusWs.emit("connection", ws, req);
-  });
-});
+nexus.ws(server);
+
+// TODO: should allow starting nexus directly via nexus.start(), without needing to pass
+// nexus into an http server instance, or to pass the http server into nexus to start the
+// websocket server.
 
 server.listen(nexus.port, () => {
   nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
