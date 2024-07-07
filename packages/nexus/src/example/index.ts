@@ -46,6 +46,11 @@ const nexus = Nexus.create({
     alchemyWsNodeProvider,
   ],
   relay: {
+    // TODO: update relay config to use more standard language like:
+    // round-robin, random, weighted-random, etc.
+    // TODO: generalize the maxAttempts, and pull them up to the top level
+    // so that setting it to 1 means no retries, setting it to 0 means infinite,
+    // etc
     failure: {
       kind: "cycle-requests",
       maxAttempts: 3,
