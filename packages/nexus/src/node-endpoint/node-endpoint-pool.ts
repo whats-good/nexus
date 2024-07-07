@@ -53,6 +53,35 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     return take(innerGenerator, this.maxRelayAttempts);
   }
 
+  public async connect() {
+    const failures = [];
+
+    for (const endpoint of this.getNextEndpoint()) {
+      try {
+        const ws = await endpoint.connect();
+
+        return {
+          kind: "success" as const,
+          ws,
+        };
+      } catch (error) {
+        failures.push(error);
+        this.logger.warn(
+          safeJsonStringify({
+            error,
+            message: "Failed to connect to ws endpoint",
+            provider: `<${endpoint.nodeProvider.name}>`,
+          })
+        );
+      }
+    }
+
+    return {
+      kind: "failure" as const,
+      failures,
+    };
+  }
+
   public async relay(
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {

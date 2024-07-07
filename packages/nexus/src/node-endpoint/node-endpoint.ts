@@ -1,9 +1,11 @@
+import type WebSocket from "ws";
 import type { NodeProvider } from "@src/node-provider";
 import {
   RpcResponseErrorPayloadSchema,
   RpcResponseSuccessPayloadSchema,
   type RpcRequestPayloadType,
 } from "@src/rpc-schema";
+import { tryConnect } from "@src/websockets";
 import {
   NodeRpcResponseError,
   NodeRpcResponseInternalFetchError,
@@ -23,6 +25,10 @@ export class NodeEndpoint {
 
   public get weight(): number {
     return this.nodeProvider.weight;
+  }
+
+  public async connect(): Promise<WebSocket> {
+    return tryConnect(this.nodeProvider.url);
   }
 
   public async relay(request: RpcRequestPayloadType): Promise<NodeRpcResponse> {
