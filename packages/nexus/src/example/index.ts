@@ -66,7 +66,7 @@ const nexus = Nexus.create({
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
 
-nexus.ws(server);
+server.on("upgrade", nexus.handleWebSocketUpgrade);
 
 // TODO: should allow starting nexus directly via nexus.start(), without needing to pass
 // nexus into an http server instance, or to pass the http server into nexus to start the

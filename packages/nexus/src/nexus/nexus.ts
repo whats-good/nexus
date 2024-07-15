@@ -1,4 +1,5 @@
 import type http from "node:http";
+import type * as stream from "node:stream";
 import type {
   ServerAdapter,
   ServerAdapterBaseObject,
@@ -43,17 +44,17 @@ export class Nexus<TPlatformContext = unknown>
   };
 
   // TODO: this is platform specific. need to make it work for all platforms, such as cloudflare workers
-  public ws(nodeServer: http.Server) {
-    nodeServer.on("upgrade", (req, socket, head) => {
-      this.webSocketController
-        .handleUpgrade(req, socket, head)
-        .catch((error) => {
-          // TODO: add proper error handling
-          this.logger.error(safeErrorStringify(error));
-          socket.destroy();
-        });
+  // NOTE: we keep this as an arrow function to maintain the correct `this` context
+  public handleWebSocketUpgrade = (
+    req: http.IncomingMessage,
+    socket: stream.Duplex,
+    head: Buffer
+  ) => {
+    this.webSocketController.handleUpgrade(req, socket, head).catch((error) => {
+      this.logger.error(safeErrorStringify(error));
+      socket.destroy();
     });
-  }
+  };
 
   public static create<TPlatformContext = unknown>(
     options?: NexusConfigOptions<TPlatformContext>
