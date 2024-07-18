@@ -45,6 +45,7 @@
     "@ethersproject/bignumber": "^5.7.0",
     "@whatwg-node/fetch": "0.9.18",
     "@whatwg-node/server": "0.9.34",
+    "eventemitter3": "^5.0.1",
     "http-proxy": "^1.18.1",
     "path-to-regexp": "^6.2.1",
     "pino": "^8.17.0",
