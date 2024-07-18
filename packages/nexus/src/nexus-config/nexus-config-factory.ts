@@ -1,4 +1,5 @@
-import { type Logger, pino } from "pino";
+import { pino } from "pino";
+import type { LoggerOptions, Logger } from "pino";
 import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
@@ -132,14 +133,21 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
   }
 
   private getLogger(): Logger {
-    return pino({
-      transport: {
+    let transport: LoggerOptions["transport"] | undefined;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- process is not always defined
+    if (!!process && !!process.stdout && process.stdout.isTTY) {
+      transport = {
         target: "pino-pretty",
         options: {
           colorize: true,
           colorizeObjects: true,
         },
-      },
+      };
+    }
+
+    return pino({
+      transport,
       level: this.getLogConfig().level,
     });
   }
