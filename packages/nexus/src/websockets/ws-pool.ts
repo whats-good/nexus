@@ -4,12 +4,12 @@ import type { Logger } from "pino";
 import type { NodeEndpoint, NodeEndpointPool } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 
-interface WebSocketManagerEvents {
+interface WebSocketPoolEvents {
   connect: (socket: WebSocket, endpoint: NodeEndpoint) => void;
   error: (error: Error) => void;
 }
 
-export class WebSocketPool extends EventEmitter<WebSocketManagerEvents> {
+export class WebSocketPool extends EventEmitter<WebSocketPoolEvents> {
   private readonly timeout: number;
   private timer: NodeJS.Timeout | null;
   private readonly logger: Logger;
