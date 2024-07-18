@@ -41,8 +41,9 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     }
   }
 
-  public getNextEndpoint(): Generator<NodeEndpoint> {
-    let innerGenerator: Generator<NodeEndpoint>;
+  // TODO: clean up this generator, give it a better name
+  public *generator(): Generator<NodeEndpoint, void> {
+    let innerGenerator: Generator<NodeEndpoint, void>;
 
     if (this.config.order === "random") {
       innerGenerator = weightedShuffleGenerator(this.nodeEndpoints);
@@ -50,36 +51,11 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
       innerGenerator = generatorOf(this.nodeEndpoints);
     }
 
-    return take(innerGenerator, this.maxRelayAttempts);
-  }
+    const outerGenerator = take(innerGenerator, this.maxRelayAttempts);
 
-  public async connect() {
-    const failures = [];
-
-    for (const endpoint of this.getNextEndpoint()) {
-      try {
-        const ws = await endpoint.connect();
-
-        return {
-          kind: "success" as const,
-          ws,
-        };
-      } catch (error) {
-        failures.push(error);
-        this.logger.warn(
-          safeJsonStringify({
-            error,
-            message: "Failed to connect to ws endpoint",
-            provider: `<${endpoint.nodeProvider.name}>`,
-          })
-        );
-      }
+    for (const endpoint of outerGenerator) {
+      yield endpoint;
     }
-
-    return {
-      kind: "failure" as const,
-      failures,
-    };
   }
 
   public async relay(
@@ -88,7 +64,7 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     const failures: NodeRpcResponseFailure[] = [];
     let attempt = 0;
 
-    for (const endpoint of this.getNextEndpoint()) {
+    for (const endpoint of this.generator()) {
       attempt += 1;
       this.logger.debug(
         safeJsonStringify({
