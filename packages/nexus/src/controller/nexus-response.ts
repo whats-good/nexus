@@ -8,6 +8,8 @@ export abstract class NexusResponse<T = unknown> {
 }
 
 export abstract class NexusJsonResponse<T = unknown> extends NexusResponse<T> {
+  // TODO: look into: https://github.com/fastify/fast-json-stringify
+
   public buildResponse(): Response {
     return new Response(JSON.stringify(this.body()), {
       status: this.httpStatusCode,
