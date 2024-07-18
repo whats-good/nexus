@@ -4,7 +4,7 @@ export const requiredUnknown = () => z.custom((x) => x !== undefined);
 
 export function* weightedShuffleGenerator<T extends { weight: number }>(
   arr: T[]
-): Generator<T> {
+): Generator<T, void> {
   // Copy the items to avoid mutating the original array
   const copy = [...arr];
 
@@ -32,7 +32,7 @@ export function* weightedShuffleGenerator<T extends { weight: number }>(
   }
 }
 
-export function* generatorOf<T>(arr: T[]): Generator<T> {
+export function* generatorOf<T>(arr: T[]): Generator<T, void> {
   for (const item of arr) {
     yield item;
   }
@@ -41,7 +41,7 @@ export function* generatorOf<T>(arr: T[]): Generator<T> {
 export function* take<T>(
   innerGenerator: Generator<T>,
   limit: number
-): Generator<T> {
+): Generator<T, void> {
   let count = 0;
 
   for (const value of innerGenerator) {
@@ -60,6 +60,7 @@ export function safeJsonStringify(
   space: string | number = 2
 ): string {
   try {
+    // TODO: look into: https://github.com/fastify/fast-json-stringify
     return JSON.stringify(value, replacer, space);
   } catch (error) {
     return `[Error: Could not stringify value]`;
