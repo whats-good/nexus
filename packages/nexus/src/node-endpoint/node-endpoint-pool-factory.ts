@@ -15,11 +15,11 @@ export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
   constructor(container: StaticContainer<TPlatformContext>) {
     this.container = container;
     this.nodeProviders = container.config.nodeProviders;
-    this.http = this.getChainToEndpointPoolMap("http");
-    this.ws = this.getChainToEndpointPoolMap("ws");
+    this.http = this.createChainToEndpointPoolMap("http");
+    this.ws = this.createChainToEndpointPoolMap("ws");
   }
 
-  private getChainToProvidersMap(
+  private createChainToProvidersMap(
     protocol: Protocol
   ): Map<Chain, NodeProvider[]> {
     const chainToProvidersMap = new Map<Chain, NodeProvider[]>();
@@ -41,10 +41,10 @@ export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
     return chainToProvidersMap;
   }
 
-  private getChainToEndpointPoolMap(
+  private createChainToEndpointPoolMap(
     protocol: Protocol
   ): Map<Chain, NodeEndpointPool> {
-    const chainToProvidersMap = this.getChainToProvidersMap(protocol);
+    const chainToProvidersMap = this.createChainToProvidersMap(protocol);
     const chainToEndpointPoolMap = new Map<Chain, NodeEndpointPool>();
 
     for (const [chain, nodeProviders] of chainToProvidersMap.entries()) {
