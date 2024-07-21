@@ -11,8 +11,14 @@ import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
 import { NexusConfig } from "./nexus-config";
 
-export interface LogConfig {
+interface LogConfigOptions {
+  level?: string;
+  colorize?: boolean;
+}
+
+interface LogConfig {
   level: string;
+  colorize: boolean;
 }
 
 const DEFAULT_PORT = 4000;
@@ -21,7 +27,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   nodeProviders?: NodeProvider[];
   relay?: Partial<RelayConfig>;
   port?: number;
-  log?: LogConfig;
+  log?: LogConfigOptions;
   eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
   middleware?: NexusMiddleware<TPlatformContext>[];
   nextTick?: typeof process.nextTick;
@@ -141,9 +147,9 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
 
   private getLogger(): Logger {
     let transport: LoggerOptions["transport"] | undefined;
+    const logConfig = this.getLogConfig();
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- process is not always defined
-    if (!!process && !!process.stdout && process.stdout.isTTY) {
+    if (logConfig.colorize) {
       transport = {
         target: "pino-pretty",
         options: {
@@ -155,17 +161,23 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
 
     return pino({
       transport,
-      level: this.getLogConfig().level,
+      level: logConfig.level,
     });
   }
 
   private getLogConfig(): LogConfig {
-    const logConfig: LogConfig = { level: "info" };
+    const logConfig: LogConfig = { level: "info", colorize: true };
 
-    if (this.options.log?.level) {
+    if (typeof this.options.log?.level === "string") {
       logConfig.level = this.options.log.level;
-    } else if (this.envConfig.logLevel) {
+    } else if (typeof this.envConfig.logLevel === "string") {
       logConfig.level = this.envConfig.logLevel;
+    }
+
+    if (typeof this.options.log?.colorize === "boolean") {
+      logConfig.colorize = this.options.log.colorize;
+    } else if (typeof this.envConfig.logColorize === "boolean") {
+      logConfig.colorize = this.envConfig.logColorize;
     }
 
     return logConfig;
