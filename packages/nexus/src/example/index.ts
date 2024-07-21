@@ -3,7 +3,6 @@ import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import { CHAIN } from "@src/default-chains";
 import { Chain } from "@src/chain";
-import { WsRpcServer } from "@src/websockets/ws-rpc-server";
 
 // const llamaRpcNodeProvider = new NodeProvider({
 //   name: "llama-rpc",
@@ -66,8 +65,7 @@ const nexus = Nexus.create({
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
-
-const nwss = new WsRpcServer(nexus.container);
+const nwss = nexus.wsServer();
 
 // TODO: add this to docs.
 server.on("upgrade", nwss.handleUpgrade.bind(nwss));

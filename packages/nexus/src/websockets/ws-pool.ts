@@ -9,14 +9,16 @@ interface WebSocketPoolEvents {
   error: (error: Error) => void;
 }
 
-export class WebSocketPool extends EventEmitter<WebSocketPoolEvents> {
+export class WebSocketPool<
+  TPlatformContext = unknown,
+> extends EventEmitter<WebSocketPoolEvents> {
   private readonly timeout: number;
   private timer: NodeJS.Timeout | null;
   private readonly logger: Logger;
 
   constructor(
     private readonly nodeEndpointPool: NodeEndpointPool,
-    container: StaticContainer
+    container: StaticContainer<TPlatformContext>
   ) {
     super();
     this.timer = null;

@@ -7,6 +7,7 @@ import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
+import { WsRpcServer } from "@src/websockets";
 
 export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
   TPlatformContext,
@@ -36,6 +37,10 @@ export class Nexus<TPlatformContext = unknown>
     // TODO: find a way to generalize the sockets via platform context.
     return (await this.controller.handleRequest(request, ctx)).buildResponse();
   };
+
+  public wsServer() {
+    return new WsRpcServer(this.container);
+  }
 
   public static create<TPlatformContext = unknown>(
     options?: NexusConfigOptions<TPlatformContext>

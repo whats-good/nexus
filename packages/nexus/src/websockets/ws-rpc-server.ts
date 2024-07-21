@@ -4,13 +4,12 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { RawData } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import * as uuid from "uuid";
 import { safeErrorStringify, safeJsonStringify } from "@src/utils";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
-import type { NodeEndpoint } from "@src/node-endpoint";
 import { WebSocketPool } from "./ws-pool";
+import { WsContext } from "./ws-context";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
@@ -30,34 +29,15 @@ function incomingDataToJSON(data: RawData) {
   }
 }
 
-class WsContext {
-  public readonly id = uuid.v4();
-  public readonly logger: Logger;
-
-  constructor(
-    public readonly client: WebSocket, // TODO: do we assign an id here?
-    public readonly node: WebSocket,
-    public readonly endpoint: NodeEndpoint,
-    private readonly container: StaticContainer
-  ) {
-    this.logger = container.logger.child({ name: `ws-context-${this.id}` });
-  }
-
-  public sendJSONToClient(data: unknown) {
-    // TODO: look into fast-json-stringify for performant serialization
-    this.client.send(JSON.stringify(data));
-  }
-}
-
 // TODO: do we actually need to extend EventEmitter here?
-export class WsRpcServer extends EventEmitter<{
+export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
   listening: () => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
-  private wsContexts = new Map<WebSocket, WsContext>();
+  private wsContexts = new Map<WebSocket, WsContext<TPlatformContext>>();
 
-  constructor(private container: StaticContainer) {
+  constructor(private container: StaticContainer<TPlatformContext>) {
     super();
 
     this.logger = container.logger.child({ name: this.constructor.name });
