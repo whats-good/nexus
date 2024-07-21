@@ -1,4 +1,4 @@
-export * from "./authentication";
+export * from "./auth";
 export * from "./chain";
 export * from "./controller";
 export * from "./default-events";
