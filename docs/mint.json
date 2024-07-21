@@ -64,7 +64,8 @@
             "features/event-handlers",
             "features/rate-limiting",
             "features/authorization",
-            "features/caching"
+            "features/caching",
+            "features/websockets"
           ]
         },
         {

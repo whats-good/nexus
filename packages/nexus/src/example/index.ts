@@ -65,14 +65,8 @@ const nexus = Nexus.create({
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
-const nwss = nexus.wsServer();
 
-// TODO: add this to docs.
-server.on("upgrade", nwss.handleUpgrade.bind(nwss));
-
-// TODO: should allow starting nexus directly via nexus.start(), without needing to pass
-// nexus into an http server instance, or to pass the http server into nexus to start the
-// websocket server.
+nexus.ws(server);
 
 server.listen(nexus.port, () => {
   nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);

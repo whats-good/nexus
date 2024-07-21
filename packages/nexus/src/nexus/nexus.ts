@@ -1,3 +1,4 @@
+import type { Server as NodeHttpServer } from "node:http";
 import type {
   ServerAdapter,
   ServerAdapterBaseObject,
@@ -40,14 +41,14 @@ export class Nexus<TPlatformContext = unknown>
     return (await this.controller.handleRequest(request, ctx)).buildResponse();
   };
 
-  public wsServer() {
-    const server = new WsRpcServer(this.container);
+  public ws(httpServer: NodeHttpServer) {
+    const wsServer = new WsRpcServer(this.container);
 
-    server.on("connection", (context) => {
+    wsServer.on("connection", (context) => {
       this.wsContextHandler.handleConnection(context);
     });
 
-    return server;
+    httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
   }
 
   public static create<TPlatformContext = unknown>(
