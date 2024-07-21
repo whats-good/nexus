@@ -5,7 +5,7 @@ import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { nodeRelayMiddleware } from "@src/node-relay-handler";
-import { authMiddleware } from "@src/authentication/authentication-middleware";
+import { authMiddleware } from "@src/auth";
 import { isNonEmptyArray } from "@src/utils";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
