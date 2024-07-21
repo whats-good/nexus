@@ -13,7 +13,7 @@ export async function authMiddleware<TPlatformContext = unknown>(
 
   const requestUrl = new URL(ctx.request.url);
 
-  if (ctx.container.authorizationService.isAuthorized(requestUrl)) {
+  if (!ctx.container.authorizationService.isAuthorized(requestUrl)) {
     const response = new UnauthorizedCustomErrorResponse(ctx.requestId);
 
     ctx.setResponse(response);

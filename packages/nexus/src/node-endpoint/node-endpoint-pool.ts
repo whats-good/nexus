@@ -1,12 +1,7 @@
 import type { Logger } from "pino";
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import {
-  generatorOf,
-  safeJsonStringify,
-  take,
-  weightedShuffleGenerator,
-} from "@src/utils";
+import { generatorOf, take, weightedShuffleGenerator } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import type { RelayConfig } from "./relay-config";
 import {
@@ -67,14 +62,16 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     for (const endpoint of this.generator()) {
       attempt += 1;
       this.logger.debug(
-        safeJsonStringify({
+        {
           relayAttempt: attempt,
           request,
           provider: `<${endpoint.nodeProvider.name}>`,
-        })
+        },
+        `Relaying request.`
       );
       const response = await endpoint.relay(request);
 
+      // TODO: remove this .log function from the response class
       response.log(this.logger);
 
       if (response.kind === "success-rpc-response") {
