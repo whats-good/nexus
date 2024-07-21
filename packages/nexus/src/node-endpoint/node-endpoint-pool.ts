@@ -10,7 +10,10 @@ import {
 } from "./node-endpoint-pool-response";
 import type { NodeEndpointPoolResponse } from "./node-endpoint-pool-response";
 import type { NodeEndpoint } from "./node-endpoint";
-import type { NodeRpcResponseFailure } from "./node-rpc-response";
+import type {
+  NodeRpcResponse,
+  NodeRpcResponseFailure,
+} from "./node-rpc-response";
 
 export class NodeEndpointPool<TPlatformContext = unknown> {
   private readonly chain: Chain;
@@ -53,6 +56,85 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     }
   }
 
+  private logResponse(relayed: NodeRpcResponse) {
+    const endpoint = `<${relayed.endpoint.nodeProvider.name}>`;
+    const { request } = relayed;
+
+    switch (relayed.kind) {
+      case "success-rpc-response": {
+        this.logger.info(
+          {
+            endpoint,
+            request,
+            response: relayed.response,
+          },
+          "Success response"
+        );
+        break;
+      }
+
+      case "error-rpc-response": {
+        this.logger.warn(
+          {
+            endpoint,
+            request,
+            response: relayed.response,
+          },
+          "Error response"
+        );
+        break;
+      }
+
+      case "internal-fetch-error": {
+        this.logger.error(
+          {
+            endpoint,
+            request,
+            error: relayed.error,
+          },
+          "Internal fetch error"
+        );
+        break;
+      }
+
+      case "non-200-response": {
+        this.logger.warn(
+          {
+            endpoint,
+            request,
+            response: relayed.response,
+          },
+          "Non-200 response"
+        );
+        break;
+      }
+
+      case "non-json-response": {
+        this.logger.warn(
+          {
+            endpoint,
+            request,
+            response: relayed.response,
+          },
+          "Non-JSON response"
+        );
+        break;
+      }
+
+      case "unknown-rpc-response": {
+        this.logger.error(
+          {
+            endpoint,
+            request,
+            response: relayed.response,
+          },
+          "Unknown response"
+        );
+        break;
+      }
+    }
+  }
+
   public async relay(
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {
@@ -69,21 +151,22 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
         },
         `Relaying request.`
       );
-      const response = await endpoint.relay(request);
+      const relayed = await endpoint.relay(request);
+
+      this.logResponse(relayed);
 
       // TODO: remove this .log function from the response class
-      response.log(this.logger);
 
-      if (response.kind === "success-rpc-response") {
+      if (relayed.kind === "success-rpc-response") {
         return new NodeEndpointPoolSuccessResponse({
           chain: this.chain,
           request,
-          success: response,
+          success: relayed,
           failures,
         });
       }
 
-      failures.push(response);
+      failures.push(relayed);
     }
 
     return new NodeEndpointPoolAllFailedResponse({

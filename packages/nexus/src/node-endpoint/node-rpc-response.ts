@@ -1,10 +1,8 @@
-import type { Logger } from "pino";
 import type {
   RpcResponseErrorPayloadType,
   RpcResponseSuccessPayloadType,
   RpcRequestPayloadType,
 } from "@src/rpc-schema";
-import { safeJsonStringify } from "@src/utils";
 import type { NodeEndpoint } from "./node-endpoint";
 
 abstract class NodeRpcResponseBase<K extends string, T> {
@@ -12,7 +10,6 @@ abstract class NodeRpcResponseBase<K extends string, T> {
   public abstract readonly kind: K;
   public readonly response: T;
   public readonly endpoint: NodeEndpoint;
-  protected abstract readonly logLevel: "info" | "warn" | "debug" | "error";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -23,14 +20,6 @@ abstract class NodeRpcResponseBase<K extends string, T> {
     this.response = params.response;
     this.endpoint = params.endpoint;
   }
-
-  protected abstract summarize(): string;
-
-  public log(logger: Logger) {
-    const message = this.summarize();
-
-    logger[this.logLevel](message);
-  }
 }
 
 export class NodeRpcResponseInternalFetchError extends NodeRpcResponseBase<
@@ -39,7 +28,6 @@ export class NodeRpcResponseInternalFetchError extends NodeRpcResponseBase<
 > {
   public readonly kind = "internal-fetch-error";
   public readonly error: unknown;
-  protected readonly logLevel = "error";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -53,14 +41,6 @@ export class NodeRpcResponseInternalFetchError extends NodeRpcResponseBase<
     });
     this.error = params.error;
   }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Internal fetch error while using <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      error: this.error,
-    });
-  }
 }
 
 export class NodeRpcResponseNon200Response extends NodeRpcResponseBase<
@@ -68,7 +48,6 @@ export class NodeRpcResponseNon200Response extends NodeRpcResponseBase<
   Response
 > {
   public readonly kind = "non-200-response";
-  protected readonly logLevel = "warn";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -79,14 +58,6 @@ export class NodeRpcResponseNon200Response extends NodeRpcResponseBase<
       request: params.request,
       response: params.response,
       endpoint: params.endpoint,
-    });
-  }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Non-200 response from <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      response: this.response,
     });
   }
 }
@@ -96,7 +67,6 @@ export class NodeRpcResponseNonJsonResponse extends NodeRpcResponseBase<
   Response
 > {
   public readonly kind = "non-json-response";
-  protected readonly logLevel = "warn";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -109,14 +79,6 @@ export class NodeRpcResponseNonJsonResponse extends NodeRpcResponseBase<
       endpoint: params.endpoint,
     });
   }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Non-JSON response from <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      response: this.response,
-    });
-  }
 }
 
 export class NodeRpcResponseSuccess extends NodeRpcResponseBase<
@@ -124,7 +86,6 @@ export class NodeRpcResponseSuccess extends NodeRpcResponseBase<
   RpcResponseSuccessPayloadType
 > {
   public readonly kind = "success-rpc-response";
-  protected readonly logLevel = "info";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -137,14 +98,6 @@ export class NodeRpcResponseSuccess extends NodeRpcResponseBase<
       endpoint: params.endpoint,
     });
   }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Success response from <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      response: this.response,
-    });
-  }
 }
 
 export class NodeRpcResponseError extends NodeRpcResponseBase<
@@ -152,7 +105,6 @@ export class NodeRpcResponseError extends NodeRpcResponseBase<
   RpcResponseErrorPayloadType
 > {
   public readonly kind = "error-rpc-response";
-  protected readonly logLevel = "warn";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -165,14 +117,6 @@ export class NodeRpcResponseError extends NodeRpcResponseBase<
       endpoint: params.endpoint,
     });
   }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Error response from <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      response: this.response,
-    });
-  }
 }
 
 export class NodeRpcResponseUnknown extends NodeRpcResponseBase<
@@ -180,7 +124,6 @@ export class NodeRpcResponseUnknown extends NodeRpcResponseBase<
   unknown
 > {
   public readonly kind = "unknown-rpc-response";
-  protected readonly logLevel = "warn";
 
   constructor(params: {
     request: RpcRequestPayloadType;
@@ -191,14 +134,6 @@ export class NodeRpcResponseUnknown extends NodeRpcResponseBase<
       request: params.request,
       response: params.response,
       endpoint: params.endpoint,
-    });
-  }
-
-  protected summarize() {
-    return safeJsonStringify({
-      message: `Unknown response from <${this.endpoint.nodeProvider.name}>`,
-      request: this.request,
-      response: this.response,
     });
   }
 }

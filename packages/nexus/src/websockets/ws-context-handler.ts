@@ -2,8 +2,8 @@ import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { safeErrorStringify, safeJsonStringify } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
+import { errSerialize } from "@src/utils";
 import type { WsContext } from "./ws-context";
 
 export class WsContextHandler<TPlatformContext = unknown> {
@@ -53,7 +53,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
     node.on("message", (data) => {
       if (client.readyState !== WebSocket.OPEN) {
         context.logger.error(
-          `Received a message from <${endpoint.nodeProvider.name}>, even though the client socket was closed.`
+          {
+            nodeProvider: endpoint.nodeProvider.name,
+          },
+          `Received a provider message for a closed client`
         );
 
         return;
@@ -61,7 +64,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
 
       // TODO: handle interception, caching, event handling and so on
       context.logger.debug(
-        `Received a message from the ws node: <${endpoint.nodeProvider.name}>. Relaying to the client...`
+        {
+          nodeProvider: endpoint.nodeProvider.name,
+        },
+        `Received a provider message, relaying to the client...`
       );
 
       client.send(data);
@@ -80,7 +86,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
       const jsonParsed = this.incomingDataToJSON(data);
 
       if (jsonParsed.kind === "error") {
-        context.logger.warn(safeErrorStringify(jsonParsed.error));
+        context.logger.warn(
+          errSerialize(jsonParsed.error),
+          "Error parsing JSON"
+        );
         context.sendJSONToClient({
           // TODO: standardize these error responses
           id: null,
@@ -90,6 +99,8 @@ export class WsContextHandler<TPlatformContext = unknown> {
             message: "Invalid Request",
           },
         });
+
+        return;
       }
 
       const rpcRequestPayloadParsed = RpcRequestPayloadSchema.safeParse(
@@ -98,7 +109,11 @@ export class WsContextHandler<TPlatformContext = unknown> {
 
       if (!rpcRequestPayloadParsed.success) {
         context.logger.warn(
-          `Received an invalid RPC payload: ${rpcRequestPayloadParsed.error.message}`
+          {
+            error: rpcRequestPayloadParsed.error,
+            request: jsonParsed.result, // TODO: add the request on other logs too
+          },
+          `Received an invalid RPC payload`
         );
         context.sendJSONToClient({
           id: null,
@@ -115,9 +130,8 @@ export class WsContextHandler<TPlatformContext = unknown> {
       const rpcRequestPayload = rpcRequestPayloadParsed.data;
 
       context.logger.debug(
-        `Received a valid RPC ws request: ${safeJsonStringify(
-          rpcRequestPayload
-        )}` // TODO: we don't need to keep converting to string. this is already done at the top, when we parse the incoming data
+        rpcRequestPayload,
+        "Received a valid RPC ws request"
       );
 
       // TODO: if there are no websocket endpoints available, we should

@@ -3,9 +3,9 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { safeErrorStringify } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
+import { errSerialize } from "@src/utils";
 import { WebSocketPool } from "./ws-pool";
 import { WsContext } from "./ws-context";
 
@@ -85,7 +85,10 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
     if (!chain) {
       this.logger.warn(
-        `Received a websocket upgrade request for an unknown chain: ${chainId}`
+        {
+          chainId,
+        },
+        `Received a websocket upgrade request for an unknown chain`
       );
       // TODO: this is probably incorrect. derive the protocol from the request
       socket.end("HTTP/1.1 400 Bad Request\r\n\r\n"); // TODO: double check that this is the correct response
@@ -98,7 +101,10 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
     if (!endpointPool) {
       this.logger.warn(
-        `Received a websocket upgrade request for a chain without a websocket endpoint: ${chainId}`
+        {
+          chain,
+        },
+        `Received a websocket upgrade request for a chain without a websocket endpoint`
       );
       socket.end("HTTP/1.1 400 Bad Request\r\n\r\n"); // TODO: double check that this is the correct response
 
@@ -126,7 +132,8 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
     wsPool.once("error", (error) => {
       this.logger.error(
-        `Could not connect to any ws provider: ${safeErrorStringify(error)}`
+        errSerialize(error),
+        `Could not connect to any ws provider`
       );
 
       socket.end("HTTP/1.1 500 Internal Server Error\r\n\r\n"); // TODO: double check that this is correct

@@ -1,6 +1,6 @@
 import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
-import { safeErrorStringify } from "@src/utils";
+import { errSerialize } from "@src/utils";
 import type { AnyEventHandlerOf } from "./event-handler";
 import type { NexusEvent } from "./nexus-event";
 
@@ -50,15 +50,20 @@ export class EventBus<TPlatformContext = unknown> {
           await handler.handle(event, this.ctx);
         } catch (e) {
           this.logger.error(
-            `Event handler failed for event: ${
-              event.constructor.name
-            }. Error: ${safeErrorStringify(e)}`
+            errSerialize(e, {
+              handler: handler.constructor.name,
+              event,
+            }),
+            `Event handler failed.`
           );
         }
       }
     } else {
       this.logger.debug(
-        `No handlers found for event: ${event.constructor.name}`
+        {
+          event,
+        },
+        `No event handlers found for event`
       );
     }
   }
@@ -68,7 +73,12 @@ export class EventBus<TPlatformContext = unknown> {
       return;
     }
 
-    this.logger.debug(`Processing ${this.eventQueue.length} event(s)...`);
+    this.logger.debug(
+      {
+        count: this.eventQueue.length,
+      },
+      "Processing event(s)..."
+    );
 
     for (const event of this.eventQueue) {
       await this.processEvent(event);

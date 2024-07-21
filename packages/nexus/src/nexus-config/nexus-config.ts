@@ -48,8 +48,8 @@ export class NexusConfig<TPlatformContext = unknown> {
       relay: this.relay,
       port: this.port,
       logLevel: this.logger.level,
-      eventHandlers: `Found ${this.eventHandlers.length} event handler(s)`,
-      middleware: `Found ${this.middleware.length} middleware`,
+      numEventHandlers: this.eventHandlers.length,
+      numMiddleware: this.middleware.length,
       auth: this.authKey ? "Enabled" : "Disabled",
     };
   }

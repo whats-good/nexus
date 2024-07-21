@@ -1,6 +1,6 @@
 import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
-import { safeErrorStringify } from "@src/utils";
+import { errSerialize } from "@src/utils";
 import type { NexusMiddleware } from "./nexus-middleware";
 
 export class NexusMiddlewareHandler<TPlatformContext = unknown> {
@@ -35,7 +35,14 @@ export class NexusMiddlewareHandler<TPlatformContext = unknown> {
     try {
       await this.middleware[index](this.ctx, next);
     } catch (e) {
-      this.logger.error(`Middleware failed. Error: ${safeErrorStringify(e)}`);
+      const name = this.middleware[index].name || "anonymous";
+
+      this.logger.error(
+        errSerialize(e, {
+          middleware: name,
+        }),
+        `Middleware failed`
+      );
     }
   }
 }

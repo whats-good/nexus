@@ -175,6 +175,7 @@ export class NodeProviderReturnedNon200ErrorResponse extends NexusCustomErrorRes
     super();
   }
 
+  // TODO: convert the message fields to be compatible with pino object logging
   public get message(): string {
     return `Node provider (${this.nodeProvider.name}) returned non-200 response.`;
   }
