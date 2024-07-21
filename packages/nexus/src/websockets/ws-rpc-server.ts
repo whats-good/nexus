@@ -107,7 +107,6 @@ export class WsRpcServer extends EventEmitter<{
     socket: Duplex,
     head: Buffer
   ) => {
-    // TODO: handle authentication here
     // TODO: use these options to configure the socket.
     // socket.setTimeout(0);
     // socket.setNoDelay(true);
@@ -115,10 +114,17 @@ export class WsRpcServer extends EventEmitter<{
     // TODO: do these for both the socket and the proxy socket
     // TODO: use stream.on('readable') instead of socket.on('data'). this
     // allows us to "pull" the data instead of being pushed.
-    // TODO: don't use pipe. matteo colina says error handling is super complex here.
     // TODO: make use of stream.pipeline, and think about {end:false} as a a way to keep the socket open.
 
     const url = new URL(req.url || "", "http://localhost"); // TODO: is localhost the right default?
+
+    if (!this.container.authorizationService.isAuthorized(url)) {
+      this.logger.warn("Received an unauthorized websocket upgrade request");
+      socket.end("HTTP/1.1 401 Unauthorized\r\n\r\n"); // TODO: double check that this is the correct response
+
+      return;
+    }
+
     const path = url.pathname;
     const route = chainIdRoute.match(path);
 

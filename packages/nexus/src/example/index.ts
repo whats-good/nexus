@@ -58,7 +58,7 @@ const nexus = Nexus.create({
     },
     order: "random",
   },
-  // rpcAuthKey: "my-secret-key",
+  rpcAuthKey: "my-secret-key",
   log: {
     level: "debug",
   },
