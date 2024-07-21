@@ -1,5 +1,16 @@
 # @whatsgood/nexus-nodejs-docker
 
+## 0.3.0
+
+### Minor Changes
+
+- 5bb3157: Introducing experimental WebSocket support
+
+### Patch Changes
+
+- Updated dependencies [5bb3157]
+  - @whatsgood/nexus@0.19.0
+
 ## 0.2.3
 
 ### Patch Changes
