@@ -144,8 +144,6 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
     const wsPool = new WebSocketPool(endpointPool, this.container);
 
-    wsPool.connect();
-
     wsPool.on("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
@@ -166,7 +164,11 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
       this.logger.error(
         `Could not connect to any ws provider: ${safeErrorStringify(error)}`
       );
+
+      socket.end("HTTP/1.1 500 Internal Server Error\r\n\r\n"); // TODO: double check that this is correct
     });
+
+    wsPool.connect();
   };
 
   private handleConnection(ws: WebSocket, request: IncomingMessage) {
@@ -284,8 +286,6 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
       // TODO: how do we treat multi json rpc messages?
     });
-
-    // TODO: should we emit a special event with the ws context?
 
     // this.emit("connection", clientSocket, request); // TODO: do we even need this?
   }
