@@ -2,8 +2,8 @@ import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { safeErrorStringify } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
+import { errSerialize } from "@src/utils";
 import type { WsContext } from "./ws-context";
 
 export class WsContextHandler<TPlatformContext = unknown> {
@@ -80,7 +80,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
       const jsonParsed = this.incomingDataToJSON(data);
 
       if (jsonParsed.kind === "error") {
-        context.logger.warn(safeErrorStringify(jsonParsed.error));
+        context.logger.warn(
+          errSerialize(jsonParsed.error),
+          "Error parsing JSON"
+        );
         context.sendJSONToClient({
           // TODO: standardize these error responses
           id: null,
@@ -90,6 +93,8 @@ export class WsContextHandler<TPlatformContext = unknown> {
             message: "Invalid Request",
           },
         });
+
+        return;
       }
 
       const rpcRequestPayloadParsed = RpcRequestPayloadSchema.safeParse(

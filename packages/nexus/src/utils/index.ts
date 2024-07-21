@@ -54,31 +54,14 @@ export function* take<T>(
   }
 }
 
-function safeJsonStringify(
-  value: unknown,
-  replacer: (number | string)[] | null = null,
-  space: string | number = 2
-): string {
-  try {
-    // TODO: look into: https://github.com/fastify/fast-json-stringify
-    return JSON.stringify(value, replacer, space);
-  } catch (error) {
-    return `[Error: Could not stringify value]`;
-  }
-}
-
-export function safeErrorStringify(err: unknown) {
-  if (!(err instanceof Error)) {
-    return safeJsonStringify(err);
+export function errSerialize(err: unknown) {
+  if (err instanceof Object) {
+    return err;
   }
 
-  const plainObject: Record<string, any> = {};
-
-  Object.getOwnPropertyNames(err).forEach((key) => {
-    plainObject[key] = err[key as keyof Error];
-  });
-
-  return safeJsonStringify(plainObject);
+  return {
+    err,
+  };
 }
 
 export type Constructor<T> = new (...args: any[]) => T;

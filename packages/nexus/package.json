@@ -31,8 +31,6 @@
   "scripts": {
     "build": "tsc && tsup",
     "dev": "ts-node -r tsconfig-paths/register src/example/index.ts",
-    "dev:ws": "ts-node -r tsconfig-paths/register src/example/ws.ts",
-    "dev:lb": "ts-node -r tsconfig-paths/register src/example/lb.ts",
     "dev:client": "ts-node -r tsconfig-paths/register src/example/client.ts",
     "prepublish": "turbo build --filter=@whatsgood/nexus",
     "typecheck": "tsc",

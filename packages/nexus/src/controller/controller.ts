@@ -14,13 +14,13 @@ import {
   RpcSuccessResponse,
 } from "@src/rpc-response";
 import { NexusMiddlewareHandler } from "@src/middleware";
-import { safeErrorStringify } from "@src/utils";
 import {
   RpcResponseErrorEvent,
   RpcResponseSuccessEvent,
 } from "@src/node-relay-handler/events";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
+import { errSerialize } from "@src/utils";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 export class Controller<TPlatformContext = unknown> {
@@ -61,9 +61,7 @@ export class Controller<TPlatformContext = unknown> {
     try {
       await middlewareHandler.handle();
     } catch (e) {
-      this.logger.error(
-        `Error in rpc middleware. Error: ${safeErrorStringify(e)}`
-      );
+      this.logger.error(errSerialize(e), "Error in rpc middleware");
 
       ctx.setResponse(new InternalErrorResponse(ctx.requestId));
     }
@@ -88,16 +86,15 @@ export class Controller<TPlatformContext = unknown> {
       ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
     } else {
       // this should never happen
-      this.logger.error(response, `Invalid response type in context`);
+      this.logger.error(response, "Invalid response type in context");
       throw new Error("Invalid response type in context");
     }
 
     this.container.nextTick(() => {
       ctx.eventBus.processAllEvents().catch((e: unknown) => {
         this.logger.error(
-          `Error processing events after handling RPC request. Error: ${safeErrorStringify(
-            e
-          )}`
+          errSerialize(e),
+          "Error processing events after handling RPC request"
         );
       });
     });

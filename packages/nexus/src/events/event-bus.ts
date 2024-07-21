@@ -1,6 +1,6 @@
 import type { Logger } from "pino";
 import type { NexusRpcContext } from "@src/dependency-injection";
-import { safeErrorStringify } from "@src/utils";
+import { errSerialize } from "@src/utils";
 import type { AnyEventHandlerOf } from "./event-handler";
 import type { NexusEvent } from "./nexus-event";
 
@@ -50,9 +50,8 @@ export class EventBus<TPlatformContext = unknown> {
           await handler.handle(event, this.ctx);
         } catch (e) {
           this.logger.error(
-            `Event handler failed for event: ${
-              event.constructor.name
-            }. Error: ${safeErrorStringify(e)}`
+            errSerialize(e),
+            `Event handler failed for event: ${event.constructor.name}`
           );
         }
       }

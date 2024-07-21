@@ -3,7 +3,6 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { safeErrorStringify } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
 import { WebSocketPool } from "./ws-pool";
@@ -125,9 +124,7 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
     });
 
     wsPool.once("error", (error) => {
-      this.logger.error(
-        `Could not connect to any ws provider: ${safeErrorStringify(error)}`
-      );
+      this.logger.error(error, `Could not connect to any ws provider`);
 
       socket.end("HTTP/1.1 500 Internal Server Error\r\n\r\n"); // TODO: double check that this is correct
     });
