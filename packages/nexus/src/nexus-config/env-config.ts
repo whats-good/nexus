@@ -44,6 +44,10 @@ const ENV_RELAY_FAILURE = z.union([
   ENV_RELAY_FAILURE_CYCLE_REQUESTS_SCHEMA,
 ]);
 
+const boolFromString = z
+  .union([z.literal("true"), z.literal("false")])
+  .transform((value) => value === "true");
+
 export const EnvSchema = z.object({
   NEXUS_PORT: NumberFromIntStringSchema.optional(),
   NEXUS_LOG_LEVEL: z
@@ -56,6 +60,7 @@ export const EnvSchema = z.object({
       z.literal("fatal"),
     ])
     .optional(),
+  NEXUS_LOG_COLORIZE: boolFromString.optional(),
   NEXUS_CHAINS: ENV_CHAINS_ARRAY_SCHEMA.optional(),
   NEXUS_NODE_PROVIDERS: ENV_NODE_PROVIDERS_ARRAY_SCHEMA.optional(),
   NEXUS_RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
@@ -70,6 +75,7 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
     NEXUS_NODE_PROVIDERS,
     NEXUS_CHAINS,
     NEXUS_LOG_LEVEL,
+    NEXUS_LOG_COLORIZE,
     NEXUS_PORT,
     NEXUS_RELAY_FAILURE,
     NEXUS_RELAY_ORDER,
@@ -127,6 +133,7 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
     nodeProviders: nodeProviders ?? [],
     port: NEXUS_PORT,
     logLevel: NEXUS_LOG_LEVEL,
+    logColorize: NEXUS_LOG_COLORIZE,
     relay,
     rpcAuthKey: NEXUS_RPC_AUTH_KEY,
     overwrittenChains: Array.from(overwrittenChainsMap.values()),
