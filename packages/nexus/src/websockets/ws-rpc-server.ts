@@ -49,12 +49,10 @@ class WsContext {
   }
 }
 
-interface WsRpcServerEvents {
-  listening: () => void;
-}
-
 // TODO: do we actually need to extend EventEmitter here?
-export class WsRpcServer extends EventEmitter<WsRpcServerEvents> {
+export class WsRpcServer extends EventEmitter<{
+  listening: () => void;
+}> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
   private wsContexts = new Map<WebSocket, WsContext>();
