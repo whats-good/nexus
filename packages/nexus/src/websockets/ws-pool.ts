@@ -15,31 +15,33 @@ export class WebSocketPool<
   private readonly timeout: number;
   private timer: NodeJS.Timeout | null;
   private readonly logger: Logger;
+  private readonly generator: Generator<NodeEndpoint, void>;
 
   constructor(
     private readonly nodeEndpointPool: NodeEndpointPool,
     container: StaticContainer<TPlatformContext>
   ) {
     super();
-    this.timer = null;
     this.timeout = 3000; // TODO: make this configurable
     this.logger = container.logger.child({ name: this.constructor.name });
+    this.generator = this.nodeEndpointPool.generator();
+    this.timer = null;
+
     this.tryNext();
   }
 
-  private connectToWebSocket(nodeEndpoint: NodeEndpoint) {
-    this.logger.info(
-      {
-        nodeProvider: nodeEndpoint.nodeProvider.name,
-      },
-      "Attempting ws connection"
-    );
-    const ws = new WebSocket(nodeEndpoint.url); // TODO: where do we handle keep-alive?
+  private cleanup(ws: WebSocket) {
+    if (this.timer) clearTimeout(this.timer);
+    ws.removeAllListeners("open");
+    ws.removeAllListeners("error");
+    ws.removeAllListeners("close");
+  }
 
-    const handleTimeout = () => {
-      if (ws.readyState !== WebSocket.CLOSED) {
-        ws.terminate();
-      }
+  private connectToWebSocket(nodeEndpoint: NodeEndpoint) {
+    const ws = new WebSocket(nodeEndpoint.url);
+
+    this.timer = setTimeout(() => {
+      this.cleanup(ws);
 
       this.logger.warn(
         {
@@ -47,69 +49,66 @@ export class WebSocketPool<
         },
         "Connection timeout"
       );
-      this.emit("error", new Error("Connection timeout"));
-      this.tryNext();
-    };
 
-    const handleOpen = () => {
-      if (this.timer) clearTimeout(this.timer);
-      removeListeners();
+      if (ws.readyState === WebSocket.CONNECTING) {
+        ws.once("open", () => {
+          this.logger.warn(
+            {
+              nodeProvider: nodeEndpoint.nodeProvider.name,
+            },
+            "Terminating connection that opened after timeout"
+          );
+          ws.terminate();
+        });
+      } else if (ws.readyState !== WebSocket.CLOSED) {
+        this.logger.warn(
+          {
+            nodeProvider: nodeEndpoint.nodeProvider.name,
+          },
+          "Forcing connection to close after timeout"
+        );
+        ws.terminate();
+      }
+
+      this.tryNext();
+    }, this.timeout);
+
+    ws.once("open", () => {
       this.logger.info(
         {
           nodeProvider: nodeEndpoint.nodeProvider.name,
         },
         "Connected"
       );
-
+      this.cleanup(ws);
       this.emit("connect", ws, nodeEndpoint);
-    };
+    });
 
-    const handleError = (err: Error) => {
-      if (this.timer) clearTimeout(this.timer);
-      removeListeners();
-      this.logger.warn(
-        {
-          nodeProvider: nodeEndpoint.nodeProvider.name,
-          error: err,
-        },
-        "Connection error"
-      );
-
-      if (ws.readyState !== WebSocket.CLOSED) {
-        ws.close();
-      }
-
-      this.emit("error", err);
-      this.tryNext();
-    };
-
-    const handleClose = () => {
-      if (this.timer) clearTimeout(this.timer);
-      removeListeners();
+    ws.once("close", () => {
       this.logger.warn(
         {
           nodeProvider: nodeEndpoint.nodeProvider.name,
         },
         "Connection closed"
       );
+      this.cleanup(ws);
       this.tryNext();
-    };
+    });
 
-    function removeListeners() {
-      ws.off("open", handleOpen);
-      ws.off("error", handleError);
-      ws.off("close", handleClose);
-    }
-
-    this.timer = setTimeout(handleTimeout, this.timeout);
-
-    ws.on("open", handleOpen);
-    ws.on("error", handleError);
+    ws.once("error", () => {
+      this.logger.warn(
+        {
+          nodeProvider: nodeEndpoint.nodeProvider.name,
+        },
+        "Connection error"
+      );
+      this.cleanup(ws);
+      this.tryNext();
+    });
   }
 
   private tryNext() {
-    const generator = this.nodeEndpointPool.generator();
-    const { value: endpoint, done } = generator.next();
+    const { value: endpoint, done } = this.generator.next();
 
     if (!done) {
       this.logger.debug("Trying the next WebSocket endpoint");

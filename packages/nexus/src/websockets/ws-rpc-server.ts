@@ -27,8 +27,6 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
       noServer: true,
     });
 
-    // this.wss.on("listening", () => this.emit("listening"));
-
     this.wss.on("connection", (ws, request) => {
       const context = this.container.wsContexts.get(ws);
 
@@ -110,7 +108,7 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
 
     const wsPool = new WebSocketPool(endpointPool, this.container);
 
-    wsPool.on("connect", (nodeSocket, endpoint) => {
+    wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
         const context = new WsContext(
@@ -126,7 +124,7 @@ export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
       });
     });
 
-    wsPool.on("error", (error) => {
+    wsPool.once("error", (error) => {
       this.logger.error(
         `Could not connect to any ws provider: ${safeErrorStringify(error)}`
       );
