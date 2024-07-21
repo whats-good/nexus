@@ -18,7 +18,7 @@ export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
 export class Nexus<TPlatformContext = unknown>
   implements ServerAdapterBaseObject<TPlatformContext>
 {
-  public readonly container: StaticContainer<TPlatformContext>;
+  private readonly container: StaticContainer<TPlatformContext>;
   private readonly controller: Controller<TPlatformContext>;
   private readonly wsContextHandler: WsContextHandler<TPlatformContext>;
   public readonly port?: number;
