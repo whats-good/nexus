@@ -3,7 +3,7 @@ import type { NexusMiddlewareNextFn } from "@src/middleware";
 import { UnauthorizedCustomErrorResponse } from "@src/rpc-response";
 import { UnauthorizedAccessEvent } from "./events";
 
-export async function authenticationMiddleware<TPlatformContext = unknown>(
+export async function authMiddleware<TPlatformContext = unknown>(
   ctx: NexusRpcContext<TPlatformContext>,
   next: NexusMiddlewareNextFn
 ) {

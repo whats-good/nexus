@@ -5,7 +5,7 @@ import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { nodeRelayMiddleware } from "@src/node-relay-handler";
-import { authenticationMiddleware } from "@src/authentication/authentication-middleware";
+import { authMiddleware } from "@src/authentication/authentication-middleware";
 import { isNonEmptyArray } from "@src/utils";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
@@ -79,7 +79,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
         "⚠️ rpcAuthKey not set. Auth middleware inactive. Set the NEXUS_RPC_AUTH_KEY environment variable, or the rpcAuthKey option in the Nexus config to enable."
       );
     } else {
-      this.logger.info("🔒 Authentication middleware active");
+      this.logger.info("🔒 Auth middleware active");
     }
 
     return authKey;
@@ -133,7 +133,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     const middleware: NexusMiddleware<TPlatformContext>[] =
       this.options.middleware || [];
 
-    middleware.push(authenticationMiddleware);
+    middleware.push(authMiddleware);
     middleware.push(nodeRelayMiddleware);
 
     return middleware;
