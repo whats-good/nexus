@@ -2,17 +2,13 @@ version: "3.8"
 
 services:
   nexus:
-    # image: "whatsgood/nexus:latest"
-    build:
-      context: .
-      dockerfile: ./packages/nexus-nodejs-docker/Dockerfile
+    image: "whatsgood/nexus:latest"
     container_name: nexus
     ports:
       - "4000:4000"
-    env_file:
-      - .env
-    # environment:
-    #   - 'NEXUS_NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
-    #   - 'NEXUS_CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
-    #   - 'NEXUS_RELAY_FAILURE=["cycle-requests", 5]'
-    #   - "NEXUS_RELAY_ORDER=random"
+    environment:
+      - 'NEXUS_NODE_PROVIDERS=[{"name": "eth.public", "url":"https://eth.public-rpc.com", "chainId": 1}]'
+      - 'NEXUS_CHAINS=[{"name": "mainnet", "chainId": 1, "blockTime": 15}]'
+      - 'NEXUS_RELAY_FAILURE=["cycle-requests", 5]'
+      - "NEXUS_RELAY_ORDER=random"
+      - "NEXUS_LOG_LEVEL=debug"
