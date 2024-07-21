@@ -37,7 +37,12 @@ export class NexusMiddlewareHandler<TPlatformContext = unknown> {
     } catch (e) {
       const name = this.middleware[index].name || "anonymous";
 
-      this.logger.error(errSerialize(e), `Middleware failed. Name: ${name}`);
+      this.logger.error(
+        errSerialize(e, {
+          middleware: name,
+        }),
+        `Middleware failed`
+      );
     }
   }
 }

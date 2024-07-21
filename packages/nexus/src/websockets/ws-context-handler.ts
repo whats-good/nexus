@@ -53,7 +53,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
     node.on("message", (data) => {
       if (client.readyState !== WebSocket.OPEN) {
         context.logger.error(
-          `Received a message from <${endpoint.nodeProvider.name}>, even though the client socket was closed.`
+          {
+            nodeProvider: endpoint.nodeProvider.name,
+          },
+          `Received a provider message for a closed client`
         );
 
         return;
@@ -61,7 +64,10 @@ export class WsContextHandler<TPlatformContext = unknown> {
 
       // TODO: handle interception, caching, event handling and so on
       context.logger.debug(
-        `Received a message from the ws node: <${endpoint.nodeProvider.name}>. Relaying to the client...`
+        {
+          nodeProvider: endpoint.nodeProvider.name,
+        },
+        `Received a provider message, relaying to the client...`
       );
 
       client.send(data);
@@ -103,7 +109,11 @@ export class WsContextHandler<TPlatformContext = unknown> {
 
       if (!rpcRequestPayloadParsed.success) {
         context.logger.warn(
-          `Received an invalid RPC payload: ${rpcRequestPayloadParsed.error.message}`
+          {
+            error: rpcRequestPayloadParsed.error,
+            request: jsonParsed.result, // TODO: add the request on other logs too
+          },
+          `Received an invalid RPC payload`
         );
         context.sendJSONToClient({
           id: null,

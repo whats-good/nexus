@@ -54,14 +54,19 @@ export function* take<T>(
   }
 }
 
-export function errSerialize(err: unknown) {
-  if (err instanceof Object) {
-    return err;
+export function errSerialize(err: unknown, meta?: Record<string, any>) {
+  if (err instanceof Error) {
+    return {
+      err: {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      },
+      meta,
+    };
   }
 
-  return {
-    err,
-  };
+  return { err, meta };
 }
 
 export type Constructor<T> = new (...args: any[]) => T;
