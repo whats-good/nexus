@@ -54,7 +54,7 @@ export function* take<T>(
   }
 }
 
-export function safeJsonStringify(
+function safeJsonStringify(
   value: unknown,
   replacer: (number | string)[] | null = null,
   space: string | number = 2

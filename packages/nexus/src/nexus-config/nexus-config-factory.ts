@@ -120,11 +120,10 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
 
     if (this.envConfig.overwrittenChains.length > 0) {
       this.logger.warn(
-        `⚠️ Overwritten chain configs detected: ${JSON.stringify(
-          this.envConfig.overwrittenChains,
-          null,
-          2
-        )}`
+        {
+          overwrittenChains: this.envConfig.overwrittenChains,
+        },
+        "⚠️ Overwritten chain configs detected"
       );
     }
 

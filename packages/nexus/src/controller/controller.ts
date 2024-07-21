@@ -14,7 +14,7 @@ import {
   RpcSuccessResponse,
 } from "@src/rpc-response";
 import { NexusMiddlewareHandler } from "@src/middleware";
-import { safeErrorStringify, safeJsonStringify } from "@src/utils";
+import { safeErrorStringify } from "@src/utils";
 import {
   RpcResponseErrorEvent,
   RpcResponseSuccessEvent,
@@ -72,9 +72,10 @@ export class Controller<TPlatformContext = unknown> {
 
     if (!response) {
       this.logger.error(
-        `No response set in context for request: ${safeJsonStringify(
-          ctx.rpcRequestPayload
-        )}`
+        {
+          request: ctx.rpcRequestPayload,
+        },
+        "No response set in context. Setting InternalErrorResponse."
       );
 
       response = new InternalErrorResponse(ctx.requestId);
@@ -87,9 +88,7 @@ export class Controller<TPlatformContext = unknown> {
       ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
     } else {
       // this should never happen
-      this.logger.error(
-        `Invalid response type in context: ${safeJsonStringify(response)}`
-      );
+      this.logger.error(response, `Invalid response type in context`);
       throw new Error("Invalid response type in context");
     }
 

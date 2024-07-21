@@ -2,7 +2,7 @@ import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { safeErrorStringify, safeJsonStringify } from "@src/utils";
+import { safeErrorStringify } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import type { WsContext } from "./ws-context";
 
@@ -115,9 +115,8 @@ export class WsContextHandler<TPlatformContext = unknown> {
       const rpcRequestPayload = rpcRequestPayloadParsed.data;
 
       context.logger.debug(
-        `Received a valid RPC ws request: ${safeJsonStringify(
-          rpcRequestPayload
-        )}` // TODO: we don't need to keep converting to string. this is already done at the top, when we parse the incoming data
+        rpcRequestPayload,
+        "Received a valid RPC ws request"
       );
 
       // TODO: if there are no websocket endpoints available, we should

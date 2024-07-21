@@ -34,7 +34,7 @@ export class NodeEndpoint {
 
     try {
       const cleanedRequest = new Request(this.nodeProvider.url, {
-        body: JSON.stringify(request),
+        body: JSON.stringify(request), // TODO: remove this JSON.stringify. See if we can get around the fetch api and work directly with incomingMessage
         method: "POST",
         headers: {
           "Content-Type": "application/json",
