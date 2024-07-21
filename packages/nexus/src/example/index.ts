@@ -3,13 +3,14 @@ import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import { CHAIN } from "@src/default-chains";
 import { Chain } from "@src/chain";
+import { WsRpcServer } from "@src/websockets/ws-rpc-server";
 
-const llamaRpcNodeProvider = new NodeProvider({
-  name: "llama-rpc",
-  chain: CHAIN.ETHEREUM_MAINNET,
-  url: "https://eth.llamarpc.com",
-  weight: 3,
-});
+// const llamaRpcNodeProvider = new NodeProvider({
+//   name: "llama-rpc",
+//   chain: CHAIN.ETHEREUM_MAINNET,
+//   url: "https://eth.llamarpc.com",
+//   weight: 3,
+// });
 
 const tenderlyNodeProvider = new NodeProvider({
   name: "tenderly",
@@ -40,7 +41,7 @@ const alchemyWsNodeProvider = new NodeProvider({
 
 const nexus = Nexus.create({
   nodeProviders: [
-    llamaRpcNodeProvider,
+    // llamaRpcNodeProvider,
     tenderlyNodeProvider,
     harmonyWsNodeProvider,
     alchemyWsNodeProvider,
@@ -57,7 +58,7 @@ const nexus = Nexus.create({
     },
     order: "random",
   },
-  rpcAuthKey: "my-secret-key",
+  // rpcAuthKey: "my-secret-key",
   log: {
     level: "debug",
   },
@@ -66,7 +67,10 @@ const nexus = Nexus.create({
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
 
-server.on("upgrade", nexus.handleWebSocketUpgrade);
+const nwss = new WsRpcServer(nexus.container);
+
+// TODO: add this to docs.
+server.on("upgrade", nwss.handleUpgrade.bind(nwss));
 
 // TODO: should allow starting nexus directly via nexus.start(), without needing to pass
 // nexus into an http server instance, or to pass the http server into nexus to start the
