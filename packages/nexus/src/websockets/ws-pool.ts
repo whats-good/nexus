@@ -29,17 +29,23 @@ export class WebSocketPool<
 
   private connectToWebSocket(nodeEndpoint: NodeEndpoint) {
     this.logger.info(
-      "Attempting to connect to <%s>",
-      nodeEndpoint.nodeProvider.name
+      {
+        nodeProvider: nodeEndpoint.nodeProvider.name,
+      },
+      "Attempting ws connection"
     );
     const ws = new WebSocket(nodeEndpoint.url); // TODO: where do we handle keep-alive?
 
     const handleTimeout = () => {
-      ws.close();
-      // TODO: should we destroy the socket here?
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.terminate();
+      }
+
       this.logger.warn(
-        "Connection timeout to <%s>",
-        nodeEndpoint.nodeProvider.name
+        {
+          nodeProvider: nodeEndpoint.nodeProvider.name,
+        },
+        "Connection timeout"
       );
       this.emit("error", new Error("Connection timeout"));
       this.tryNext();
@@ -48,7 +54,12 @@ export class WebSocketPool<
     const handleOpen = () => {
       if (this.timer) clearTimeout(this.timer);
       removeListeners();
-      this.logger.info("Connected to <%s>", nodeEndpoint.nodeProvider.name);
+      this.logger.info(
+        {
+          nodeProvider: nodeEndpoint.nodeProvider.name,
+        },
+        "Connected"
+      );
 
       this.emit("connect", ws, nodeEndpoint);
     };
@@ -57,9 +68,11 @@ export class WebSocketPool<
       if (this.timer) clearTimeout(this.timer);
       removeListeners();
       this.logger.warn(
-        "Error connecting to <%s>: %s",
-        nodeEndpoint.nodeProvider.name,
-        err.message
+        {
+          nodeProvider: nodeEndpoint.nodeProvider.name,
+          error: err,
+        },
+        "Connection error"
       );
 
       if (ws.readyState !== WebSocket.CLOSED) {
@@ -74,8 +87,10 @@ export class WebSocketPool<
       if (this.timer) clearTimeout(this.timer);
       removeListeners();
       this.logger.warn(
-        "Connection closed to <%s>",
-        nodeEndpoint.nodeProvider.name
+        {
+          nodeProvider: nodeEndpoint.nodeProvider.name,
+        },
+        "Connection closed"
       );
       this.tryNext();
     };
@@ -97,7 +112,7 @@ export class WebSocketPool<
     const { value: endpoint, done } = generator.next();
 
     if (!done) {
-      this.logger.debug("Trying the next ws endpoint");
+      this.logger.debug("Trying the next WebSocket endpoint");
       this.connectToWebSocket(endpoint);
     } else {
       this.emit(
