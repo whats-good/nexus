@@ -1,0 +1,35 @@
+---
+title: "Websockets"
+description: "Learn how to configure Nexus WebSocket support"
+---
+
+## Introduction
+
+`Nexus` has experimental support for WebSockets. This feature is currently only available for NodeJS. Cloudflare Workers currently only support http requests. Below is the minimal setup required to enable WebSocket support in your Nexus server.
+
+```typescript
+import {
+  Nexus,
+  NodeProvider,
+  CHAIN,
+} from "@whatsgood/nexus";
+
+const alchemyEthMainnetWsProvider = new NodeProvider({
+  name: "alchemy-eth-mainnet-ws",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_ETH_MAINNET_WS_URL,
+});
+
+const nexus = Nexus.create({
+  nodeProviders: [alchemyEthMainnetWsProvider],
+  //...
+});
+
+const server = createServer(nexus);
+nexus.ws(server);
+
+server.listen(nexus.port, () => {
+  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
+});
+
+```
