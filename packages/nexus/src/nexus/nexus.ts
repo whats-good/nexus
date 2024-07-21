@@ -37,7 +37,6 @@ export class Nexus<TPlatformContext = unknown>
     ctx: TPlatformContext
   ): Promise<Response> => {
     // TODO: wrap this with a try-catch for final error handling
-    // TODO: find a way to generalize the sockets via platform context.
     return (await this.controller.handleRequest(request, ctx)).buildResponse();
   };
 
