@@ -1,5 +1,12 @@
 # @whatsgood/example-nodejs-standalone-server
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [5bb3157]
+  - @whatsgood/nexus@0.19.0
+
 ## 0.6.2
 
 ### Patch Changes

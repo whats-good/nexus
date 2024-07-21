@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.19.0
+
+### Minor Changes
+
+- 5bb3157: Introducing experimental WebSocket support
+
 ## 0.18.0
 
 ### Minor Changes

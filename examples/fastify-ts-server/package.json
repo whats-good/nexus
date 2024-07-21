@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/example-fastify-ts-server",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
