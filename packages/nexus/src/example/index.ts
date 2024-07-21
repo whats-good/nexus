@@ -1,15 +1,15 @@
-import { createServer } from "node:http";
+import * as http from "node:http";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";
 import { CHAIN } from "@src/default-chains";
-// import { weightedShuffle } from "..";
+import { Chain } from "@src/chain";
 
-const llamaRpcNodeProvider = new NodeProvider({
-  name: "llama-rpc",
-  chain: CHAIN.ETHEREUM_MAINNET,
-  url: "https://eth.llamarpc.com",
-  weight: 3,
-});
+// const llamaRpcNodeProvider = new NodeProvider({
+//   name: "llama-rpc",
+//   chain: CHAIN.ETHEREUM_MAINNET,
+//   url: "https://eth.llamarpc.com",
+//   weight: 3,
+// });
 
 const tenderlyNodeProvider = new NodeProvider({
   name: "tenderly",
@@ -18,27 +18,39 @@ const tenderlyNodeProvider = new NodeProvider({
   weight: 11,
 });
 
-// const providers = [llamaRpcNodeProvider, tenderlyNodeProvider];
+const harmonyChain = new Chain({
+  name: "harmony",
+  chainId: 1666600000,
+  blockTime: 8,
+});
 
-// const picks = new Map<string, number>();
+const harmonyWsNodeProvider = new NodeProvider({
+  name: "harmony-ws",
+  chain: harmonyChain,
+  url: "wss://ws.s0.t.hmny.io",
+  weight: 1,
+});
 
-// for (let i = 0; i < 100000; i++) {
-//   const shuffled = weightedShuffle(providers);
-//   const first = shuffled[0];
-
-//   picks.set(first.name, (picks.get(first.name) || 0) + 1);
-// }
-
-// console.log(picks);
-// console.log("actual ratio", picks.get("llama-rpc")! / picks.get("tenderly")!);
-// console.log(
-//   "expected ratio",
-//   llamaRpcNodeProvider.weight / tenderlyNodeProvider.weight
-// );
+const alchemyWsNodeProvider = new NodeProvider({
+  name: "alchemy-ws",
+  chain: CHAIN.ETHEREUM_MAINNET,
+  url: process.env.ALCHEMY_WS_URL!,
+  weight: 1,
+});
 
 const nexus = Nexus.create({
-  nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
+  nodeProviders: [
+    // llamaRpcNodeProvider,
+    tenderlyNodeProvider,
+    harmonyWsNodeProvider,
+    alchemyWsNodeProvider,
+  ],
   relay: {
+    // TODO: update relay config to use more standard language like:
+    // round-robin, random, weighted-random, etc.
+    // TODO: generalize the maxAttempts, and pull them up to the top level
+    // so that setting it to 1 means no retries, setting it to 0 means infinite,
+    // etc
     failure: {
       kind: "cycle-requests",
       maxAttempts: 3,
@@ -52,6 +64,16 @@ const nexus = Nexus.create({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
-createServer(nexus).listen(nexus.port, () => {
+const server = http.createServer(nexus);
+const nwss = nexus.wsServer();
+
+// TODO: add this to docs.
+server.on("upgrade", nwss.handleUpgrade.bind(nwss));
+
+// TODO: should allow starting nexus directly via nexus.start(), without needing to pass
+// nexus into an http server instance, or to pass the http server into nexus to start the
+// websocket server.
+
+server.listen(nexus.port, () => {
   nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
 });

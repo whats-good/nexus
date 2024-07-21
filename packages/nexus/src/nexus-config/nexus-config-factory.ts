@@ -1,10 +1,11 @@
-import { type Logger, pino } from "pino";
+import { pino } from "pino";
+import type { LoggerOptions, Logger } from "pino";
 import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { nodeRelayMiddleware } from "@src/node-relay-handler";
-import { getAuthenticationMiddleware } from "@src/authentication/authentication-middleware";
+import { authMiddleware } from "@src/auth";
 import { isNonEmptyArray } from "@src/utils";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
@@ -66,7 +67,22 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
       middleware: this.getMiddleware(),
       // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
       nextTick: params.nextTick || process.nextTick,
+      authKey: this.getAuthKey(),
     });
+  }
+
+  private getAuthKey(): string | undefined {
+    const authKey = this.options.rpcAuthKey || this.envConfig.rpcAuthKey;
+
+    if (!authKey) {
+      this.logger.warn(
+        "⚠️ rpcAuthKey not set. Auth middleware inactive. Set the NEXUS_RPC_AUTH_KEY environment variable, or the rpcAuthKey option in the Nexus config to enable."
+      );
+    } else {
+      this.logger.info("🔒 Auth middleware active");
+    }
+
+    return authKey;
   }
 
   private getRelayConfig(): RelayConfig {
@@ -117,29 +133,28 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     const middleware: NexusMiddleware<TPlatformContext>[] =
       this.options.middleware || [];
 
-    const rpcAuthMiddleware = this.getRpcAuthMiddleware();
-
-    if (rpcAuthMiddleware) {
-      // we prepend the rpc auth middleware to the given middleware
-      // so that it is the first middleware to run
-      middleware.unshift(rpcAuthMiddleware);
-    }
-
-    // we create the relay middleware on the spot, and append it to the given middleware
+    middleware.push(authMiddleware);
     middleware.push(nodeRelayMiddleware);
 
     return middleware;
   }
 
   private getLogger(): Logger {
-    return pino({
-      transport: {
+    let transport: LoggerOptions["transport"] | undefined;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- process is not always defined
+    if (!!process && !!process.stdout && process.stdout.isTTY) {
+      transport = {
         target: "pino-pretty",
         options: {
           colorize: true,
           colorizeObjects: true,
         },
-      },
+      };
+    }
+
+    return pino({
+      transport,
       level: this.getLogConfig().level,
     });
   }
@@ -166,25 +181,5 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     }
 
     return this.options.port || this.envConfig.port || DEFAULT_PORT;
-  }
-
-  private getRpcAuthMiddleware():
-    | NexusMiddleware<TPlatformContext>
-    | undefined {
-    const rpcAuthKey = this.options.rpcAuthKey || this.envConfig.rpcAuthKey;
-
-    if (!rpcAuthKey) {
-      this.logger.warn(
-        "⚠️ rpcAuthKey not set. Authentication middleware inactive. Set the NEXUS_RPC_AUTH_KEY environment variable, or the rpcAuthKey option in the Nexus config to enable."
-      );
-    } else {
-      this.logger.info("🔒 Authentication middleware active");
-
-      return getAuthenticationMiddleware<TPlatformContext>({
-        authKey: rpcAuthKey,
-      });
-    }
-
-    return undefined;
   }
 }

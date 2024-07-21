@@ -2,12 +2,11 @@ import { z } from "zod";
 
 export const requiredUnknown = () => z.custom((x) => x !== undefined);
 
-export function weightedShuffle<T extends { weight: number }>(arr: T[]): T[] {
+export function* weightedShuffleGenerator<T extends { weight: number }>(
+  arr: T[]
+): Generator<T, void> {
   // Copy the items to avoid mutating the original array
   const copy = [...arr];
-
-  // Create a new array to store the shuffled items
-  const shuffled: T[] = [];
 
   // Calculate the total weight
   let totalWeight = copy.reduce((sum, item) => sum + item.weight, 0);
@@ -22,7 +21,7 @@ export function weightedShuffle<T extends { weight: number }>(arr: T[]): T[] {
 
       if (random <= 0) {
         // Add the selected item to the shuffled array
-        shuffled.push(copy[i]);
+        yield copy[i];
 
         // Remove the selected item from the itemsCopy array
         totalWeight -= copy[i].weight;
@@ -31,8 +30,28 @@ export function weightedShuffle<T extends { weight: number }>(arr: T[]): T[] {
       }
     }
   }
+}
 
-  return shuffled;
+export function* generatorOf<T>(arr: T[]): Generator<T, void> {
+  for (const item of arr) {
+    yield item;
+  }
+}
+
+export function* take<T>(
+  innerGenerator: Generator<T>,
+  limit: number
+): Generator<T, void> {
+  let count = 0;
+
+  for (const value of innerGenerator) {
+    if (count >= limit) {
+      return;
+    }
+
+    yield value;
+    count++;
+  }
 }
 
 export function safeJsonStringify(
@@ -41,6 +60,7 @@ export function safeJsonStringify(
   space: string | number = 2
 ): string {
   try {
+    // TODO: look into: https://github.com/fastify/fast-json-stringify
     return JSON.stringify(value, replacer, space);
   } catch (error) {
     return `[Error: Could not stringify value]`;

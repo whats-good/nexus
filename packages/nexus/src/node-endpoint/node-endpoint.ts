@@ -21,8 +21,12 @@ export class NodeEndpoint {
     this.nodeProvider = params.nodeProvider;
   }
 
-  public get weight(): number {
+  public get weight() {
     return this.nodeProvider.weight;
+  }
+
+  public get url() {
+    return this.nodeProvider.url;
   }
 
   public async relay(request: RpcRequestPayloadType): Promise<NodeRpcResponse> {

@@ -14,6 +14,7 @@ export class NexusConfig<TPlatformContext = unknown> {
   public readonly middleware: NexusMiddleware<TPlatformContext>[];
   public readonly nextTick: typeof process.nextTick;
   public readonly logger: Logger;
+  public readonly authKey?: string;
 
   constructor(params: {
     nodeProviders: [NodeProvider, ...NodeProvider[]];
@@ -24,6 +25,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     middleware: NexusMiddleware<TPlatformContext>[];
     nextTick: typeof process.nextTick;
     logger: Logger;
+    authKey?: string;
   }) {
     this.nodeProviders = params.nodeProviders;
     this.chains = params.chains;
@@ -33,6 +35,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     this.middleware = params.middleware;
     this.nextTick = params.nextTick;
     this.logger = params.logger;
+    this.authKey = params.authKey;
   }
 
   // a summary object that removes potentially sensitive information
@@ -47,6 +50,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       logLevel: this.logger.level,
       eventHandlers: `Found ${this.eventHandlers.length} event handler(s)`,
       middleware: `Found ${this.middleware.length} middleware`,
+      auth: this.authKey ? "Enabled" : "Disabled",
     };
   }
 }

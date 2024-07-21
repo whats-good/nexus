@@ -1,7 +1,7 @@
 import type { Logger } from "pino";
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import { safeJsonStringify, weightedShuffle } from "@src/utils";
+import { generatorOf, take, weightedShuffleGenerator } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
 import type { RelayConfig } from "./relay-config";
 import {
@@ -17,6 +17,7 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
   private readonly nodeEndpoints: NodeEndpoint[];
   private readonly config: RelayConfig;
   private readonly logger: Logger;
+  private readonly maxRelayAttempts: number = 1;
 
   constructor(params: {
     chain: Chain;
@@ -29,40 +30,48 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
     this.logger = params.container.logger.child({
       name: this.constructor.name,
     });
+
+    if (this.config.failure.kind === "cycle-requests") {
+      this.maxRelayAttempts = this.config.failure.maxAttempts;
+    }
   }
 
-  private getAvailableNodeEndpoints(): NodeEndpoint[] {
-    let nodeEndpoints = this.nodeEndpoints;
+  // TODO: clean up this generator, give it a better name
+  public *generator(): Generator<NodeEndpoint, void> {
+    let innerGenerator: Generator<NodeEndpoint, void>;
 
     if (this.config.order === "random") {
-      nodeEndpoints = weightedShuffle(nodeEndpoints);
+      innerGenerator = weightedShuffleGenerator(this.nodeEndpoints);
+    } else {
+      innerGenerator = generatorOf(this.nodeEndpoints);
     }
 
-    if (this.config.failure.kind === "fail-immediately") {
-      return nodeEndpoints.slice(0, 1);
-    }
+    const outerGenerator = take(innerGenerator, this.maxRelayAttempts);
 
-    return nodeEndpoints.slice(0, this.config.failure.maxAttempts);
+    for (const endpoint of outerGenerator) {
+      yield endpoint;
+    }
   }
 
   public async relay(
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {
-    const endpoints = this.getAvailableNodeEndpoints();
     const failures: NodeRpcResponseFailure[] = [];
+    let attempt = 0;
 
-    for (let i = 0; i < endpoints.length; i++) {
-      const endpoint = endpoints[i];
-
+    for (const endpoint of this.generator()) {
+      attempt += 1;
       this.logger.debug(
-        safeJsonStringify({
-          relayAttempt: i + 1,
+        {
+          relayAttempt: attempt,
           request,
           provider: `<${endpoint.nodeProvider.name}>`,
-        })
+        },
+        `Relaying request.`
       );
       const response = await endpoint.relay(request);
 
+      // TODO: remove this .log function from the response class
       response.log(this.logger);
 
       if (response.kind === "success-rpc-response") {
