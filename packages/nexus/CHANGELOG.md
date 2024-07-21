@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.20.0
+
+### Minor Changes
+
+- 37f1134: WebSockets now enabled via nexus.ws(server: Server)
+
 ## 0.19.0
 
 ### Minor Changes
