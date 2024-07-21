@@ -24,6 +24,7 @@ export class WebSocketPool<
     this.timer = null;
     this.timeout = 3000; // TODO: make this configurable
     this.logger = container.logger.child({ name: this.constructor.name });
+    this.tryNext();
   }
 
   private connectToWebSocket(nodeEndpoint: NodeEndpoint) {
@@ -104,9 +105,5 @@ export class WebSocketPool<
         new Error("Failed to establish any WebSocket connection")
       );
     }
-  }
-
-  public connect() {
-    this.tryNext();
   }
 }

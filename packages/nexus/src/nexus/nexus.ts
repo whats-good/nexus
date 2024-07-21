@@ -8,6 +8,7 @@ import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 import { WsRpcServer } from "@src/websockets";
+import { WsContextHandler } from "@src/websockets/ws-context-handler";
 
 export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
   TPlatformContext,
@@ -19,6 +20,7 @@ export class Nexus<TPlatformContext = unknown>
 {
   public readonly container: StaticContainer<TPlatformContext>;
   private readonly controller: Controller<TPlatformContext>;
+  private readonly wsContextHandler: WsContextHandler<TPlatformContext>;
   public readonly port?: number;
   public readonly logger: Logger;
 
@@ -27,6 +29,7 @@ export class Nexus<TPlatformContext = unknown>
     this.controller = new Controller(container);
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
+    this.wsContextHandler = new WsContextHandler(container);
   }
 
   public handle = async (
@@ -39,7 +42,13 @@ export class Nexus<TPlatformContext = unknown>
   };
 
   public wsServer() {
-    return new WsRpcServer(this.container);
+    const server = new WsRpcServer(this.container);
+
+    server.on("connection", (context) => {
+      this.wsContextHandler.handleConnection(context);
+    });
+
+    return server;
   }
 
   public static create<TPlatformContext = unknown>(
