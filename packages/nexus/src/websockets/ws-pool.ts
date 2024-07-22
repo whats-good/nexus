@@ -9,9 +9,7 @@ interface WebSocketPoolEvents {
   error: (error: Error) => void;
 }
 
-export class WebSocketPool<
-  TPlatformContext = unknown,
-> extends EventEmitter<WebSocketPoolEvents> {
+export class WebSocketPool extends EventEmitter<WebSocketPoolEvents> {
   private readonly timeout: number;
   private timer: NodeJS.Timeout | null;
   private readonly logger: Logger;
@@ -19,7 +17,7 @@ export class WebSocketPool<
 
   constructor(
     private readonly nodeEndpointPool: NodeEndpointPool,
-    container: StaticContainer<TPlatformContext>
+    container: StaticContainer
   ) {
     super();
     this.timeout = 3000; // TODO: make this configurable

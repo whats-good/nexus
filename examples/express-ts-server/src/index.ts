@@ -1,11 +1,5 @@
-import { Nexus, NexusRpcContext, NodeProvider, CHAIN } from "@whatsgood/nexus";
+import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
 import express from "express";
-import type { Request as Req, Response as Res } from "express";
-
-interface ExpressContext extends Record<string, any> {
-  req: Req;
-  res: Res;
-}
 
 // Step 1: Initialize node providers
 const llamaRpcNodeProvider = new NodeProvider({
@@ -21,7 +15,7 @@ const tenderlyNodeProvider = new NodeProvider({
 });
 
 // Step 2: Create a Nexus instance by putting it all together
-const nexus = Nexus.create<ExpressContext>({
+const nexus = Nexus.create({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
   log: { level: "debug" },
   port: 4000,

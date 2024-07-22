@@ -12,13 +12,13 @@ import { WsContext } from "./ws-context";
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
-export class WsRpcServer<TPlatformContext = unknown> extends EventEmitter<{
-  connection: (context: WsContext<TPlatformContext>) => void;
+export class WsRpcServer extends EventEmitter<{
+  connection: (context: WsContext) => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
 
-  constructor(private container: StaticContainer<TPlatformContext>) {
+  constructor(private container: StaticContainer) {
     super();
 
     this.logger = container.logger.child({ name: this.constructor.name });

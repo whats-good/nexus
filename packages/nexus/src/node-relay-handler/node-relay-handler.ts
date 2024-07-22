@@ -10,12 +10,12 @@ import {
   type RpcResponse,
 } from "@src/rpc-response";
 
-export class NodeRelayHandler<TPlatformContext = unknown> {
+export class NodeRelayHandler {
   private readonly nodeEndpointPool: NodeEndpointPool;
   private readonly rpcRequestPayload: RpcRequestPayloadType;
   private readonly requestId: string | number | null;
 
-  constructor(ctx: NexusRpcContext<TPlatformContext>) {
+  constructor(ctx: NexusRpcContext) {
     this.nodeEndpointPool = ctx.nodeEndpointPool;
     this.rpcRequestPayload = ctx.rpcRequestPayload;
     this.requestId = ctx.requestId;

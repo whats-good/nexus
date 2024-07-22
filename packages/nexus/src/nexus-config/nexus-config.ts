@@ -4,12 +4,12 @@ import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 
-export class NexusConfig<TPlatformContext = unknown> {
+export class NexusConfig {
   public readonly nodeProviders: [NodeProvider, ...NodeProvider[]];
   public readonly chains: Map<number, Chain>;
   public readonly relay: RelayConfig;
   public readonly port: number;
-  public readonly middleware: NexusMiddleware<TPlatformContext>[];
+  public readonly middleware: NexusMiddleware[];
   public readonly logger: Logger;
   public readonly authKey?: string;
 
@@ -18,7 +18,7 @@ export class NexusConfig<TPlatformContext = unknown> {
     chains: Map<number, Chain>;
     relay: RelayConfig;
     port: number;
-    middleware: NexusMiddleware<TPlatformContext>[];
+    middleware: NexusMiddleware[];
     logger: Logger;
     authKey?: string;
   }) {

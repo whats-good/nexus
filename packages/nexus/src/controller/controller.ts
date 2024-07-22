@@ -19,36 +19,31 @@ import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
-export class Controller<TPlatformContext = unknown> {
-  private readonly container: StaticContainer<TPlatformContext>;
-  private readonly config: NexusConfig<TPlatformContext>;
-  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
+export class Controller {
+  private readonly container: StaticContainer;
+  private readonly config: NexusConfig;
+  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   private readonly logger: Logger;
 
-  constructor(container: StaticContainer<TPlatformContext>) {
+  constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
     this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
   }
 
-  public async handleRequest(
-    request: Request,
-    platformContext: TPlatformContext
-  ): Promise<NexusResponse> {
+  public async handleRequest(request: Request): Promise<NexusResponse> {
     const url = new URL(request.url);
     const chainIdParams = chainIdRoute.match(url.pathname);
 
     if (chainIdParams) {
-      return this.handleChainIdRoute(chainIdParams, request, platformContext);
+      return this.handleChainIdRoute(chainIdParams, request);
     }
 
     return new NexusNotFoundResponse();
   }
 
-  private async handleRpcContext(
-    ctx: NexusRpcContext<TPlatformContext>
-  ): Promise<RpcResponse> {
+  private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
     const middlewareHandler = new NexusMiddlewareHandler({
       ctx,
       middleware: this.config.middleware,
@@ -91,8 +86,7 @@ export class Controller<TPlatformContext = unknown> {
 
   private async handleChainIdRoute(
     params: PathParamsOf<typeof chainIdRoute>,
-    request: Request,
-    platformContext: TPlatformContext
+    request: Request
   ): Promise<RpcResponse> {
     let parsedJsonRequestPayload: unknown;
 
@@ -130,11 +124,10 @@ export class Controller<TPlatformContext = unknown> {
 
     const ctx = new NexusRpcContext({
       container: this.container,
-      platformContext,
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
-      request,
+      url: new URL(request.url),
     });
 
     return this.handleRpcContext(ctx);

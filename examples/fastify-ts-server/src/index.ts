@@ -1,11 +1,6 @@
 import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
 
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-
-type FastifyContext = {
-  req: FastifyRequest;
-  reply: FastifyReply;
-};
+import Fastify from "fastify";
 
 // Step 1: Initialize node providers
 const llamaRpcNodeProvider = new NodeProvider({
@@ -21,7 +16,7 @@ const tenderlyNodeProvider = new NodeProvider({
 });
 
 // Step 2: Create a Nexus instance by putting it all together
-const nexus = Nexus.create<FastifyContext>({
+const nexus = Nexus.create({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
   log: { level: "debug" },
   port: 4000,

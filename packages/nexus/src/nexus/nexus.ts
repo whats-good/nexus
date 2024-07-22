@@ -11,22 +11,17 @@ import { StaticContainer } from "@src/dependency-injection";
 import { WsRpcServer } from "@src/websockets";
 import { WsContextHandler } from "@src/websockets/ws-context-handler";
 
-export type NexusServerInstance<TPlatformContext = unknown> = ServerAdapter<
-  TPlatformContext,
-  Nexus<TPlatformContext>
->;
+export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
-export class Nexus<TPlatformContext = unknown>
-  implements ServerAdapterBaseObject<TPlatformContext>
-{
-  private readonly container: StaticContainer<TPlatformContext>;
-  private readonly controller: Controller<TPlatformContext>;
-  private readonly wsContextHandler: WsContextHandler<TPlatformContext>;
+export class Nexus implements ServerAdapterBaseObject<unknown> {
+  private readonly container: StaticContainer;
+  private readonly controller: Controller;
+  private readonly wsContextHandler: WsContextHandler;
   public readonly port?: number;
   public readonly logger: Logger;
-  public readonly on: StaticContainer<TPlatformContext>["eventBus"]["on"];
+  public readonly on: StaticContainer["eventBus"]["on"];
 
-  private constructor(container: StaticContainer<TPlatformContext>) {
+  private constructor(container: StaticContainer) {
     this.container = container;
     this.controller = new Controller(container);
     this.port = container.config.port;
@@ -35,12 +30,9 @@ export class Nexus<TPlatformContext = unknown>
     this.on = container.eventBus.on.bind(container.eventBus);
   }
 
-  public handle = async (
-    request: Request,
-    ctx: TPlatformContext
-  ): Promise<Response> => {
+  public handle = async (request: Request): Promise<Response> => {
     // TODO: wrap this with a try-catch for final error handling
-    return (await this.controller.handleRequest(request, ctx)).buildResponse();
+    return (await this.controller.handleRequest(request)).buildResponse();
   };
 
   public ws(httpServer: NodeHttpServer) {
@@ -53,9 +45,7 @@ export class Nexus<TPlatformContext = unknown>
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
   }
 
-  public static create<TPlatformContext = unknown>(
-    options?: NexusConfigOptions<TPlatformContext>
-  ) {
+  public static create(options?: NexusConfigOptions) {
     const nexusConfigFactory = new NexusConfigFactory(options);
     const config = nexusConfigFactory.getNexusConfig();
 
@@ -66,8 +56,8 @@ export class Nexus<TPlatformContext = unknown>
     staticContainer.logger.info(config.summary(), "Nexus created");
     const server = new Nexus(staticContainer);
 
-    return createServerAdapter<TPlatformContext, Nexus<TPlatformContext>>(
+    return createServerAdapter<unknown, Nexus>(
       server
-    ) as unknown as NexusServerInstance<TPlatformContext>;
+    ) as unknown as NexusServerInstance;
   }
 }
