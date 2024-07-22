@@ -1,5 +1,17 @@
 # @whatsgood/example-fastify-ts-server
 
+## 0.10.0
+
+### Minor Changes
+
+- 100c058: Event handlers overhaul
+
+### Patch Changes
+
+- Updated dependencies [e9fe592]
+- Updated dependencies [100c058]
+  - @whatsgood/nexus@0.21.0
+
 ## 0.9.4
 
 ### Patch Changes
