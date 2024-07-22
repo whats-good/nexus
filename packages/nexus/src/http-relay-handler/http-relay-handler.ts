@@ -70,7 +70,6 @@ export class HttpRelayHandler {
       return new ProviderNotConfiguredErrorResponse(ctx.requestId, ctx.chain);
     }
 
-    // TODO: consider passing ctx and nodeEndpointPool as params to the handler instead of the constructor
     const poolResponse = await nodeEndpointPool.relay(ctx.rpcRequestPayload);
 
     if (poolResponse.kind === "success") {
