@@ -24,6 +24,7 @@ export class Nexus<TPlatformContext = unknown>
   private readonly wsContextHandler: WsContextHandler<TPlatformContext>;
   public readonly port?: number;
   public readonly logger: Logger;
+  public readonly on: StaticContainer<TPlatformContext>["eventBus"]["on"];
 
   private constructor(container: StaticContainer<TPlatformContext>) {
     this.container = container;
@@ -31,6 +32,7 @@ export class Nexus<TPlatformContext = unknown>
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.wsContextHandler = new WsContextHandler(container);
+    this.on = container.eventBus.on.bind(container.eventBus);
   }
 
   public handle = async (
@@ -61,10 +63,7 @@ export class Nexus<TPlatformContext = unknown>
       config,
     });
 
-    staticContainer.logger.info(
-      "Nexus created with the following config: %o",
-      config.summary()
-    );
+    staticContainer.logger.info(config.summary(), "Nexus created");
     const server = new Nexus(staticContainer);
 
     return createServerAdapter<TPlatformContext, Nexus<TPlatformContext>>(
