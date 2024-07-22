@@ -134,7 +134,7 @@ export class Controller<TPlatformContext = unknown> {
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
-      request,
+      url: new URL(request.url),
     });
 
     return this.handleRpcContext(ctx);

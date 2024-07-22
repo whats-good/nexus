@@ -8,8 +8,8 @@ export class NexusRpcContext<TPlatformContext = unknown> {
   public readonly container: StaticContainer<TPlatformContext>;
   public readonly platformContext: TPlatformContext;
   public readonly chain: Chain;
+  public readonly url: URL;
   public readonly nodeEndpointPool: NodeEndpointPool;
-  public readonly request: Request;
   public readonly rpcRequestPayload: RpcRequestPayloadType;
   public readonly requestId: string | number | null;
   private rpcResponse: RpcResponse | null = null;
@@ -18,15 +18,15 @@ export class NexusRpcContext<TPlatformContext = unknown> {
     container: StaticContainer<TPlatformContext>;
     platformContext: TPlatformContext;
     chain: Chain;
+    url: URL;
     nodeEndpointPool: NodeEndpointPool;
-    request: Request;
     rpcRequestPayload: RpcRequestPayloadType;
   }) {
     this.container = params.container;
     this.platformContext = params.platformContext;
     this.chain = params.chain;
+    this.url = params.url;
     this.nodeEndpointPool = params.nodeEndpointPool;
-    this.request = params.request;
     this.rpcRequestPayload = params.rpcRequestPayload;
     this.requestId = params.rpcRequestPayload.id || null;
   }

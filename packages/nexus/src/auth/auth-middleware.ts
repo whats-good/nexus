@@ -10,9 +10,7 @@ export async function authMiddleware<TPlatformContext = unknown>(
   // like our middleware have reuse potential for other transports like websockets.
   // so, we should consider refactoring this to be more generic.
 
-  const requestUrl = new URL(ctx.request.url);
-
-  if (!ctx.container.authorizationService.isAuthorized(requestUrl)) {
+  if (!ctx.container.authorizationService.isAuthorized(ctx.url)) {
     const response = new UnauthorizedCustomErrorResponse(ctx.requestId);
 
     ctx.setResponse(response);
