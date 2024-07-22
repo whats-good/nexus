@@ -1,25 +1,7 @@
-import {
-  Nexus,
-  UnauthorizedAccessEvent,
-  EventHandler,
-  NexusRpcContext,
-  NodeProvider,
-  CHAIN,
-} from "@whatsgood/nexus";
+import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";
 import { createServer } from "node:http";
 
-// Step 1: Create an example event handler.
-// - Feel free to remove this example or add your own event handlers.
-const onUnauthorizedAccess: EventHandler<UnauthorizedAccessEvent> = {
-  event: UnauthorizedAccessEvent,
-  handle: async (event: UnauthorizedAccessEvent, ctx: NexusRpcContext) => {
-    ctx.container.logger.info(
-      `Unauthorized access detected at: ${event.createdAt}.`
-    );
-  },
-};
-
-// Step 2: Initialize node providers
+// Step 1: Initialize node providers
 const llamaRpcNodeProvider = new NodeProvider({
   name: "llama-rpc",
   chain: CHAIN.ETHEREUM_MAINNET,
@@ -32,15 +14,25 @@ const tenderlyNodeProvider = new NodeProvider({
   url: "https://gateway.tenderly.co/public/mainnet",
 });
 
-// Step 3: Create a Nexus instance by putting it all together
+// Step 2: Create a Nexus instance by putting it all together
 const nexus = Nexus.create({
   nodeProviders: [llamaRpcNodeProvider, tenderlyNodeProvider],
-  eventHandlers: [onUnauthorizedAccess],
   log: { level: "debug" },
   port: 4000,
   relay: {
     order: "random",
   },
+});
+
+// Step 3: Optionally define event handlers
+nexus.on("rpcResponseSuccess", (response, ctx) => {
+  nexus.logger.debug(
+    {
+      response: response.body(),
+      chain: ctx.chain,
+    },
+    "rpc response success event captured"
+  );
 });
 
 // Step 4: Start the server

@@ -63,6 +63,16 @@ const nexus = Nexus.create({
   },
 });
 
+nexus.on("rpcResponseSuccess", (response, ctx) => {
+  nexus.logger.debug(
+    {
+      response: response.body(),
+      chain: ctx.chain,
+    },
+    "rpc response success event captured"
+  );
+});
+
 // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This promise is okay
 const server = http.createServer(nexus);
 

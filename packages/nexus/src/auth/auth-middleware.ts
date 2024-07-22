@@ -1,7 +1,6 @@
 import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NexusMiddlewareNextFn } from "@src/middleware";
 import { UnauthorizedCustomErrorResponse } from "@src/rpc-response";
-import { UnauthorizedAccessEvent } from "./events";
 
 export async function authMiddleware<TPlatformContext = unknown>(
   ctx: NexusRpcContext<TPlatformContext>,
@@ -17,9 +16,6 @@ export async function authMiddleware<TPlatformContext = unknown>(
     const response = new UnauthorizedCustomErrorResponse(ctx.requestId);
 
     ctx.setResponse(response);
-    const event = new UnauthorizedAccessEvent();
-
-    ctx.eventBus.dispatch(event);
 
     return;
   }

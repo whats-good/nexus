@@ -14,10 +14,6 @@ import {
   RpcSuccessResponse,
 } from "@src/rpc-response";
 import { NexusMiddlewareHandler } from "@src/middleware";
-import {
-  RpcResponseErrorEvent,
-  RpcResponseSuccessEvent,
-} from "@src/node-relay-handler/events";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
@@ -81,23 +77,14 @@ export class Controller<TPlatformContext = unknown> {
     }
 
     if (response instanceof RpcSuccessResponse) {
-      ctx.eventBus.dispatch(new RpcResponseSuccessEvent(response));
+      ctx.container.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      ctx.eventBus.dispatch(new RpcResponseErrorEvent(response));
+      ctx.container.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");
       throw new Error("Invalid response type in context");
     }
-
-    this.container.nextTick(() => {
-      ctx.eventBus.processAllEvents().catch((e: unknown) => {
-        this.logger.error(
-          errSerialize(e),
-          "Error processing events after handling RPC request"
-        );
-      });
-    });
 
     return response;
   }
