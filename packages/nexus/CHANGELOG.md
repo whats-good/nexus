@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.22.0
+
+### Minor Changes
+
+- 2495356: Removing TPlatformContext generics
+
 ## 0.21.0
 
 ### Minor Changes
