@@ -15,7 +15,7 @@ export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly container: StaticContainer;
   private readonly controller: Controller;
-  private readonly wsContextHandler: WsPairHandler;
+  private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
   public readonly on: StaticContainer["eventBus"]["on"];
@@ -25,7 +25,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     this.controller = new Controller(container);
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
-    this.wsContextHandler = new WsPairHandler(container);
+    this.wsPairHandler = new WsPairHandler(container);
     this.on = container.eventBus.on.bind(container.eventBus);
   }
 
@@ -38,7 +38,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const wsServer = new WsRpcServer(this.container);
 
     wsServer.on("connection", (context) => {
-      this.wsContextHandler.handleConnection(context);
+      this.wsPairHandler.handleConnection(context);
     });
 
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
