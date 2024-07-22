@@ -16,6 +16,7 @@
 
 ![Discord](https://img.shields.io/discord/1003351311904948334?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)
 ![GitHub Actions Status](https://github.com/whats-good/nexus/actions/workflows/main-ci.yml/badge.svg)
+![Docker Image Size (tag)](https://img.shields.io/docker/image-size/whatsgood/nexus/latest?logo=docker&label=Docker)
 
   <!-- ![GitHub stars](https://img.shields.io/github/stars/whats-good/nexus?style=social&label=Star) -->
 
