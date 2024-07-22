@@ -22,11 +22,13 @@ export class Controller {
   private readonly container: StaticContainer;
   private readonly config: NexusConfig;
   private readonly logger: Logger;
+  private readonly nodeRelayHandler: NodeRelayHandler;
 
   constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
+    this.nodeRelayHandler = new NodeRelayHandler(container);
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -58,10 +60,8 @@ export class Controller {
     let response = ctx.getResponse();
 
     if (!response) {
-      const nodeRelayHandler = new NodeRelayHandler(ctx, this.container);
-
       try {
-        response = await nodeRelayHandler.handle();
+        response = await this.nodeRelayHandler.handle(ctx);
       } catch (e) {
         this.logger.error(errSerialize(e), "Error in node relay handler");
 
