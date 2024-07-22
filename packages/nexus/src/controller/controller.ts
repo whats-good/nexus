@@ -15,20 +15,20 @@ import { NexusMiddlewareHandler } from "@src/middleware";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
-import { NodeRelayHandler } from "@src/node-relay-handler";
+import { HttpRelayHandler } from "@src/http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 export class Controller {
   private readonly container: StaticContainer;
   private readonly config: NexusConfig;
   private readonly logger: Logger;
-  private readonly nodeRelayHandler: NodeRelayHandler;
+  private readonly httpRelayHandler: HttpRelayHandler;
 
   constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
-    this.nodeRelayHandler = new NodeRelayHandler(container);
+    this.httpRelayHandler = new HttpRelayHandler(container);
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -61,7 +61,7 @@ export class Controller {
 
     if (!response) {
       try {
-        response = await this.nodeRelayHandler.handle(ctx);
+        response = await this.httpRelayHandler.handle(ctx);
       } catch (e) {
         this.logger.error(errSerialize(e), "Error in node relay handler");
 

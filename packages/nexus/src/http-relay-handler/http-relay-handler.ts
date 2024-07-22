@@ -13,7 +13,7 @@ import {
   type RpcResponse,
 } from "@src/rpc-response";
 
-export class NodeRelayHandler {
+export class HttpRelayHandler {
   constructor(private readonly container: StaticContainer) {}
 
   private handleFailureResponse(

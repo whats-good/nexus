@@ -9,7 +9,7 @@ export * from "./nexus";
 export * from "./nexus-config";
 export * from "./node-endpoint";
 export * from "./node-provider";
-export * from "./node-relay-handler";
+export * from "./http-relay-handler";
 export * from "./rpc-response";
 export * from "./rpc-schema";
 export * from "./utils";
