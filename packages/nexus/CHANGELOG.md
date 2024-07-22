@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.21.0
+
+### Minor Changes
+
+- e9fe592: Logging overhaul for enhanced metadata in logs
+- 100c058: Event handlers overhaul
+
 ## 0.20.0
 
 ### Minor Changes
