@@ -155,6 +155,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     return pino({
       transport,
       level: logConfig.level,
+      // TODO: big objects get cut off when logging in json format. need to figure out how to fix this
     });
   }
 
