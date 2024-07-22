@@ -4,7 +4,10 @@ import type { WebSocket } from "ws";
 import type { NodeEndpoint } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 
-export class WsContext {
+/**
+ * Represents a pair of websockets, one for the client and one for the node.
+ */
+export class WebSocketPair {
   public readonly id = uuid.v4();
   public readonly logger: Logger;
 
@@ -14,7 +17,7 @@ export class WsContext {
     public readonly endpoint: NodeEndpoint,
     container: StaticContainer
   ) {
-    this.logger = container.logger.child({ name: `ws-context-${this.id}` });
+    this.logger = container.logger.child({ name: `ws-pair-${this.id}` });
   }
 
   public sendJSONToClient(data: unknown) {

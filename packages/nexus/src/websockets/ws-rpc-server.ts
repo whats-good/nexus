@@ -7,13 +7,13 @@ import type { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { WebSocketPool } from "./ws-pool";
-import { WsContext } from "./ws-context";
+import { WebSocketPair } from "./ws-pair";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
 export class WsRpcServer extends EventEmitter<{
-  connection: (context: WsContext) => void;
+  connection: (pair: WebSocketPair) => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
@@ -28,13 +28,13 @@ export class WsRpcServer extends EventEmitter<{
     });
 
     this.wss.on("connection", (ws, request) => {
-      const context = this.container.wsContexts.get(ws);
+      const pair = this.container.wsPairs.get(ws);
 
       this.logger.debug("New websocket connection established");
 
-      if (!context) {
+      if (!pair) {
         this.logger.error(
-          "Received a connection, but no context was found for it"
+          "Received a connection, but no socket pair was found for it"
         );
         ws.terminate();
         request.destroy();
@@ -42,7 +42,7 @@ export class WsRpcServer extends EventEmitter<{
         return;
       }
 
-      this.emit("connection", context);
+      this.emit("connection", pair);
     });
   }
 
@@ -117,14 +117,14 @@ export class WsRpcServer extends EventEmitter<{
     wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
-        const context = new WsContext(
+        const pair = new WebSocketPair(
           clientSocket,
           nodeSocket,
           endpoint,
           this.container
         );
 
-        this.container.wsContexts.set(clientSocket, context);
+        this.container.wsPairs.set(clientSocket, pair);
 
         this.wss.emit("connection", clientSocket, req);
       });
