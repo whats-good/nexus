@@ -41,7 +41,7 @@ export class NexusConfig<TPlatformContext = unknown> {
       relay: this.relay,
       port: this.port,
       logLevel: this.logger.level,
-      numMiddleware: this.middleware.map((m) => m.name),
+      middleware: this.middleware.map((m) => m.name),
       auth: this.authKey ? "Enabled" : "Disabled",
     };
   }
