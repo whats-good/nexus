@@ -1,7 +1,6 @@
 import type { Logger } from "pino";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 import { NexusRpcContext } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
@@ -9,7 +8,6 @@ import {
   ChainNotFoundErrorResponse,
   InternalErrorResponse,
   ParseErrorResponse,
-  ProviderNotConfiguredErrorResponse,
   RpcErrorResponse,
   RpcSuccessResponse,
 } from "@src/rpc-response";
@@ -17,19 +15,18 @@ import { NexusMiddlewareHandler } from "@src/middleware";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
+import { NodeRelayHandler } from "@src/node-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 export class Controller {
   private readonly container: StaticContainer;
   private readonly config: NexusConfig;
-  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   private readonly logger: Logger;
 
   constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
-    this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -61,15 +58,15 @@ export class Controller {
     let response = ctx.getResponse();
 
     if (!response) {
-      this.logger.error(
-        {
-          request: ctx.rpcRequestPayload,
-        },
-        "No response set in context. Setting InternalErrorResponse."
-      );
+      const nodeRelayHandler = new NodeRelayHandler(ctx, this.container);
 
-      response = new InternalErrorResponse(ctx.requestId);
-      ctx.setResponse(response);
+      try {
+        response = await nodeRelayHandler.handle();
+      } catch (e) {
+        this.logger.error(errSerialize(e), "Error in node relay handler");
+
+        response = new InternalErrorResponse(ctx.requestId);
+      }
     }
 
     if (response instanceof RpcSuccessResponse) {
