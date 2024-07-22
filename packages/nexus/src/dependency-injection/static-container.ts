@@ -6,7 +6,6 @@ import type { WsContext } from "@src/websockets/ws-context";
 
 export class StaticContainer<TPlatformContext = unknown> {
   public readonly config: NexusConfig<TPlatformContext>;
-  public readonly nextTick: typeof process.nextTick;
   public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
   public readonly authorizationService: AuthorizationService;
   public readonly wsContexts = new Map<
@@ -16,7 +15,6 @@ export class StaticContainer<TPlatformContext = unknown> {
 
   constructor(params: { config: NexusConfig<TPlatformContext> }) {
     this.config = params.config;
-    this.nextTick = this.config.nextTick;
     this.nodeEndpointPoolFactory = new NodeEndpointPoolFactory(this);
     this.authorizationService = new AuthorizationService(this.config.authKey);
   }

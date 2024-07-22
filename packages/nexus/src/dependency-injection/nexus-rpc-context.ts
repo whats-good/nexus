@@ -33,7 +33,6 @@ export class NexusRpcContext<TPlatformContext = unknown> {
     this.requestId = params.rpcRequestPayload.id || null;
     this.eventBus = new EventBus({
       ctx: this,
-      handlers: this.container.config.eventHandlers,
     });
   }
 

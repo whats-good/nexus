@@ -90,15 +90,6 @@ export class Controller<TPlatformContext = unknown> {
       throw new Error("Invalid response type in context");
     }
 
-    this.container.nextTick(() => {
-      ctx.eventBus.processAllEvents().catch((e: unknown) => {
-        this.logger.error(
-          errSerialize(e),
-          "Error processing events after handling RPC request"
-        );
-      });
-    });
-
     return response;
   }
 

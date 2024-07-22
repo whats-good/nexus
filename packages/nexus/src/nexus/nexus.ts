@@ -55,7 +55,7 @@ export class Nexus<TPlatformContext = unknown>
     options?: NexusConfigOptions<TPlatformContext>
   ) {
     const nexusConfigFactory = new NexusConfigFactory(options);
-    const config = nexusConfigFactory.getNexusConfig(options || {});
+    const config = nexusConfigFactory.getNexusConfig();
 
     const staticContainer = new StaticContainer({
       config,

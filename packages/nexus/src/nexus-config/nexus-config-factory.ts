@@ -1,6 +1,5 @@
 import { pino } from "pino";
 import type { LoggerOptions, Logger } from "pino";
-import type { AnyEventHandlerOf } from "@src/events";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
@@ -28,9 +27,7 @@ export interface NexusConfigOptions<TPlatformContext = unknown> {
   relay?: Partial<RelayConfig>;
   port?: number;
   log?: LogConfigOptions;
-  eventHandlers?: AnyEventHandlerOf<TPlatformContext>[];
   middleware?: NexusMiddleware<TPlatformContext>[];
-  nextTick?: typeof process.nextTick;
   rpcAuthKey?: string;
   env?: Record<string, string | undefined>;
 }
@@ -57,7 +54,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     return {};
   }
 
-  public getNexusConfig(params: NexusConfigOptions<TPlatformContext>) {
+  public getNexusConfig() {
     const nodeProviders = this.getNodeProviders();
     const uniqueChains = Array.from(
       new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
@@ -69,10 +66,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
       relay: this.getRelayConfig(),
       port: this.getPort(),
       logger: this.logger,
-      eventHandlers: this.options.eventHandlers || [],
       middleware: this.getMiddleware(),
-      // eslint-disable-next-line @typescript-eslint/unbound-method -- process.nextTick is an edge case
-      nextTick: params.nextTick || process.nextTick,
       authKey: this.getAuthKey(),
     });
   }
