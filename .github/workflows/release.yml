@@ -35,7 +35,7 @@ jobs:
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@v1
+        uses: whats-good/changesets-action@v1
         with:
           publish: pnpm ci:publish
           version: pnpm ci:version
