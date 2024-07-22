@@ -1,5 +1,12 @@
 # @whatsgood/nexus-nodejs-docker
 
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [2495356]
+  - @whatsgood/nexus@0.22.0
+
 ## 0.3.2
 
 ### Patch Changes
