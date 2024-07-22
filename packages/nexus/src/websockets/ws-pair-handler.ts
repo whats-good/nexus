@@ -6,7 +6,7 @@ import type { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { WebSocketPair } from "./ws-pair";
 
-export class WsContextHandler {
+export class WsPairHandler {
   private readonly logger: Logger;
 
   constructor(private container: StaticContainer) {

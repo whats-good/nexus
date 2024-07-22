@@ -8,15 +8,14 @@ import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
-import { WsRpcServer } from "@src/websockets";
-import { WsContextHandler } from "@src/websockets/ws-context-handler";
+import { WsRpcServer, WsPairHandler } from "@src/websockets";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly container: StaticContainer;
   private readonly controller: Controller;
-  private readonly wsContextHandler: WsContextHandler;
+  private readonly wsContextHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
   public readonly on: StaticContainer["eventBus"]["on"];
@@ -26,7 +25,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     this.controller = new Controller(container);
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
-    this.wsContextHandler = new WsContextHandler(container);
+    this.wsContextHandler = new WsPairHandler(container);
     this.on = container.eventBus.on.bind(container.eventBus);
   }
 
