@@ -46,6 +46,7 @@ export class Controller {
   private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
     const middlewareHandler = new NexusMiddlewareHandler({
       ctx,
+      container: this.container,
       middleware: this.config.middleware,
     });
 
@@ -72,9 +73,9 @@ export class Controller {
     }
 
     if (response instanceof RpcSuccessResponse) {
-      ctx.container.eventBus.emit("rpcResponseSuccess", response, ctx);
+      this.container.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      ctx.container.eventBus.emit("rpcResponseError", response, ctx);
+      this.container.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");
@@ -123,7 +124,6 @@ export class Controller {
     }
 
     const ctx = new NexusRpcContext({
-      container: this.container,
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
