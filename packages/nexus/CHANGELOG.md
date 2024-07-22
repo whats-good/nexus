@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.23.0
+
+### Minor Changes
+
+- 27eefb7: Made RpcContext transport-independent. Middleware can be reused between http and websockets
+
 ## 0.22.0
 
 ### Minor Changes
