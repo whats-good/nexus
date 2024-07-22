@@ -117,12 +117,12 @@ export class WsRpcServer extends EventEmitter<{
     wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
-        const pair = new WebSocketPair(
-          clientSocket,
-          nodeSocket,
+        const pair = new WebSocketPair({
+          client: clientSocket,
+          node: nodeSocket,
           endpoint,
-          this.container.logger
-        );
+          logger: this.container.logger,
+        });
 
         this.container.wsPairHandler.registerWsPair(pair);
 
