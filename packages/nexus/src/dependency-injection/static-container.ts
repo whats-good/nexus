@@ -3,6 +3,7 @@ import { AuthorizationService } from "@src/auth";
 import type { NexusConfig } from "@src/nexus-config";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { WsContext } from "@src/websockets/ws-context";
+import { EventBus } from "@src/events";
 
 export class StaticContainer<TPlatformContext = unknown> {
   public readonly config: NexusConfig<TPlatformContext>;
@@ -12,6 +13,7 @@ export class StaticContainer<TPlatformContext = unknown> {
     WebSocket,
     WsContext<TPlatformContext>
   >();
+  public readonly eventBus = new EventBus<TPlatformContext>();
 
   constructor(params: { config: NexusConfig<TPlatformContext> }) {
     this.config = params.config;

@@ -77,9 +77,9 @@ export class Controller<TPlatformContext = unknown> {
     }
 
     if (response instanceof RpcSuccessResponse) {
-      ctx.eventBus.emit("rpcResponseSuccess", response, ctx);
+      ctx.container.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      ctx.eventBus.emit("rpcResponseError", response, ctx);
+      ctx.container.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");

@@ -11,11 +11,4 @@ export class EventBus<TPlatformContext = unknown> extends EventEmitter<{
     response: RpcErrorResponse,
     ctx: NexusRpcContext<TPlatformContext>
   ) => void;
-}> {
-  private readonly ctx: NexusRpcContext<TPlatformContext>;
-
-  constructor(params: { ctx: NexusRpcContext<TPlatformContext> }) {
-    super();
-    this.ctx = params.ctx;
-  }
-}
+}> {}

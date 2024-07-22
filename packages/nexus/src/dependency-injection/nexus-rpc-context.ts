@@ -1,7 +1,6 @@
 import type { Chain } from "@src/chain";
 import type { NodeEndpointPool } from "@src/node-endpoint";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
-import { EventBus } from "@src/events";
 import type { RpcResponse } from "@src/rpc-response";
 import type { StaticContainer } from "./static-container";
 
@@ -13,7 +12,6 @@ export class NexusRpcContext<TPlatformContext = unknown> {
   public readonly request: Request;
   public readonly rpcRequestPayload: RpcRequestPayloadType;
   public readonly requestId: string | number | null;
-  public readonly eventBus: EventBus<TPlatformContext>;
   private rpcResponse: RpcResponse | null = null;
 
   constructor(params: {
@@ -31,9 +29,6 @@ export class NexusRpcContext<TPlatformContext = unknown> {
     this.request = params.request;
     this.rpcRequestPayload = params.rpcRequestPayload;
     this.requestId = params.rpcRequestPayload.id || null;
-    this.eventBus = new EventBus({
-      ctx: this,
-    });
   }
 
   public setResponse(response: RpcResponse) {
