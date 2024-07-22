@@ -1,8 +1,5 @@
 import type { Server as NodeHttpServer } from "node:http";
-import type {
-  ServerAdapter,
-  ServerAdapterBaseObject,
-} from "@whatwg-node/server";
+import type { ServerAdapterBaseObject } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
@@ -10,8 +7,6 @@ import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 import { WsRpcServer } from "@src/websockets";
 import { WsContextHandler } from "@src/websockets/ws-context-handler";
-
-export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly container: StaticContainer;
@@ -54,10 +49,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     });
 
     staticContainer.logger.info(config.summary(), "Nexus created");
-    const server = new Nexus(staticContainer);
+    const nexus = new Nexus(staticContainer);
 
-    return createServerAdapter<unknown, Nexus>(
-      server
-    ) as unknown as NexusServerInstance;
+    return createServerAdapter(nexus);
   }
 }
