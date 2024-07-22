@@ -6,7 +6,6 @@ import type { StaticContainer } from "./static-container";
 
 export class NexusRpcContext<TPlatformContext = unknown> {
   public readonly container: StaticContainer<TPlatformContext>;
-  public readonly platformContext: TPlatformContext;
   public readonly chain: Chain;
   public readonly url: URL;
   public readonly nodeEndpointPool: NodeEndpointPool;
@@ -16,14 +15,12 @@ export class NexusRpcContext<TPlatformContext = unknown> {
 
   constructor(params: {
     container: StaticContainer<TPlatformContext>;
-    platformContext: TPlatformContext;
     chain: Chain;
     url: URL;
     nodeEndpointPool: NodeEndpointPool;
     rpcRequestPayload: RpcRequestPayloadType;
   }) {
     this.container = params.container;
-    this.platformContext = params.platformContext;
     this.chain = params.chain;
     this.url = params.url;
     this.nodeEndpointPool = params.nodeEndpointPool;

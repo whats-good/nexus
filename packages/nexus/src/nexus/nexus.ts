@@ -35,12 +35,9 @@ export class Nexus<TPlatformContext = unknown>
     this.on = container.eventBus.on.bind(container.eventBus);
   }
 
-  public handle = async (
-    request: Request,
-    ctx: TPlatformContext
-  ): Promise<Response> => {
+  public handle = async (request: Request): Promise<Response> => {
     // TODO: wrap this with a try-catch for final error handling
-    return (await this.controller.handleRequest(request, ctx)).buildResponse();
+    return (await this.controller.handleRequest(request)).buildResponse();
   };
 
   public ws(httpServer: NodeHttpServer) {

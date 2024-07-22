@@ -32,15 +32,12 @@ export class Controller<TPlatformContext = unknown> {
     this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
   }
 
-  public async handleRequest(
-    request: Request,
-    platformContext: TPlatformContext
-  ): Promise<NexusResponse> {
+  public async handleRequest(request: Request): Promise<NexusResponse> {
     const url = new URL(request.url);
     const chainIdParams = chainIdRoute.match(url.pathname);
 
     if (chainIdParams) {
-      return this.handleChainIdRoute(chainIdParams, request, platformContext);
+      return this.handleChainIdRoute(chainIdParams, request);
     }
 
     return new NexusNotFoundResponse();
@@ -91,8 +88,7 @@ export class Controller<TPlatformContext = unknown> {
 
   private async handleChainIdRoute(
     params: PathParamsOf<typeof chainIdRoute>,
-    request: Request,
-    platformContext: TPlatformContext
+    request: Request
   ): Promise<RpcResponse> {
     let parsedJsonRequestPayload: unknown;
 
@@ -130,7 +126,6 @@ export class Controller<TPlatformContext = unknown> {
 
     const ctx = new NexusRpcContext({
       container: this.container,
-      platformContext,
       chain,
       nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
