@@ -28,7 +28,7 @@ export class WsRpcServer extends EventEmitter<{
     });
 
     this.wss.on("connection", (ws, request) => {
-      const pair = this.container.wsPairs.get(ws);
+      const pair = this.container.wsPairHandler.getWsPair(ws);
 
       this.logger.debug("New websocket connection established");
 
@@ -121,10 +121,10 @@ export class WsRpcServer extends EventEmitter<{
           clientSocket,
           nodeSocket,
           endpoint,
-          this.container
+          this.container.logger
         );
 
-        this.container.wsPairs.set(clientSocket, pair);
+        this.container.wsPairHandler.registerWsPair(pair);
 
         this.wss.emit("connection", clientSocket, req);
       });

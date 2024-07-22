@@ -8,9 +8,18 @@ import type { WebSocketPair } from "./ws-pair";
 
 export class WsPairHandler {
   private readonly logger: Logger;
+  private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
 
   constructor(private container: StaticContainer) {
     this.logger = container.logger.child({ name: this.constructor.name });
+  }
+
+  public getWsPair(client: WebSocket) {
+    return this.wsPairs.get(client);
+  }
+
+  public registerWsPair(pair: WebSocketPair) {
+    this.wsPairs.set(pair.client, pair);
   }
 
   private incomingDataToJSON(data: RawData) {
@@ -43,7 +52,7 @@ export class WsPairHandler {
       this.logger.debug("Node socket terminated.");
     }
 
-    this.container.wsPairs.delete(client);
+    this.wsPairs.delete(client);
   }
 
   public handleConnection(pair: WebSocketPair) {
