@@ -114,18 +114,8 @@ export class Controller {
       );
     }
 
-    const nodeEndpointPool = this.nodeEndpointPoolFactory.http.get(chain);
-
-    if (!nodeEndpointPool) {
-      return new ProviderNotConfiguredErrorResponse(
-        rpcRequestPayload.data.id || null,
-        chain
-      );
-    }
-
     const ctx = new NexusRpcContext({
       chain,
-      nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
       url: new URL(request.url),
     });

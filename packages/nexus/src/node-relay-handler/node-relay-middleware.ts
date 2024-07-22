@@ -10,7 +10,7 @@ export const nodeRelayMiddleware = async (
   container: StaticContainer,
   next: NexusMiddlewareNextFn
 ): Promise<void> => {
-  const nodeRelayHandler = new NodeRelayHandler(ctx);
+  const nodeRelayHandler = new NodeRelayHandler(ctx, container);
   const response = await nodeRelayHandler.handle();
 
   ctx.setResponse(response);

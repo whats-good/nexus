@@ -1,34 +1,86 @@
-import type { NexusRpcContext } from "@src/dependency-injection";
-import type { NodeEndpointPool } from "@src/node-endpoint";
-import type { RpcRequestPayloadType } from "@src/rpc-schema";
+import type {
+  NexusRpcContext,
+  StaticContainer,
+} from "@src/dependency-injection";
+import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
 import {
   InternalErrorResponse,
   NodeProviderReturnedInvalidResponse,
   NodeProviderReturnedNon200ErrorResponse,
+  ProviderNotConfiguredErrorResponse,
   RpcErrorResponse,
   RpcSuccessResponse,
   type RpcResponse,
 } from "@src/rpc-response";
 
 export class NodeRelayHandler {
-  private readonly nodeEndpointPool: NodeEndpointPool;
-  private readonly rpcRequestPayload: RpcRequestPayloadType;
-  private readonly requestId: string | number | null;
+  constructor(
+    private readonly ctx: NexusRpcContext,
+    private readonly container: StaticContainer
+  ) {}
 
-  constructor(ctx: NexusRpcContext) {
-    this.nodeEndpointPool = ctx.nodeEndpointPool;
-    this.rpcRequestPayload = ctx.rpcRequestPayload;
-    this.requestId = ctx.requestId;
+  private handleFailureResponse(failure: NodeRpcResponseFailure) {
+    switch (failure.kind) {
+      case "error-rpc-response": {
+        // TODO: make this a config: should we relay node provider failures to the client, without any
+        // additional processing?
+        return RpcErrorResponse.fromErrorResponsePayload(
+          failure.response.error,
+          this.ctx.requestId
+        );
+      }
+
+      case "non-200-response": {
+        return new NodeProviderReturnedNon200ErrorResponse(
+          this.ctx.requestId,
+          failure.endpoint.nodeProvider
+        );
+      }
+
+      case "internal-fetch-error": {
+        return new InternalErrorResponse(this.ctx.requestId);
+      }
+
+      case "non-json-response": {
+        return new NodeProviderReturnedInvalidResponse(
+          this.ctx.requestId,
+          failure.endpoint.nodeProvider
+        );
+      }
+
+      case "unknown-rpc-response": {
+        return new NodeProviderReturnedInvalidResponse(
+          this.ctx.requestId,
+          failure.endpoint.nodeProvider
+        );
+      }
+
+      default: {
+        return new InternalErrorResponse(this.ctx.requestId);
+      }
+    }
   }
 
   public async handle(): Promise<RpcResponse> {
-    const poolResponse = await this.nodeEndpointPool.relay(
-      this.rpcRequestPayload
+    const nodeEndpointPool = this.container.nodeEndpointPoolFactory.http.get(
+      this.ctx.chain
+    );
+
+    if (!nodeEndpointPool) {
+      return new ProviderNotConfiguredErrorResponse(
+        this.ctx.requestId,
+        this.ctx.chain
+      );
+    }
+
+    // TODO: consider passing ctx and nodeEndpointPool as params to the handler instead of the constructor
+    const poolResponse = await nodeEndpointPool.relay(
+      this.ctx.rpcRequestPayload
     );
 
     if (poolResponse.kind === "success") {
       return new RpcSuccessResponse(
-        this.requestId,
+        this.ctx.requestId,
         poolResponse.success.response.result
       );
     }
@@ -37,33 +89,6 @@ export class NodeRelayHandler {
     const failureResponse =
       poolResponse.failures[poolResponse.failures.length - 1];
 
-    if (failureResponse.kind === "error-rpc-response") {
-      // TODO: make this a config: should we relay node provider failures to the client, without any
-      // additional processing?
-      return RpcErrorResponse.fromErrorResponsePayload(
-        failureResponse.response.error,
-        this.requestId
-      );
-    } else if (failureResponse.kind === "non-200-response") {
-      return new NodeProviderReturnedNon200ErrorResponse(
-        this.requestId,
-        failureResponse.endpoint.nodeProvider
-      );
-    } else if (failureResponse.kind === "internal-fetch-error") {
-      return new InternalErrorResponse(this.requestId);
-    } else if (failureResponse.kind === "non-json-response") {
-      return new NodeProviderReturnedInvalidResponse(
-        this.requestId,
-        failureResponse.endpoint.nodeProvider
-      );
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- disabling, because we'll likely introduce additional failure types
-    } else if (failureResponse.kind === "unknown-rpc-response") {
-      return new NodeProviderReturnedInvalidResponse(
-        this.requestId,
-        failureResponse.endpoint.nodeProvider
-      );
-    }
-
-    return new InternalErrorResponse(this.rpcRequestPayload.id || null);
+    return this.handleFailureResponse(failureResponse);
   }
 }
