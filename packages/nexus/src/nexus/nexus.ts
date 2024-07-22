@@ -37,8 +37,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public ws(httpServer: NodeHttpServer) {
     const wsServer = new WsRpcServer(this.container);
 
-    wsServer.on("connection", (context) => {
-      this.wsPairHandler.handleConnection(context);
+    wsServer.on("connection", (pair) => {
+      this.wsPairHandler.handleConnection(pair);
     });
 
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
