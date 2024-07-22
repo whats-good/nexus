@@ -4,7 +4,7 @@ import type { WebSocket } from "ws";
 import type { NodeEndpoint } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 
-export class WsContext<TPlatformContext = unknown> {
+export class WsContext {
   public readonly id = uuid.v4();
   public readonly logger: Logger;
 
@@ -12,7 +12,7 @@ export class WsContext<TPlatformContext = unknown> {
     public readonly client: WebSocket,
     public readonly node: WebSocket,
     public readonly endpoint: NodeEndpoint,
-    private readonly container: StaticContainer<TPlatformContext>
+    container: StaticContainer
   ) {
     this.logger = container.logger.child({ name: `ws-context-${this.id}` });
   }

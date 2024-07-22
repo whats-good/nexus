@@ -15,7 +15,7 @@ import type {
   NodeRpcResponseFailure,
 } from "./node-rpc-response";
 
-export class NodeEndpointPool<TPlatformContext = unknown> {
+export class NodeEndpointPool {
   private readonly chain: Chain;
   private readonly nodeEndpoints: NodeEndpoint[];
   private readonly config: RelayConfig;
@@ -25,7 +25,7 @@ export class NodeEndpointPool<TPlatformContext = unknown> {
   constructor(params: {
     chain: Chain;
     nodeEndpoints: NodeEndpoint[];
-    container: StaticContainer<TPlatformContext>;
+    container: StaticContainer;
   }) {
     this.chain = params.chain;
     this.nodeEndpoints = params.nodeEndpoints;

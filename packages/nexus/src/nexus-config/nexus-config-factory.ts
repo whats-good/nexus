@@ -22,22 +22,22 @@ interface LogConfig {
 
 const DEFAULT_PORT = 4000;
 
-export interface NexusConfigOptions<TPlatformContext = unknown> {
+export interface NexusConfigOptions {
   nodeProviders?: NodeProvider[];
   relay?: Partial<RelayConfig>;
   port?: number;
   log?: LogConfigOptions;
-  middleware?: NexusMiddleware<TPlatformContext>[];
+  middleware?: NexusMiddleware[];
   rpcAuthKey?: string;
   env?: Record<string, string | undefined>;
 }
 
-export class NexusConfigFactory<TPlatformContext = unknown> {
-  private readonly options: NexusConfigOptions<TPlatformContext>;
+export class NexusConfigFactory {
+  private readonly options: NexusConfigOptions;
   private readonly envConfig: EnvConfig;
   private readonly logger: Logger;
 
-  constructor(options?: NexusConfigOptions<TPlatformContext>) {
+  constructor(options?: NexusConfigOptions) {
     this.options = options || {};
     this.envConfig = getEnvConfig(this.getEnv());
     this.logger = this.getLogger();
@@ -60,7 +60,7 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
       new Set(nodeProviders.map((nodeProvider) => nodeProvider.chain))
     );
 
-    return new NexusConfig<TPlatformContext>({
+    return new NexusConfig({
       nodeProviders,
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: this.getRelayConfig(),
@@ -128,9 +128,8 @@ export class NexusConfigFactory<TPlatformContext = unknown> {
     return combinedNodeProviders;
   }
 
-  private getMiddleware(): NexusMiddleware<TPlatformContext>[] {
-    const middleware: NexusMiddleware<TPlatformContext>[] =
-      this.options.middleware || [];
+  private getMiddleware(): NexusMiddleware[] {
+    const middleware: NexusMiddleware[] = this.options.middleware || [];
 
     middleware.push(authMiddleware);
     middleware.push(nodeRelayMiddleware);

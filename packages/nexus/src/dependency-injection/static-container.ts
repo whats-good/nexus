@@ -5,17 +5,14 @@ import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { WsContext } from "@src/websockets/ws-context";
 import { EventBus } from "@src/events";
 
-export class StaticContainer<TPlatformContext = unknown> {
-  public readonly config: NexusConfig<TPlatformContext>;
-  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
+export class StaticContainer {
+  public readonly config: NexusConfig;
+  public readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   public readonly authorizationService: AuthorizationService;
-  public readonly wsContexts = new Map<
-    WebSocket,
-    WsContext<TPlatformContext>
-  >();
-  public readonly eventBus = new EventBus<TPlatformContext>();
+  public readonly wsContexts = new Map<WebSocket, WsContext>();
+  public readonly eventBus = new EventBus();
 
-  constructor(params: { config: NexusConfig<TPlatformContext> }) {
+  constructor(params: { config: NexusConfig }) {
     this.config = params.config;
     this.nodeEndpointPoolFactory = new NodeEndpointPoolFactory(this);
     this.authorizationService = new AuthorizationService(this.config.authKey);

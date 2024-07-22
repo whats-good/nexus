@@ -3,15 +3,12 @@ import type { NexusRpcContext } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { NexusMiddleware } from "./nexus-middleware";
 
-export class NexusMiddlewareHandler<TPlatformContext = unknown> {
-  private readonly middleware: NexusMiddleware<TPlatformContext>[];
-  private readonly ctx: NexusRpcContext<TPlatformContext>;
+export class NexusMiddlewareHandler {
+  private readonly middleware: NexusMiddleware[];
+  private readonly ctx: NexusRpcContext;
   private readonly logger: Logger;
 
-  constructor(params: {
-    middleware: NexusMiddleware<TPlatformContext>[];
-    ctx: NexusRpcContext<TPlatformContext>;
-  }) {
+  constructor(params: { middleware: NexusMiddleware[]; ctx: NexusRpcContext }) {
     this.middleware = params.middleware;
     this.ctx = params.ctx;
     this.logger = this.ctx.container.logger.child({

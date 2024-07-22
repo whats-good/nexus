@@ -6,10 +6,10 @@ import type { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { WsContext } from "./ws-context";
 
-export class WsContextHandler<TPlatformContext = unknown> {
+export class WsContextHandler {
   private readonly logger: Logger;
 
-  constructor(private container: StaticContainer<TPlatformContext>) {
+  constructor(private container: StaticContainer) {
     this.logger = container.logger.child({ name: this.constructor.name });
   }
 
@@ -29,7 +29,7 @@ export class WsContextHandler<TPlatformContext = unknown> {
     }
   }
 
-  private handleContextCleanup(context: WsContext<TPlatformContext>) {
+  private handleContextCleanup(context: WsContext) {
     const { client, node } = context;
 
     if (client.readyState !== WebSocket.CLOSED) {
@@ -46,7 +46,7 @@ export class WsContextHandler<TPlatformContext = unknown> {
     this.container.wsContexts.delete(client);
   }
 
-  public handleConnection(context: WsContext<TPlatformContext>) {
+  public handleConnection(context: WsContext) {
     const { client, node, endpoint } = context;
     // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 

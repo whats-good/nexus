@@ -2,8 +2,8 @@ import type { NexusRpcContext } from "@src/dependency-injection";
 import type { NexusMiddlewareNextFn } from "@src/middleware";
 import { UnauthorizedCustomErrorResponse } from "@src/rpc-response";
 
-export async function authMiddleware<TPlatformContext = unknown>(
-  ctx: NexusRpcContext<TPlatformContext>,
+export async function authMiddleware(
+  ctx: NexusRpcContext,
   next: NexusMiddlewareNextFn
 ) {
   // TODO: NexusRpcContext fully assumes that it's an http request. But some functionality

@@ -19,13 +19,13 @@ import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
-export class Controller<TPlatformContext = unknown> {
-  private readonly container: StaticContainer<TPlatformContext>;
-  private readonly config: NexusConfig<TPlatformContext>;
-  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory<TPlatformContext>;
+export class Controller {
+  private readonly container: StaticContainer;
+  private readonly config: NexusConfig;
+  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   private readonly logger: Logger;
 
-  constructor(container: StaticContainer<TPlatformContext>) {
+  constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
@@ -43,9 +43,7 @@ export class Controller<TPlatformContext = unknown> {
     return new NexusNotFoundResponse();
   }
 
-  private async handleRpcContext(
-    ctx: NexusRpcContext<TPlatformContext>
-  ): Promise<RpcResponse> {
+  private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
     const middlewareHandler = new NexusMiddlewareHandler({
       ctx,
       middleware: this.config.middleware,

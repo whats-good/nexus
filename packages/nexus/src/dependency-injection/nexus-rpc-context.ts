@@ -4,8 +4,8 @@ import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import type { RpcResponse } from "@src/rpc-response";
 import type { StaticContainer } from "./static-container";
 
-export class NexusRpcContext<TPlatformContext = unknown> {
-  public readonly container: StaticContainer<TPlatformContext>;
+export class NexusRpcContext {
+  public readonly container: StaticContainer;
   public readonly chain: Chain;
   public readonly url: URL;
   public readonly nodeEndpointPool: NodeEndpointPool;
@@ -14,7 +14,7 @@ export class NexusRpcContext<TPlatformContext = unknown> {
   private rpcResponse: RpcResponse | null = null;
 
   constructor(params: {
-    container: StaticContainer<TPlatformContext>;
+    container: StaticContainer;
     chain: Chain;
     url: URL;
     nodeEndpointPool: NodeEndpointPool;

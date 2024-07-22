@@ -6,13 +6,13 @@ import { NodeEndpoint } from "./node-endpoint";
 
 type Protocol = "http" | "ws";
 
-export class NodeEndpointPoolFactory<TPlatformContext = unknown> {
-  private readonly container: StaticContainer<TPlatformContext>;
+export class NodeEndpointPoolFactory {
+  private readonly container: StaticContainer;
   private readonly nodeProviders: NodeProvider[];
   public readonly http: Map<Chain, NodeEndpointPool>;
   public readonly ws: Map<Chain, NodeEndpointPool>;
 
-  constructor(container: StaticContainer<TPlatformContext>) {
+  constructor(container: StaticContainer) {
     this.container = container;
     this.nodeProviders = container.config.nodeProviders;
     this.http = this.createChainToEndpointPoolMap("http");
