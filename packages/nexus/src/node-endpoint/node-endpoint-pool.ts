@@ -135,6 +135,8 @@ export class NodeEndpointPool {
     }
   }
 
+  // TODO: pull this out of the endpoint pool, and place into the http-relay-handler.
+  // node-endpoint-pool should only be responsible for cycling through the endpoints.
   public async relay(
     request: RpcRequestPayloadType
   ): Promise<NodeEndpointPoolResponse> {

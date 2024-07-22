@@ -1,5 +1,8 @@
 import type { Logger } from "pino";
-import type { NexusRpcContext } from "@src/dependency-injection";
+import type {
+  NexusRpcContext,
+  StaticContainer,
+} from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { NexusMiddleware } from "./nexus-middleware";
 
@@ -7,11 +10,17 @@ export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
   private readonly ctx: NexusRpcContext;
   private readonly logger: Logger;
+  private readonly container: StaticContainer;
 
-  constructor(params: { middleware: NexusMiddleware[]; ctx: NexusRpcContext }) {
+  constructor(params: {
+    middleware: NexusMiddleware[];
+    ctx: NexusRpcContext;
+    container: StaticContainer;
+  }) {
     this.middleware = params.middleware;
     this.ctx = params.ctx;
-    this.logger = this.ctx.container.logger.child({
+    this.container = params.container;
+    this.logger = params.container.logger.child({
       name: this.constructor.name,
     });
   }
@@ -30,7 +39,7 @@ export class NexusMiddlewareHandler {
     };
 
     try {
-      await this.middleware[index](this.ctx, next);
+      await this.middleware[index](this.ctx, this.container, next);
     } catch (e) {
       const name = this.middleware[index].name || "anonymous";
 

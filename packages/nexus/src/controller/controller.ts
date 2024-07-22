@@ -1,7 +1,6 @@
 import type { Logger } from "pino";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { StaticContainer } from "@src/dependency-injection";
 import { NexusRpcContext } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
@@ -9,7 +8,6 @@ import {
   ChainNotFoundErrorResponse,
   InternalErrorResponse,
   ParseErrorResponse,
-  ProviderNotConfiguredErrorResponse,
   RpcErrorResponse,
   RpcSuccessResponse,
 } from "@src/rpc-response";
@@ -17,19 +15,20 @@ import { NexusMiddlewareHandler } from "@src/middleware";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
+import { HttpRelayHandler } from "@src/http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 export class Controller {
   private readonly container: StaticContainer;
   private readonly config: NexusConfig;
-  private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory;
   private readonly logger: Logger;
+  private readonly httpRelayHandler: HttpRelayHandler;
 
   constructor(container: StaticContainer) {
     this.container = container;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.config = container.config;
-    this.nodeEndpointPoolFactory = container.nodeEndpointPoolFactory;
+    this.httpRelayHandler = new HttpRelayHandler(container);
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -46,6 +45,7 @@ export class Controller {
   private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
     const middlewareHandler = new NexusMiddlewareHandler({
       ctx,
+      container: this.container,
       middleware: this.config.middleware,
     });
 
@@ -60,21 +60,19 @@ export class Controller {
     let response = ctx.getResponse();
 
     if (!response) {
-      this.logger.error(
-        {
-          request: ctx.rpcRequestPayload,
-        },
-        "No response set in context. Setting InternalErrorResponse."
-      );
+      try {
+        response = await this.httpRelayHandler.handle(ctx);
+      } catch (e) {
+        this.logger.error(errSerialize(e), "Error in node relay handler");
 
-      response = new InternalErrorResponse(ctx.requestId);
-      ctx.setResponse(response);
+        response = new InternalErrorResponse(ctx.requestId);
+      }
     }
 
     if (response instanceof RpcSuccessResponse) {
-      ctx.container.eventBus.emit("rpcResponseSuccess", response, ctx);
+      this.container.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      ctx.container.eventBus.emit("rpcResponseError", response, ctx);
+      this.container.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");
@@ -113,19 +111,8 @@ export class Controller {
       );
     }
 
-    const nodeEndpointPool = this.nodeEndpointPoolFactory.http.get(chain);
-
-    if (!nodeEndpointPool) {
-      return new ProviderNotConfiguredErrorResponse(
-        rpcRequestPayload.data.id || null,
-        chain
-      );
-    }
-
     const ctx = new NexusRpcContext({
-      container: this.container,
       chain,
-      nodeEndpointPool,
       rpcRequestPayload: rpcRequestPayload.data,
       url: new URL(request.url),
     });

@@ -8,15 +8,14 @@ import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
 import { Controller } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
-import { WsRpcServer } from "@src/websockets";
-import { WsContextHandler } from "@src/websockets/ws-context-handler";
+import { WsRpcServer, WsPairHandler } from "@src/websockets";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly container: StaticContainer;
   private readonly controller: Controller;
-  private readonly wsContextHandler: WsContextHandler;
+  private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
   public readonly on: StaticContainer["eventBus"]["on"];
@@ -26,7 +25,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     this.controller = new Controller(container);
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
-    this.wsContextHandler = new WsContextHandler(container);
+    this.wsPairHandler = new WsPairHandler(container);
     this.on = container.eventBus.on.bind(container.eventBus);
   }
 
@@ -38,8 +37,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public ws(httpServer: NodeHttpServer) {
     const wsServer = new WsRpcServer(this.container);
 
-    wsServer.on("connection", (context) => {
-      this.wsContextHandler.handleConnection(context);
+    wsServer.on("connection", (pair) => {
+      this.wsPairHandler.handleConnection(pair);
     });
 
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
