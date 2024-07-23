@@ -6,17 +6,7 @@
 # Check if the --frozen flag was passed, and the FROZEN flag to true
 if [[ $* == *--frozen* ]]
 then
-    FROZEN=true
-else
-    FROZEN=false
-fi
-
-# Check if the --autocommit flag was passed, and the AUTOCOMMIT flag to true
-if [[ $* == *--autocommit* ]]
-then
-    AUTOCOMMIT=true
-else
-    AUTOCOMMIT=false
+    FROZEN="true"
 fi
 
 NEXUS_PATH=./packages/nexus
@@ -40,36 +30,27 @@ echo "Running integrations docs generation script"
 sh ./scripts/generate-docs-integrations.sh
 
 # If the --frozen flag was passed, run a git diff to see if the changelog or the readme has changed 
-if [ "$FROZEN" = true ] ; then
-    echo "Checking if the changelog has changed"
-    if [[ $(git diff --name-only) == *"docs/development/changelog.mdx"* ]] ; then
-        echo "Error: The changelog has changed. Please run 'pnpm docs:generate' and commit the changes"
-        exit 1
-    fi
+if [ "$FROZEN" = "true" ] ; then
 
-    echo "Checking if the readme has changed"
-    if [[ $(git diff --name-only) == *"packages/nexus/README.md"* ]] ; then
-        echo "Error: The README has changed. Please run 'pnpm docs:generate' and commit the changes"
-        exit 1
+    # If the STRICT flag is passed, check if the changelog or the readme has changed too
+    if [ "$STRICT" = "true" ] ; then
+        echo "Checking if the changelog has changed"
+        if [[ $(git diff --name-only) == *"docs/development/changelog.mdx"* ]] ; then
+            echo "Error: The changelog has changed. Please run 'pnpm docs:generate' and commit the changes"
+            exit 1
+        fi
+
+        echo "Checking if the readme has changed"
+        if [[ $(git diff --name-only) == *"packages/nexus/README.md"* ]] ; then
+            echo "Error: The README has changed. Please run 'pnpm docs:generate' and commit the changes"
+            exit 1
+        fi
     fi
 
     echo "Checking if the integrations have changed"
     if [[ $(git diff --name-only) == *"docs/integrations/"* ]] ; then
         echo "Error: The examples have changed. Please run 'pnpm docs:generate' and commit the changes"
         exit 1
-    fi
-fi
-
-# If the --autocommit flag was passed, commit the changes
-if [ "$AUTOCOMMIT" = true ] ; then
-  # First, check if there are any changes to commit
-    if [[ $(git diff --name-only) == *"docs/changelog.mdx"* ]] || [[ $(git diff --name-only) == *"packages/nexus/README.md"* ]] ; then
-        echo "Committing changes"
-        git add docs/changelog.mdx
-        git add packages/nexus/README.md
-        git commit -m "docs: update changelog and readme"
-    else
-        echo "No changes to commit"
     fi
 fi
 

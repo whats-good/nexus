@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
@@ -32,6 +36,9 @@ jobs:
 
       - name: Docs
         run: pnpm docs:generate --frozen
+        env:
+          # if this is a pull request, set the STRICT environment variable to true
+          STRICT: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
 
       - name: Slack Notification
         id: slack
