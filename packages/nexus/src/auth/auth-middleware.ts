@@ -15,7 +15,7 @@ export async function authMiddleware(
   // so, we should consider refactoring this to be more generic.
 
   if (!container.authorizationService.isAuthorized(ctx.url)) {
-    const response = new UnauthorizedCustomErrorResponse(ctx.requestId);
+    const response = new UnauthorizedCustomErrorResponse(ctx.request.id);
 
     ctx.setResponse(response);
 

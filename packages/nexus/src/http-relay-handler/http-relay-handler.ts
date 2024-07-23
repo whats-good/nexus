@@ -26,37 +26,37 @@ export class HttpRelayHandler {
         // additional processing?
         return RpcErrorResponse.fromErrorResponsePayload(
           failure.response.error,
-          ctx.requestId
+          ctx.request.id
         );
       }
 
       case "non-200-response": {
         return new NodeProviderReturnedNon200ErrorResponse(
-          ctx.requestId,
+          ctx.request.id,
           failure.endpoint.nodeProvider
         );
       }
 
       case "internal-fetch-error": {
-        return new InternalErrorResponse(ctx.requestId);
+        return new InternalErrorResponse(ctx.request.id);
       }
 
       case "non-json-response": {
         return new NodeProviderReturnedInvalidResponse(
-          ctx.requestId,
+          ctx.request.id,
           failure.endpoint.nodeProvider
         );
       }
 
       case "unknown-rpc-response": {
         return new NodeProviderReturnedInvalidResponse(
-          ctx.requestId,
+          ctx.request.id,
           failure.endpoint.nodeProvider
         );
       }
 
       default: {
-        return new InternalErrorResponse(ctx.requestId);
+        return new InternalErrorResponse(ctx.request.id);
       }
     }
   }
@@ -67,14 +67,14 @@ export class HttpRelayHandler {
     );
 
     if (!nodeEndpointPool) {
-      return new ProviderNotConfiguredErrorResponse(ctx.requestId, ctx.chain);
+      return new ProviderNotConfiguredErrorResponse(ctx.request.id, ctx.chain);
     }
 
-    const poolResponse = await nodeEndpointPool.relay(ctx.rpcRequestPayload);
+    const poolResponse = await nodeEndpointPool.relay(ctx.request);
 
     if (poolResponse.kind === "success") {
       return new RpcSuccessResponse(
-        ctx.requestId,
+        ctx.request.id,
         poolResponse.success.response.result
       );
     }
