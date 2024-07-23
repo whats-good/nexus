@@ -1,6 +1,6 @@
 {
   "name": "@whatsgood/example-nodejs-standalone-server",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
   "author": {
     "name": "Kerem Kazan",
