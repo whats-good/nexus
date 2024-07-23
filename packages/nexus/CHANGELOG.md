@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.23.1
+
+### Patch Changes
+
+- cffcd19: RpcContext api no longer separates the request from its id
+
 ## 0.23.0
 
 ### Minor Changes

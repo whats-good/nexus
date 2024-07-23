@@ -1,5 +1,12 @@
 # @whatsgood/example-bun-ts-server
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [cffcd19]
+  - @whatsgood/nexus@0.23.1
+
 ## 0.6.2
 
 ### Patch Changes
