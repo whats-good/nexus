@@ -3,14 +3,14 @@ import { IntSchema, IntStringSchema, requiredUnknown } from "@src/utils";
 
 /*************** Common ***************/
 
-export const RpcRequestIdSchema = IntSchema.or(IntStringSchema).nullish();
+export const RpcRequestIdSchema = IntSchema.or(IntStringSchema);
 export type RpcRequestId = z.infer<typeof RpcRequestIdSchema>;
 
 /*************** RPC Request ***************/
 
 export const RpcRequestPayloadSchema = z.object({
   jsonrpc: z.literal("2.0"),
-  id: RpcRequestIdSchema,
+  id: RpcRequestIdSchema.nullish().transform((id) => id ?? null),
   method: z.string(),
   params: z.unknown().nullish(),
 });
@@ -19,8 +19,8 @@ export type RpcRequestPayloadType = z.infer<typeof RpcRequestPayloadSchema>;
 
 /*************** RPC Response ***************/
 
-export const RpcResponsePayloadBaseSchema = z.object({
-  id: RpcRequestIdSchema,
+const RpcResponsePayloadBaseSchema = z.object({
+  id: RpcRequestIdSchema.nullable(),
   jsonrpc: z.literal("2.0"),
 });
 

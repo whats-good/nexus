@@ -5,9 +5,8 @@ import type { RpcResponse } from "@src/rpc-response";
 export class NexusRpcContext {
   public readonly chain: Chain;
   public readonly url: URL;
-  public readonly rpcRequestPayload: RpcRequestPayloadType;
-  public readonly requestId: string | number | null;
-  private rpcResponse: RpcResponse | null = null;
+  public readonly request: RpcRequestPayloadType;
+  private response: RpcResponse | null = null;
 
   constructor(params: {
     chain: Chain;
@@ -16,19 +15,18 @@ export class NexusRpcContext {
   }) {
     this.chain = params.chain;
     this.url = params.url;
-    this.rpcRequestPayload = params.rpcRequestPayload;
-    this.requestId = params.rpcRequestPayload.id || null;
+    this.request = params.rpcRequestPayload;
   }
 
   public setResponse(response: RpcResponse) {
-    if (this.rpcResponse) {
+    if (this.response) {
       throw new Error("Response already set");
     } else {
-      this.rpcResponse = response;
+      this.response = response;
     }
   }
 
   public getResponse(): RpcResponse | null {
-    return this.rpcResponse;
+    return this.response;
   }
 }

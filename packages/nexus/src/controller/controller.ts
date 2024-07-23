@@ -54,7 +54,7 @@ export class Controller {
     } catch (e) {
       this.logger.error(errSerialize(e), "Error in rpc middleware");
 
-      ctx.setResponse(new InternalErrorResponse(ctx.requestId));
+      ctx.setResponse(new InternalErrorResponse(ctx.request.id));
     }
 
     let response = ctx.getResponse();
@@ -65,7 +65,7 @@ export class Controller {
       } catch (e) {
         this.logger.error(errSerialize(e), "Error in node relay handler");
 
-        response = new InternalErrorResponse(ctx.requestId);
+        response = new InternalErrorResponse(ctx.request.id);
       }
     }
 
