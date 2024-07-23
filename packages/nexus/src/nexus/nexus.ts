@@ -6,7 +6,7 @@ import type {
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
-import { Controller } from "@src/controller";
+import { HttpController } from "@src/controller";
 import { StaticContainer } from "@src/dependency-injection";
 import { WsRpcServer, WsPairHandler } from "@src/websockets";
 
@@ -14,7 +14,7 @@ export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly container: StaticContainer;
-  private readonly controller: Controller;
+  private readonly controller: HttpController;
   private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
@@ -22,7 +22,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
 
   private constructor(container: StaticContainer) {
     this.container = container;
-    this.controller = new Controller(container);
+    this.controller = new HttpController(container);
     this.port = container.config.port;
     this.logger = container.logger.child({ name: this.constructor.name });
     this.wsPairHandler = new WsPairHandler(container);
