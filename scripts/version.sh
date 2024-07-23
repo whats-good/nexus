@@ -7,7 +7,6 @@ set -eo pipefail
 set -x
 
 pnpm changeset version
-# TODO: temporarily disabled
-# ./scripts/docs.sh 
+pnpm docs:generate
 
 echo "Done!"
