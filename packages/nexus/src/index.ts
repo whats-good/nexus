@@ -1,6 +1,6 @@
 export * from "./auth";
 export * from "./chain";
-export * from "./controller";
+export * from "./http";
 export * from "./default-chains";
 export * from "./dependency-injection";
 export * from "./events";
@@ -9,7 +9,6 @@ export * from "./nexus";
 export * from "./nexus-config";
 export * from "./node-endpoint";
 export * from "./node-provider";
-export * from "./http-relay-handler";
 export * from "./rpc-response";
 export * from "./rpc-schema";
 export * from "./utils";
