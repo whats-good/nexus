@@ -3,7 +3,7 @@ import type {
   RpcResponseSuccessPayloadType,
   RpcResponseErrorFieldType,
 } from "@src/rpc-schema";
-import { NexusJsonResponse } from "@src/controller/nexus-response";
+import { NexusJsonResponse } from "@src/http-controller/nexus-response";
 import type { NodeProvider } from "@src/node-provider";
 import type { Chain } from "@src/chain";
 

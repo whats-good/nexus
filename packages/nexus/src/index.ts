@@ -1,6 +1,6 @@
 export * from "./auth";
 export * from "./chain";
-export * from "./controller";
+export * from "./http-controller";
 export * from "./default-chains";
 export * from "./dependency-injection";
 export * from "./events";

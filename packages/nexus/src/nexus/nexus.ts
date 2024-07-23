@@ -6,7 +6,7 @@ import type {
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
 import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
-import { HttpController } from "@src/controller";
+import { HttpController } from "@src/http-controller";
 import { StaticContainer } from "@src/dependency-injection";
 import { WsRpcServer, WsPairHandler } from "@src/websockets";
 
