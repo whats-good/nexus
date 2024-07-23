@@ -15,7 +15,7 @@ import { NexusMiddlewareHandler } from "@src/middleware";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
-import { HttpRelayHandler } from "@src/http-relay-handler";
+import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 export class HttpController {
