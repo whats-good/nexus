@@ -2,7 +2,6 @@ import type { Logger } from "pino";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { StaticContainer } from "@src/dependency-injection";
-import { NexusRpcContext } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
@@ -15,6 +14,7 @@ import { NexusMiddlewareHandler } from "@src/middleware";
 import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
+import { NexusRpcContext } from "@src/nexus-rpc-context";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 

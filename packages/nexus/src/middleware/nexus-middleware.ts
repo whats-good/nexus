@@ -1,7 +1,5 @@
-import type {
-  NexusRpcContext,
-  StaticContainer,
-} from "@src/dependency-injection";
+import type { StaticContainer } from "@src/dependency-injection";
+import type { NexusRpcContext } from "@src/nexus-rpc-context";
 
 export type NexusMiddlewareNextFn = () => Promise<void>;
 

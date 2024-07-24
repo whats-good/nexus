@@ -1,9 +1,7 @@
 import type { Logger } from "pino";
-import type {
-  NexusRpcContext,
-  StaticContainer,
-} from "@src/dependency-injection";
+import type { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
+import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import type { NexusMiddleware } from "./nexus-middleware";
 
 export class NexusMiddlewareHandler {

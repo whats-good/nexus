@@ -1,8 +1,6 @@
-import type {
-  NexusRpcContext,
-  StaticContainer,
-} from "@src/dependency-injection";
+import type { StaticContainer } from "@src/dependency-injection";
 import type { NexusMiddlewareNextFn } from "@src/middleware";
+import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { UnauthorizedCustomErrorResponse } from "@src/rpc-response";
 
 export async function authMiddleware(
