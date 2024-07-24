@@ -1,5 +1,16 @@
 # @whatsgood/nexus
 
+## 0.24.0
+
+### Minor Changes
+
+- 97bf30f: RpcContext moved out of the dependency-injection module
+- 97bf30f: Created a container.getLogger function
+
+### Patch Changes
+
+- 5487681: Moving http modules into 'http'
+
 ## 0.23.1
 
 ### Patch Changes
