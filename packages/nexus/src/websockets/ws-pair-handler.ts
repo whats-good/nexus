@@ -11,7 +11,7 @@ export class WsPairHandler {
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
 
   constructor(private container: StaticContainer) {
-    this.logger = container.logger.child({ name: this.constructor.name });
+    this.logger = container.getLogger(WsPairHandler.name);
   }
 
   public getWsPair(client: WebSocket) {

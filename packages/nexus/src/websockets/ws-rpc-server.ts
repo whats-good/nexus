@@ -21,7 +21,7 @@ export class WsRpcServer extends EventEmitter<{
   constructor(private container: StaticContainer) {
     super();
 
-    this.logger = container.logger.child({ name: this.constructor.name });
+    this.logger = container.getLogger(WsRpcServer.name);
 
     this.wss = new WebSocketServer({
       noServer: true,
@@ -121,7 +121,7 @@ export class WsRpcServer extends EventEmitter<{
           client: clientSocket,
           node: nodeSocket,
           endpoint,
-          logger: this.container.logger,
+          getLogger: this.container.getLogger.bind(this.container),
         });
 
         this.container.wsPairHandler.registerWsPair(pair);

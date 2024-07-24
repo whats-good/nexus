@@ -1,9 +1,7 @@
 import type { Logger } from "pino";
-import type {
-  NexusRpcContext,
-  StaticContainer,
-} from "@src/dependency-injection";
+import type { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
+import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import type { NexusMiddleware } from "./nexus-middleware";
 
 export class NexusMiddlewareHandler {
@@ -20,9 +18,7 @@ export class NexusMiddlewareHandler {
     this.middleware = params.middleware;
     this.ctx = params.ctx;
     this.container = params.container;
-    this.logger = params.container.logger.child({
-      name: this.constructor.name,
-    });
+    this.logger = params.container.getLogger(NexusMiddlewareHandler.name);
   }
 
   public async handle() {

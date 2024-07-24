@@ -1,7 +1,5 @@
-import type {
-  NexusRpcContext,
-  StaticContainer,
-} from "@src/dependency-injection";
+import type { StaticContainer } from "@src/dependency-injection";
+import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
 import {
   InternalErrorResponse,

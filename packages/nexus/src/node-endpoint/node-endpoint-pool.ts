@@ -30,9 +30,7 @@ export class NodeEndpointPool {
     this.chain = params.chain;
     this.nodeEndpoints = params.nodeEndpoints;
     this.config = params.container.config.relay;
-    this.logger = params.container.logger.child({
-      name: this.constructor.name,
-    });
+    this.logger = params.container.getLogger(NodeEndpointPool.name);
 
     if (this.config.failure.kind === "cycle-requests") {
       this.maxRelayAttempts = this.config.failure.maxAttempts;

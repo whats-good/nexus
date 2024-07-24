@@ -21,7 +21,7 @@ export class WebSocketPool extends EventEmitter<WebSocketPoolEvents> {
   ) {
     super();
     this.timeout = 3000; // TODO: make this configurable
-    this.logger = container.logger.child({ name: this.constructor.name });
+    this.logger = container.getLogger(WebSocketPool.name);
     this.generator = this.nodeEndpointPool.generator();
     this.timer = null;
 

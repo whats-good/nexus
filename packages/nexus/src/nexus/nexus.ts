@@ -24,7 +24,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     this.container = container;
     this.controller = new HttpController(container);
     this.port = container.config.port;
-    this.logger = container.logger.child({ name: this.constructor.name });
+    this.logger = this.container.getLogger(Nexus.name);
     this.wsPairHandler = new WsPairHandler(container);
     this.on = container.eventBus.on.bind(container.eventBus);
   }
@@ -52,8 +52,9 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
       config,
     });
 
-    staticContainer.logger.info(config.summary(), "Nexus created");
     const server = new Nexus(staticContainer);
+
+    server.logger.info("Nexus server created");
 
     return createServerAdapter<unknown, Nexus>(
       server
