@@ -20,9 +20,7 @@ export class NexusMiddlewareHandler {
     this.middleware = params.middleware;
     this.ctx = params.ctx;
     this.container = params.container;
-    this.logger = params.container.logger.child({
-      name: this.constructor.name,
-    });
+    this.logger = params.container.getLogger(NexusMiddlewareHandler.name);
   }
 
   public async handle() {

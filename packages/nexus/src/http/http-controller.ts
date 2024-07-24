@@ -26,7 +26,7 @@ export class HttpController {
 
   constructor(container: StaticContainer) {
     this.container = container;
-    this.logger = container.logger.child({ name: this.constructor.name });
+    this.logger = container.getLogger(HttpController.name);
     this.config = container.config;
     this.httpRelayHandler = new HttpRelayHandler(container);
   }
