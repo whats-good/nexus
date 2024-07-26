@@ -69,6 +69,10 @@ function generate_code_group_entry() {
     local source_file_extension="${source_path##*.}"
     local source_filename="${source_path##*/}"
 
+    if [ $source_file_extension == "ts" ]; then
+        source_file_extension="typescript"
+    fi
+
     echo "\`\`\`$source_file_extension $source_filename" >> $destination_path
     cat $source_path >> $destination_path
     echo "\`\`\`" >> $destination_path
