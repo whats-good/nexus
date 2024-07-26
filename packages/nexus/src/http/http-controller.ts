@@ -1,7 +1,8 @@
 import type { Logger } from "pino";
+import { injectable } from "tsyringe";
 import type { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { StaticContainer } from "@src/dependency-injection";
+import { StaticContainer } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
@@ -18,17 +19,18 @@ import { NexusRpcContext } from "@src/nexus-rpc-context";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
+@injectable()
 export class HttpController {
-  private readonly container: StaticContainer;
   private readonly config: NexusConfig;
   private readonly logger: Logger;
-  private readonly httpRelayHandler: HttpRelayHandler;
 
-  constructor(container: StaticContainer) {
+  constructor(
+    private readonly container: StaticContainer,
+    private readonly httpRelayHandler: HttpRelayHandler
+  ) {
     this.container = container;
     this.logger = container.getLogger(HttpController.name);
     this.config = container.config;
-    this.httpRelayHandler = new HttpRelayHandler(container);
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {

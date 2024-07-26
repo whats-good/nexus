@@ -1,11 +1,13 @@
+import { injectable } from "tsyringe";
 import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
-import type { StaticContainer } from "@src/dependency-injection/static-container";
+import { StaticContainer } from "@src/dependency-injection/static-container";
 import { NodeEndpointPool } from "./node-endpoint-pool";
 import { NodeEndpoint } from "./node-endpoint";
 
 type Protocol = "http" | "ws";
 
+@injectable()
 export class NodeEndpointPoolFactory {
   private readonly container: StaticContainer;
   private readonly nodeProviders: NodeProvider[];

@@ -1,11 +1,13 @@
 import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
+import { injectable } from "tsyringe";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { StaticContainer } from "@src/dependency-injection";
+import { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { WebSocketPair } from "./ws-pair";
 
+@injectable()
 export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();

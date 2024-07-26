@@ -3,22 +3,30 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import type { StaticContainer } from "@src/dependency-injection";
+import { injectable } from "tsyringe";
+import { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
+import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import { WebSocketPool } from "./ws-pool";
 import { WebSocketPair } from "./ws-pair";
+import { WsPairHandler } from "./ws-pair-handler";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
+@injectable()
 export class WsRpcServer extends EventEmitter<{
   connection: (pair: WebSocketPair) => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
 
-  constructor(private container: StaticContainer) {
+  constructor(
+    private container: StaticContainer,
+    private readonly wsPairHandler: WsPairHandler,
+    private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory
+  ) {
     super();
 
     this.logger = container.getLogger(WsRpcServer.name);
@@ -28,7 +36,7 @@ export class WsRpcServer extends EventEmitter<{
     });
 
     this.wss.on("connection", (ws, request) => {
-      const pair = this.container.wsPairHandler.getWsPair(ws);
+      const pair = this.wsPairHandler.getWsPair(ws);
 
       this.logger.debug("New websocket connection established");
 
@@ -97,7 +105,7 @@ export class WsRpcServer extends EventEmitter<{
       return;
     }
 
-    const endpointPool = this.container.nodeEndpointPoolFactory.ws.get(chain);
+    const endpointPool = this.nodeEndpointPoolFactory.ws.get(chain);
 
     if (!endpointPool) {
       this.logger.warn(
@@ -124,7 +132,7 @@ export class WsRpcServer extends EventEmitter<{
           getLogger: this.container.getLogger.bind(this.container),
         });
 
-        this.container.wsPairHandler.registerWsPair(pair);
+        this.wsPairHandler.registerWsPair(pair);
 
         this.wss.emit("connection", clientSocket, req);
       });
