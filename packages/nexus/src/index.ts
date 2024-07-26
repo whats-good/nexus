@@ -2,7 +2,6 @@ export * from "./auth";
 export * from "./chain";
 export * from "./http";
 export * from "./default-chains";
-export * from "./dependency-injection";
 export * from "./events";
 export * from "./middleware";
 export * from "./nexus";
