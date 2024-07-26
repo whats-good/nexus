@@ -3,7 +3,7 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
@@ -17,7 +17,8 @@ import { WsPairHandler } from "./ws-pair-handler";
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
-@singleton()
+
+@scoped(Lifecycle.ContainerScoped)
 export class WsRpcServer extends EventEmitter<{
   connection: (pair: WebSocketPair) => void;
 }> {

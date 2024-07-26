@@ -1,9 +1,9 @@
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
 
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class AuthorizationService {
   private readonly authKey?: string;
 

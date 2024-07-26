@@ -1,8 +1,8 @@
 import type { Logger } from "pino";
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class LoggerFactory {
   constructor(private readonly config: NexusConfig) {}
 

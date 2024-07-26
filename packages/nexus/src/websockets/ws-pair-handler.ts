@@ -1,13 +1,13 @@
 import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import { errSerialize } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
 import type { WebSocketPair } from "./ws-pair";
 
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
@@ -62,6 +62,7 @@ export class WsPairHandler {
     // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 
     node.on("message", (data) => {
+      // TODO: emit events for successful and failed messages from the node
       if (client.readyState !== WebSocket.OPEN) {
         pair.logger.error(
           {

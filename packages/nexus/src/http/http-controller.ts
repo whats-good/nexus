@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { RpcResponse } from "@src/rpc-response";
@@ -20,7 +20,7 @@ import { EventBus } from "@src/events";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class HttpController {
   private readonly logger: Logger;
 

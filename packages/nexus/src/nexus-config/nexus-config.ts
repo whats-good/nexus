@@ -1,11 +1,11 @@
 import { type Logger } from "pino";
-import { singleton } from "tsyringe";
+import { Lifecycle, scoped } from "tsyringe";
 import type { Chain } from "@src/chain";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 
-@singleton()
+@scoped(Lifecycle.ContainerScoped)
 export class NexusConfig {
   public readonly nodeProviders: [NodeProvider, ...NodeProvider[]];
   public readonly chains: Map<number, Chain>;

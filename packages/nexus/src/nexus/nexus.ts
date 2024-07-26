@@ -7,7 +7,7 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { container, injectable } from "tsyringe";
+import { container, Lifecycle, scoped } from "tsyringe";
 import {
   NexusConfig,
   NexusConfigFactory,
@@ -20,7 +20,7 @@ import { EventBus } from "@src/events";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
-@injectable()
+@scoped(Lifecycle.ContainerScoped)
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   public readonly port?: number;
   public readonly logger: Logger;
