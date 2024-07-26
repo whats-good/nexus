@@ -7,7 +7,7 @@ description: "Learn how to configure chains and use them in Nexus"
 
 Nexus ships with a handful of built-in chains. These can be accessed via the `CHAIN` constant.
 
-```ts
+```typescript
 import {
   NodeProvider,
   CHAIN,
@@ -25,7 +25,7 @@ const alchemyNodeProvider = new NodeProvider({
 
 If your target chain is not supported by Nexus, you can add it as a custom chain. When creating a chain, you need to provide a `name`, `chainId`, and `blockTime`. These values are then used to identify access, and fine-tune caching and other features.
 
-```ts
+```typescript
 import {
   NodeProvider,
   CHAIN,
