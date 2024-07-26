@@ -2,4 +2,4 @@
 "@whatsgood/nexus": minor
 ---
 
-Introducing tsyringe for ioc
+Introducing inversify for ioc
