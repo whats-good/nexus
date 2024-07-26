@@ -6,36 +6,33 @@ import type { NexusMiddleware } from "./nexus-middleware";
 
 export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
-  private readonly ctx: NexusRpcContext;
   private readonly logger: Logger;
   private readonly container: StaticContainer;
 
   constructor(params: {
     middleware: NexusMiddleware[];
-    ctx: NexusRpcContext;
     container: StaticContainer;
   }) {
     this.middleware = params.middleware;
-    this.ctx = params.ctx;
     this.container = params.container;
     this.logger = params.container.getLogger(NexusMiddlewareHandler.name);
   }
 
-  public async handle() {
-    await this.composeMiddleware(0);
+  public async handle(ctx: NexusRpcContext) {
+    await this.composeMiddleware(0, ctx);
   }
 
-  private async composeMiddleware(index: number) {
+  private async composeMiddleware(index: number, ctx: NexusRpcContext) {
     if (index === this.middleware.length) {
       return;
     }
 
     const next = async () => {
-      await this.composeMiddleware(index + 1);
+      await this.composeMiddleware(index + 1, ctx);
     };
 
     try {
-      await this.middleware[index](this.ctx, this.container, next);
+      await this.middleware[index](ctx, this.container, next);
     } catch (e) {
       const name = this.middleware[index].name || "anonymous";
 

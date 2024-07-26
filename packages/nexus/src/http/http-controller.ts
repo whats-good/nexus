@@ -46,13 +46,12 @@ export class HttpController {
 
   private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
     const middlewareHandler = new NexusMiddlewareHandler({
-      ctx,
       container: this.container,
       middleware: this.config.middleware,
     });
 
     try {
-      await middlewareHandler.handle();
+      await middlewareHandler.handle(ctx);
     } catch (e) {
       this.logger.error(errSerialize(e), "Error in rpc middleware");
 
