@@ -1,7 +1,7 @@
-import { container } from "tsyringe";
 import type { NexusMiddlewareNextFn } from "@src/middleware";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { UnauthorizedCustomErrorResponse } from "@src/rpc-response";
+import { container } from "@src/dependency-injection";
 import { AuthorizationService } from "./authorization-service";
 
 export async function authMiddleware(

@@ -1,13 +1,13 @@
 import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import { errSerialize } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
 import type { WebSocketPair } from "./ws-pair";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();

@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { RpcResponse } from "@src/rpc-response";
@@ -20,7 +20,7 @@ import { EventBus } from "@src/events";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class HttpController {
   private readonly logger: Logger;
 

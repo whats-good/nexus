@@ -1,9 +1,9 @@
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import { NexusConfig } from "@src/nexus-config";
 
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class AuthorizationService {
   private readonly authKey?: string;
 

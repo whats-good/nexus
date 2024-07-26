@@ -1,9 +1,9 @@
 import { EventEmitter } from "eventemitter3";
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import type { RpcErrorResponse, RpcSuccessResponse } from "@src/rpc-response";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class EventBus extends EventEmitter<{
   rpcResponseSuccess: (
     response: RpcSuccessResponse,

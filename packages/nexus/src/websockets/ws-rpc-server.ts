@@ -3,7 +3,7 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
@@ -18,7 +18,7 @@ import { WsPairHandler } from "./ws-pair-handler";
 
 // TODO: do we actually need to extend EventEmitter here?
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class WsRpcServer extends EventEmitter<{
   connection: (pair: WebSocketPair) => void;
 }> {

@@ -1,4 +1,4 @@
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
@@ -12,7 +12,7 @@ import {
   type RpcResponse,
 } from "@src/rpc-response";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class HttpRelayHandler {
   constructor(
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory

@@ -1,4 +1,4 @@
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
 import { LoggerFactory } from "@src/logging";
@@ -8,7 +8,7 @@ import { NodeEndpoint } from "./node-endpoint";
 
 type Protocol = "http" | "ws";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class NodeEndpointPoolFactory {
   private readonly nodeProviders: NodeProvider[];
   public readonly http: Map<Chain, NodeEndpointPool>;

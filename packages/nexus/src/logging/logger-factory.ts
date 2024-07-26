@@ -1,8 +1,8 @@
 import type { Logger } from "pino";
-import { Lifecycle, scoped } from "tsyringe";
+import { injectable } from "inversify";
 import { NexusConfig } from "@src/nexus-config";
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class LoggerFactory {
   constructor(private readonly config: NexusConfig) {}
 
