@@ -1,8 +1,8 @@
 import type { Logger } from "pino";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 
-@injectable()
+@singleton()
 export class LoggerFactory {
   constructor(private readonly config: NexusConfig) {}
 

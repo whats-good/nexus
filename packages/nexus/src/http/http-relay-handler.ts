@@ -1,4 +1,4 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
@@ -12,7 +12,7 @@ import {
   type RpcResponse,
 } from "@src/rpc-response";
 
-@injectable()
+@singleton()
 export class HttpRelayHandler {
   constructor(
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory

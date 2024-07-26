@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { errSerialize } from "@src/utils";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NexusConfig } from "@src/nexus-config";
@@ -7,7 +7,7 @@ import { authMiddleware } from "@src/auth";
 import { LoggerFactory } from "@src/logging";
 import type { NexusMiddleware } from "./nexus-middleware";
 
-@injectable()
+@singleton()
 export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
   private readonly logger: Logger;

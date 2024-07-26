@@ -3,21 +3,21 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import { AuthorizationService } from "@src/auth";
 import { NexusConfig } from "@src/nexus-config";
+import { LoggerFactory } from "@src/logging";
 import { WebSocketPool } from "./ws-pool";
 import { WebSocketPair } from "./ws-pair";
 import { WsPairHandler } from "./ws-pair-handler";
-import { LoggerFactory } from "@src/logging";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
-@injectable()
+@singleton()
 export class WsRpcServer extends EventEmitter<{
   connection: (pair: WebSocketPair) => void;
 }> {

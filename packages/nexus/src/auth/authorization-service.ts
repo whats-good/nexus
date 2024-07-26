@@ -1,9 +1,9 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
 
-@injectable()
+@singleton()
 export class AuthorizationService {
   private readonly authKey?: string;
 
