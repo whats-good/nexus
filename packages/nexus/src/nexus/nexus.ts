@@ -7,7 +7,8 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { container, Lifecycle, scoped } from "tsyringe";
+import { decorate, injectable } from "inversify";
+import { EventEmitter } from "eventemitter3";
 import {
   NexusConfig,
   NexusConfigFactory,
@@ -17,10 +18,17 @@ import { HttpController } from "@src/http";
 import { WsPairHandler, WsRpcServer } from "@src/websockets";
 import { LoggerFactory } from "@src/logging";
 import { EventBus } from "@src/events";
+import { container } from "@src/dependency-injection";
+import { HttpRelayHandler } from "@src/http/http-relay-handler";
+import { NodeEndpointPoolFactory } from "@src/node-endpoint";
+import { NexusMiddlewareHandler } from "@src/middleware";
+import { AuthorizationService } from "@src/auth";
+
+decorate(injectable(), EventEmitter); // TODO: put this somewhere else
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
-@scoped(Lifecycle.ContainerScoped)
+@injectable()
 export class Nexus implements ServerAdapterBaseObject<unknown> {
   public readonly port?: number;
   public readonly logger: Logger;
@@ -57,7 +65,19 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const nexusConfigFactory = new NexusConfigFactory(options);
     const config = nexusConfigFactory.getNexusConfig();
 
-    container.register(NexusConfig, { useValue: config });
+    container.bind(NexusConfig).toConstantValue(config);
+    container.bind(HttpController).toSelf().inSingletonScope();
+    container.bind(Nexus).toSelf().inSingletonScope();
+    container.bind(LoggerFactory).toSelf().inSingletonScope();
+    container.bind(WsPairHandler).toSelf().inSingletonScope();
+    container.bind(WsRpcServer).toSelf().inSingletonScope();
+    container.bind(EventBus).toSelf().inSingletonScope();
+    container.bind(HttpRelayHandler).toSelf().inSingletonScope();
+    container.bind(NodeEndpointPoolFactory).toSelf().inSingletonScope();
+    container.bind(NexusMiddlewareHandler).toSelf().inSingletonScope();
+    container.bind(EventEmitter).toSelf().inSingletonScope();
+    container.bind(AuthorizationService).toSelf().inSingletonScope();
+
     const nexus = container.resolve(Nexus);
 
     nexus.logger.info("Nexus server created");
