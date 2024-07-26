@@ -1,21 +1,22 @@
 import type { Logger } from "pino";
-import type { StaticContainer } from "@src/dependency-injection";
+import { injectable } from "tsyringe";
+import { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
+import { NexusConfig } from "@src/nexus-config";
 import type { NexusMiddleware } from "./nexus-middleware";
 
+@injectable()
 export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
   private readonly logger: Logger;
-  private readonly container: StaticContainer;
 
-  constructor(params: {
-    middleware: NexusMiddleware[];
-    container: StaticContainer;
-  }) {
-    this.middleware = params.middleware;
-    this.container = params.container;
-    this.logger = params.container.getLogger(NexusMiddlewareHandler.name);
+  constructor(
+    config: NexusConfig,
+    private readonly container: StaticContainer
+  ) {
+    this.middleware = config.middleware;
+    this.logger = container.getLogger(NexusMiddlewareHandler.name);
   }
 
   public async handle(ctx: NexusRpcContext) {

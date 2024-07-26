@@ -26,7 +26,8 @@ export class HttpController {
 
   constructor(
     private readonly container: StaticContainer,
-    private readonly httpRelayHandler: HttpRelayHandler
+    private readonly httpRelayHandler: HttpRelayHandler,
+    private readonly middlewareHandler: NexusMiddlewareHandler
   ) {
     this.container = container;
     this.logger = container.getLogger(HttpController.name);
@@ -45,13 +46,8 @@ export class HttpController {
   }
 
   private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
-    const middlewareHandler = new NexusMiddlewareHandler({
-      container: this.container,
-      middleware: this.config.middleware,
-    });
-
     try {
-      await middlewareHandler.handle(ctx);
+      await this.middlewareHandler.handle(ctx);
     } catch (e) {
       this.logger.error(errSerialize(e), "Error in rpc middleware");
 
