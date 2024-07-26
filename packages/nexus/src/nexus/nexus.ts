@@ -7,7 +7,7 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { container } from "tsyringe";
+import { container, injectable } from "tsyringe";
 import {
   NexusConfig,
   NexusConfigFactory,
@@ -20,23 +20,22 @@ import { EventBus } from "@src/events";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
+@injectable()
 export class Nexus implements ServerAdapterBaseObject<unknown> {
-  private readonly controller: HttpController;
-  private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
   public readonly on: EventBus["on"];
 
-  private constructor() {
-    this.controller = container.resolve(HttpController);
-    this.wsPairHandler = container.resolve(WsPairHandler);
-    const loggerFactory = container.resolve(LoggerFactory); // TODO: nexus class should be injected with all these, instead of using container.resolve like this
-
+  constructor(
+    private readonly controller: HttpController,
+    private readonly wsPairHandler: WsPairHandler,
+    loggerFactory: LoggerFactory,
+    eventBus: EventBus,
+    config: NexusConfig
+  ) {
     this.logger = loggerFactory.get(Nexus.name);
-    const eventBus = container.resolve(EventBus);
-
     this.on = eventBus.on.bind(eventBus);
-    this.port = container.resolve(NexusConfig).port;
+    this.port = config.port;
   }
 
   public handle = async (request: Request): Promise<Response> => {
@@ -59,13 +58,12 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const config = nexusConfigFactory.getNexusConfig();
 
     container.register(NexusConfig, { useValue: config });
+    const nexus = container.resolve(Nexus);
 
-    const server = new Nexus();
-
-    server.logger.info("Nexus server created");
+    nexus.logger.info("Nexus server created");
 
     return createServerAdapter<unknown, Nexus>(
-      server
+      nexus
     ) as unknown as NexusServerInstance;
   }
 }
