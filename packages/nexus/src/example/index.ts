@@ -1,5 +1,3 @@
-import "reflect-metadata"; // TODO: document this, and later remove it. make the user responsible for importing it, since they may already have it imported
-
 import * as http from "node:http";
 import { Nexus } from "@src/nexus";
 import { NodeProvider } from "@src/node-provider";

@@ -270,9 +270,6 @@ importers:
       '@whatsgood/nexus':
         specifier: workspace:*
         version: link:../nexus
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -9011,6 +9008,7 @@ packages:
 
   /reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
+    dev: true
 
   /reflect.getprototypeof@1.0.4:
     resolution: {integrity: sha512-ECkTw8TmJwW60lOTR+ZkODISW6RQ8+2CL3COqtiJKLd6MmB45hN51HprHFziKLGkAuTGQhBb91V8cy+KHlaCjw==}
