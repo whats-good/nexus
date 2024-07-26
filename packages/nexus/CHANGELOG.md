@@ -1,5 +1,11 @@
 # @whatsgood/nexus
 
+## 0.25.0
+
+### Minor Changes
+
+- be82f82: Introducing inversify for ioc
+
 ## 0.24.0
 
 ### Minor Changes
