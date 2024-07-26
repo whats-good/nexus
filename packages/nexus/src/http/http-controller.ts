@@ -1,7 +1,7 @@
 import type { Logger } from "pino";
-import type { NexusConfig } from "@src/nexus-config";
+import { inject, injectable } from "inversify";
+import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { StaticContainer } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
@@ -15,20 +15,25 @@ import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NexusRpcContext } from "@src/nexus-rpc-context";
+import { LoggerFactory } from "@src/logging";
+import { EventBus } from "@src/events";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
+@injectable()
 export class HttpController {
-  private readonly container: StaticContainer;
-  private readonly config: NexusConfig;
   private readonly logger: Logger;
-  private readonly httpRelayHandler: HttpRelayHandler;
 
-  constructor(container: StaticContainer) {
-    this.container = container;
-    this.logger = container.getLogger(HttpController.name);
-    this.config = container.config;
-    this.httpRelayHandler = new HttpRelayHandler(container);
+  constructor(
+    @inject(NexusConfig) private readonly config: NexusConfig,
+    @inject(LoggerFactory) private readonly loggerFactory: LoggerFactory,
+    @inject(HttpRelayHandler)
+    private readonly httpRelayHandler: HttpRelayHandler,
+    @inject(NexusMiddlewareHandler)
+    private readonly middlewareHandler: NexusMiddlewareHandler,
+    @inject(EventBus) private readonly eventBus: EventBus
+  ) {
+    this.logger = this.loggerFactory.get(HttpController.name);
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -43,14 +48,8 @@ export class HttpController {
   }
 
   private async handleRpcContext(ctx: NexusRpcContext): Promise<RpcResponse> {
-    const middlewareHandler = new NexusMiddlewareHandler({
-      ctx,
-      container: this.container,
-      middleware: this.config.middleware,
-    });
-
     try {
-      await middlewareHandler.handle();
+      await this.middlewareHandler.handle(ctx);
     } catch (e) {
       this.logger.error(errSerialize(e), "Error in rpc middleware");
 
@@ -70,9 +69,9 @@ export class HttpController {
     }
 
     if (response instanceof RpcSuccessResponse) {
-      this.container.eventBus.emit("rpcResponseSuccess", response, ctx);
+      this.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      this.container.eventBus.emit("rpcResponseError", response, ctx);
+      this.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");

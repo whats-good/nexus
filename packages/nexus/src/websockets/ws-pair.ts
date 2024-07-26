@@ -2,7 +2,7 @@ import * as uuid from "uuid";
 import type { Logger } from "pino";
 import type { WebSocket } from "ws";
 import type { NodeEndpoint } from "@src/node-endpoint";
-import type { StaticContainer } from "@src/dependency-injection";
+import type { LoggerFactory } from "@src/logging";
 
 /**
  * Represents a pair of websockets, one for the client and one for the node.
@@ -18,12 +18,12 @@ export class WebSocketPair {
     client: WebSocket;
     node: WebSocket;
     endpoint: NodeEndpoint;
-    getLogger: StaticContainer["getLogger"];
+    loggerFactory: LoggerFactory;
   }) {
     this.client = params.client;
     this.node = params.node;
     this.endpoint = params.endpoint;
-    this.logger = params.getLogger(WebSocketPair.name, {
+    this.logger = params.loggerFactory.get(WebSocketPair.name, {
       clientId: this.id,
     });
   }

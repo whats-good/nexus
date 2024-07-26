@@ -1,17 +1,19 @@
 import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
+import { inject, injectable } from "inversify";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import type { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
+import { LoggerFactory } from "@src/logging";
 import type { WebSocketPair } from "./ws-pair";
 
+@injectable()
 export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
 
-  constructor(private container: StaticContainer) {
-    this.logger = container.getLogger(WsPairHandler.name);
+  constructor(@inject(LoggerFactory) loggerFactory: LoggerFactory) {
+    this.logger = loggerFactory.get(WsPairHandler.name);
   }
 
   public getWsPair(client: WebSocket) {
@@ -60,6 +62,7 @@ export class WsPairHandler {
     // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 
     node.on("message", (data) => {
+      // TODO: emit events for successful and failed messages from the node
       if (client.readyState !== WebSocket.OPEN) {
         pair.logger.error(
           {

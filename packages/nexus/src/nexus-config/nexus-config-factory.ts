@@ -3,7 +3,6 @@ import type { LoggerOptions, Logger } from "pino";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
-import { authMiddleware } from "@src/auth";
 import { isNonEmptyArray } from "@src/utils";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
@@ -129,8 +128,6 @@ export class NexusConfigFactory {
 
   private getMiddleware(): NexusMiddleware[] {
     const middleware: NexusMiddleware[] = this.options.middleware || [];
-
-    middleware.push(authMiddleware);
 
     return middleware;
   }

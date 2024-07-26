@@ -3,32 +3,47 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import type { StaticContainer } from "@src/dependency-injection";
+import { inject, injectable } from "inversify";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
+import { NodeEndpointPoolFactory } from "@src/node-endpoint";
+import { AuthorizationService } from "@src/auth";
+import { NexusConfig } from "@src/nexus-config";
+import { LoggerFactory } from "@src/logging";
 import { WebSocketPool } from "./ws-pool";
 import { WebSocketPair } from "./ws-pair";
+import { WsPairHandler } from "./ws-pair-handler";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
 // TODO: do we actually need to extend EventEmitter here?
+
+@injectable()
 export class WsRpcServer extends EventEmitter<{
   connection: (pair: WebSocketPair) => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
 
-  constructor(private container: StaticContainer) {
+  constructor(
+    @inject(NexusConfig) private readonly config: NexusConfig,
+    @inject(LoggerFactory) private readonly loggingFactory: LoggerFactory,
+    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(NodeEndpointPoolFactory)
+    private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory,
+    @inject(AuthorizationService)
+    private readonly authorizationService: AuthorizationService
+  ) {
     super();
 
-    this.logger = container.getLogger(WsRpcServer.name);
+    this.logger = this.loggingFactory.get(WsRpcServer.name);
 
     this.wss = new WebSocketServer({
       noServer: true,
     });
 
     this.wss.on("connection", (ws, request) => {
-      const pair = this.container.wsPairHandler.getWsPair(ws);
+      const pair = this.wsPairHandler.getWsPair(ws);
 
       this.logger.debug("New websocket connection established");
 
@@ -62,7 +77,7 @@ export class WsRpcServer extends EventEmitter<{
 
     const url = new URL(req.url || "", "http://localhost"); // TODO: is localhost the right default?
 
-    if (!this.container.authorizationService.isAuthorized(url)) {
+    if (!this.authorizationService.isAuthorized(url)) {
       this.logger.warn("Received an unauthorized websocket upgrade request");
       socket.end("HTTP/1.1 401 Unauthorized\r\n\r\n"); // TODO: double check that this is the correct response
 
@@ -81,7 +96,7 @@ export class WsRpcServer extends EventEmitter<{
     }
 
     const { chainId } = route;
-    const chain = this.container.config.chains.get(chainId);
+    const chain = this.config.chains.get(chainId);
 
     if (!chain) {
       this.logger.warn(
@@ -97,7 +112,7 @@ export class WsRpcServer extends EventEmitter<{
       return;
     }
 
-    const endpointPool = this.container.nodeEndpointPoolFactory.ws.get(chain);
+    const endpointPool = this.nodeEndpointPoolFactory.ws.get(chain);
 
     if (!endpointPool) {
       this.logger.warn(
@@ -112,19 +127,21 @@ export class WsRpcServer extends EventEmitter<{
       return;
     }
 
-    const wsPool = new WebSocketPool(endpointPool, this.container);
+    // TODO: use dependency injection to create a request scoped wsPool
+    const wsPool = new WebSocketPool(endpointPool, this.loggingFactory);
 
     wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
+        // TODO: use dependency injection to create a request scoped wsPair
         const pair = new WebSocketPair({
           client: clientSocket,
           node: nodeSocket,
           endpoint,
-          getLogger: this.container.getLogger.bind(this.container),
+          loggerFactory: this.loggingFactory,
         });
 
-        this.container.wsPairHandler.registerWsPair(pair);
+        this.wsPairHandler.registerWsPair(pair);
 
         this.wss.emit("connection", clientSocket, req);
       });

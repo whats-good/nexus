@@ -1,5 +1,6 @@
-import type { StaticContainer } from "@src/dependency-injection";
+import { inject, injectable } from "inversify";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
+import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
 import {
   InternalErrorResponse,
@@ -11,8 +12,12 @@ import {
   type RpcResponse,
 } from "@src/rpc-response";
 
+@injectable()
 export class HttpRelayHandler {
-  constructor(private readonly container: StaticContainer) {}
+  constructor(
+    @inject(NodeEndpointPoolFactory)
+    private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory
+  ) {}
 
   private handleFailureResponse(
     ctx: NexusRpcContext,
@@ -60,9 +65,7 @@ export class HttpRelayHandler {
   }
 
   public async handle(ctx: NexusRpcContext): Promise<RpcResponse> {
-    const nodeEndpointPool = this.container.nodeEndpointPoolFactory.http.get(
-      ctx.chain
-    );
+    const nodeEndpointPool = this.nodeEndpointPoolFactory.http.get(ctx.chain);
 
     if (!nodeEndpointPool) {
       return new ProviderNotConfiguredErrorResponse(ctx.request.id, ctx.chain);

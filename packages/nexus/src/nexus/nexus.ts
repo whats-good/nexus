@@ -5,28 +5,43 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { NexusConfigFactory, type NexusConfigOptions } from "@src/nexus-config";
+import { decorate, inject, injectable } from "inversify";
+import { EventEmitter } from "eventemitter3";
+import {
+  NexusConfig,
+  NexusConfigFactory,
+  type NexusConfigOptions,
+} from "@src/nexus-config";
 import { HttpController } from "@src/http";
-import { StaticContainer } from "@src/dependency-injection";
-import { WsRpcServer, WsPairHandler } from "@src/websockets";
+import { WsPairHandler, WsRpcServer } from "@src/websockets";
+import { LoggerFactory } from "@src/logging";
+import { EventBus } from "@src/events";
+import { container } from "@src/dependency-injection";
+import { HttpRelayHandler } from "@src/http/http-relay-handler";
+import { NodeEndpointPoolFactory } from "@src/node-endpoint";
+import { NexusMiddlewareHandler } from "@src/middleware";
+import { AuthorizationService } from "@src/auth";
+
+decorate(injectable(), EventEmitter); // TODO: put this somewhere else
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
+@injectable()
 export class Nexus implements ServerAdapterBaseObject<unknown> {
-  private readonly container: StaticContainer;
-  private readonly controller: HttpController;
-  private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
-  public readonly on: StaticContainer["eventBus"]["on"];
+  public readonly on: EventBus["on"];
 
-  private constructor(container: StaticContainer) {
-    this.container = container;
-    this.controller = new HttpController(container);
-    this.port = container.config.port;
-    this.logger = this.container.getLogger(Nexus.name);
-    this.wsPairHandler = new WsPairHandler(container);
-    this.on = container.eventBus.on.bind(container.eventBus);
+  constructor(
+    @inject(HttpController) private readonly controller: HttpController,
+    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(EventBus) eventBus: EventBus,
+    @inject(NexusConfig) config: NexusConfig
+  ) {
+    this.logger = loggerFactory.get(Nexus.name);
+    this.on = eventBus.on.bind(eventBus);
+    this.port = config.port;
   }
 
   public handle = async (request: Request): Promise<Response> => {
@@ -35,7 +50,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   };
 
   public ws(httpServer: NodeHttpServer) {
-    const wsServer = new WsRpcServer(this.container);
+    const wsServer = container.resolve(WsRpcServer);
 
     wsServer.on("connection", (pair) => {
       this.wsPairHandler.handleConnection(pair);
@@ -48,16 +63,25 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const nexusConfigFactory = new NexusConfigFactory(options);
     const config = nexusConfigFactory.getNexusConfig();
 
-    const staticContainer = new StaticContainer({
-      config,
-    });
+    container.bind(NexusConfig).toConstantValue(config);
+    container.bind(HttpController).toSelf().inSingletonScope();
+    container.bind(Nexus).toSelf().inSingletonScope();
+    container.bind(LoggerFactory).toSelf().inSingletonScope();
+    container.bind(WsPairHandler).toSelf().inSingletonScope();
+    container.bind(WsRpcServer).toSelf().inSingletonScope();
+    container.bind(EventBus).toSelf().inSingletonScope();
+    container.bind(HttpRelayHandler).toSelf().inSingletonScope();
+    container.bind(NodeEndpointPoolFactory).toSelf().inSingletonScope();
+    container.bind(NexusMiddlewareHandler).toSelf().inSingletonScope();
+    container.bind(EventEmitter).toSelf().inSingletonScope();
+    container.bind(AuthorizationService).toSelf().inSingletonScope();
 
-    const server = new Nexus(staticContainer);
+    const nexus = container.resolve(Nexus);
 
-    server.logger.info("Nexus server created");
+    nexus.logger.info("Nexus server created");
 
     return createServerAdapter<unknown, Nexus>(
-      server
+      nexus
     ) as unknown as NexusServerInstance;
   }
 }

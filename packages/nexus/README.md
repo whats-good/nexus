@@ -48,7 +48,7 @@ yarn add @whatsgood/nexus
 
 ## Quickstart
 
-```ts
+```typescript
 // node.js standalone server example
 
 import { Nexus, NodeProvider, CHAIN } from "@whatsgood/nexus";

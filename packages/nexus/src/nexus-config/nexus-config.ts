@@ -1,9 +1,11 @@
 import { type Logger } from "pino";
+import { injectable } from "inversify";
 import type { Chain } from "@src/chain";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 
+@injectable()
 export class NexusConfig {
   public readonly nodeProviders: [NodeProvider, ...NodeProvider[]];
   public readonly chains: Map<number, Chain>;

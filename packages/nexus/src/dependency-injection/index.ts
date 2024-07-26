@@ -1,1 +1,1 @@
-export * from "./static-container";
+export * from "./container";
