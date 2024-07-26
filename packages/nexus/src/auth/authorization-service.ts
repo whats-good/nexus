@@ -1,7 +1,15 @@
+import { injectable } from "tsyringe";
+import { NexusConfig } from "@src/nexus-config";
+
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
 
+@injectable()
 export class AuthorizationService {
-  constructor(private readonly authKey?: string) {}
+  private readonly authKey?: string;
+
+  constructor(config: NexusConfig) {
+    this.authKey = config.authKey;
+  }
 
   public isAuthorized(url: URL) {
     if (!this.authKey) {

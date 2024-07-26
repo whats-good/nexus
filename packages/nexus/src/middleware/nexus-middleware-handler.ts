@@ -12,10 +12,7 @@ export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
   private readonly logger: Logger;
 
-  constructor(
-    config: NexusConfig,
-    private readonly container: StaticContainer
-  ) {
+  constructor(config: NexusConfig, container: StaticContainer) {
     this.middleware = [...config.middleware, authMiddleware];
     this.logger = container.getLogger(NexusMiddlewareHandler.name);
   }
@@ -34,7 +31,7 @@ export class NexusMiddlewareHandler {
     };
 
     try {
-      await this.middleware[index](ctx, this.container, next);
+      await this.middleware[index](ctx, next);
     } catch (e) {
       const name = this.middleware[index].name || "anonymous";
 

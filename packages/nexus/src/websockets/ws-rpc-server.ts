@@ -8,6 +8,7 @@ import { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
+import { AuthorizationService } from "@src/auth";
 import { WebSocketPool } from "./ws-pool";
 import { WebSocketPair } from "./ws-pair";
 import { WsPairHandler } from "./ws-pair-handler";
@@ -25,7 +26,8 @@ export class WsRpcServer extends EventEmitter<{
   constructor(
     private container: StaticContainer,
     private readonly wsPairHandler: WsPairHandler,
-    private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory
+    private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory,
+    private readonly authorizationService: AuthorizationService
   ) {
     super();
 
@@ -70,7 +72,7 @@ export class WsRpcServer extends EventEmitter<{
 
     const url = new URL(req.url || "", "http://localhost"); // TODO: is localhost the right default?
 
-    if (!this.container.authorizationService.isAuthorized(url)) {
+    if (!this.authorizationService.isAuthorized(url)) {
       this.logger.warn("Received an unauthorized websocket upgrade request");
       socket.end("HTTP/1.1 401 Unauthorized\r\n\r\n"); // TODO: double check that this is the correct response
 
