@@ -2,6 +2,7 @@ import { injectable } from "tsyringe";
 import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
 import { StaticContainer } from "@src/dependency-injection/static-container";
+import { LoggerFactory } from "@src/logging";
 import { NodeEndpointPool } from "./node-endpoint-pool";
 import { NodeEndpoint } from "./node-endpoint";
 
@@ -14,7 +15,10 @@ export class NodeEndpointPoolFactory {
   public readonly http: Map<Chain, NodeEndpointPool>;
   public readonly ws: Map<Chain, NodeEndpointPool>;
 
-  constructor(container: StaticContainer) {
+  constructor(
+    container: StaticContainer,
+    private readonly loggerFactory: LoggerFactory // TODO: this should not be a property.
+  ) {
     this.container = container;
     this.nodeProviders = container.config.nodeProviders;
     this.http = this.createChainToEndpointPoolMap("http");
@@ -61,6 +65,7 @@ export class NodeEndpointPoolFactory {
                 nodeProvider,
               })
           ),
+          loggerFactory: this.loggerFactory,
         })
       );
     }

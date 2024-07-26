@@ -1,6 +1,6 @@
 import type { Logger } from "pino";
 import { injectable } from "tsyringe";
-import type { NexusConfig } from "@src/nexus-config";
+import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import { StaticContainer } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
@@ -16,21 +16,23 @@ import type { PathParamsOf } from "@src/routes";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NexusRpcContext } from "@src/nexus-rpc-context";
+import { LoggerFactory } from "@src/logging";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
 @injectable()
 export class HttpController {
-  private readonly config: NexusConfig;
   private readonly logger: Logger;
 
   constructor(
     private readonly container: StaticContainer,
+    private readonly config: NexusConfig,
+    private readonly loggerFactory: LoggerFactory,
     private readonly httpRelayHandler: HttpRelayHandler,
     private readonly middlewareHandler: NexusMiddlewareHandler
   ) {
     this.container = container;
-    this.logger = container.getLogger(HttpController.name);
+    this.logger = this.loggerFactory.get(HttpController.name);
     this.config = container.config;
   }
 

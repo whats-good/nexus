@@ -4,14 +4,15 @@ import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
 import { injectable } from "tsyringe";
-import { StaticContainer } from "@src/dependency-injection";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import { AuthorizationService } from "@src/auth";
+import { NexusConfig } from "@src/nexus-config";
 import { WebSocketPool } from "./ws-pool";
 import { WebSocketPair } from "./ws-pair";
 import { WsPairHandler } from "./ws-pair-handler";
+import { LoggerFactory } from "@src/logging";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
@@ -24,14 +25,15 @@ export class WsRpcServer extends EventEmitter<{
   private readonly logger: Logger;
 
   constructor(
-    private container: StaticContainer,
+    private readonly config: NexusConfig,
+    private readonly loggingFactory: LoggerFactory,
     private readonly wsPairHandler: WsPairHandler,
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory,
     private readonly authorizationService: AuthorizationService
   ) {
     super();
 
-    this.logger = container.getLogger(WsRpcServer.name);
+    this.logger = this.loggingFactory.get(WsRpcServer.name);
 
     this.wss = new WebSocketServer({
       noServer: true,
@@ -91,7 +93,7 @@ export class WsRpcServer extends EventEmitter<{
     }
 
     const { chainId } = route;
-    const chain = this.container.config.chains.get(chainId);
+    const chain = this.config.chains.get(chainId);
 
     if (!chain) {
       this.logger.warn(
@@ -122,16 +124,18 @@ export class WsRpcServer extends EventEmitter<{
       return;
     }
 
-    const wsPool = new WebSocketPool(endpointPool, this.container);
+    // TODO: use dependency injection to create a request scoped wsPool
+    const wsPool = new WebSocketPool(endpointPool, this.loggingFactory);
 
     wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
+        // TODO: use dependency injection to create a request scoped wsPair
         const pair = new WebSocketPair({
           client: clientSocket,
           node: nodeSocket,
           endpoint,
-          getLogger: this.container.getLogger.bind(this.container),
+          loggerFactory: this.loggingFactory,
         });
 
         this.wsPairHandler.registerWsPair(pair);

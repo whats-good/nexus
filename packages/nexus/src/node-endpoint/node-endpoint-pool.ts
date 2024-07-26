@@ -3,6 +3,7 @@ import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import { generatorOf, take, weightedShuffleGenerator } from "@src/utils";
 import type { StaticContainer } from "@src/dependency-injection";
+import type { LoggerFactory } from "@src/logging";
 import type { RelayConfig } from "./relay-config";
 import {
   NodeEndpointPoolAllFailedResponse,
@@ -15,6 +16,7 @@ import type {
   NodeRpcResponseFailure,
 } from "./node-rpc-response";
 
+// TODO: make injectable!
 export class NodeEndpointPool {
   private readonly chain: Chain;
   private readonly nodeEndpoints: NodeEndpoint[];
@@ -26,11 +28,12 @@ export class NodeEndpointPool {
     chain: Chain;
     nodeEndpoints: NodeEndpoint[];
     container: StaticContainer;
+    loggerFactory: LoggerFactory;
   }) {
     this.chain = params.chain;
     this.nodeEndpoints = params.nodeEndpoints;
     this.config = params.container.config.relay;
-    this.logger = params.container.getLogger(NodeEndpointPool.name);
+    this.logger = params.loggerFactory.get(NodeEndpointPool.name);
 
     if (this.config.failure.kind === "cycle-requests") {
       this.maxRelayAttempts = this.config.failure.maxAttempts;

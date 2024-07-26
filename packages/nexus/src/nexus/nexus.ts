@@ -14,13 +14,13 @@ import {
   type NexusConfigOptions,
 } from "@src/nexus-config";
 import { HttpController } from "@src/http";
+import { WsPairHandler, WsRpcServer } from "@src/websockets";
 import { StaticContainer } from "@src/dependency-injection";
-import { WsRpcServer, WsPairHandler } from "@src/websockets";
+import { LoggerFactory } from "@src/logging";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
 export class Nexus implements ServerAdapterBaseObject<unknown> {
-  private readonly container: StaticContainer;
   private readonly controller: HttpController;
   private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
@@ -28,12 +28,13 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public readonly on: StaticContainer["eventBus"]["on"];
 
   private constructor(staticContainer: StaticContainer) {
-    this.container = staticContainer;
     this.controller = container.resolve(HttpController);
-    this.port = staticContainer.config.port;
-    this.logger = this.container.getLogger(Nexus.name);
-    this.wsPairHandler = new WsPairHandler(staticContainer);
+    this.wsPairHandler = container.resolve(WsPairHandler);
+    const loggerFactory = container.resolve(LoggerFactory); // TODO: nexus class should be injected with all these, instead of using container.resolve like this
+
+    this.logger = loggerFactory.get(Nexus.name);
     this.on = staticContainer.eventBus.on.bind(staticContainer.eventBus);
+    this.port = staticContainer.config.port;
   }
 
   public handle = async (request: Request): Promise<Response> => {
@@ -56,10 +57,6 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const config = nexusConfigFactory.getNexusConfig();
 
     container.register(NexusConfig, { useValue: config });
-    // container.register(StaticContainer, { useClass: StaticContainer });
-    // container.register(HttpController, { useClass: HttpController });
-    // container.register(WsPairHandler, { useClass: WsPairHandler });
-    // container.register(WsRpcServer, { useClass: WsRpcServer });
 
     const server = new Nexus(container.resolve(StaticContainer));
 

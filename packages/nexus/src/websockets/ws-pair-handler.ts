@@ -3,8 +3,8 @@ import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import { injectable } from "tsyringe";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
+import { LoggerFactory } from "@src/logging";
 import type { WebSocketPair } from "./ws-pair";
 
 @injectable()
@@ -12,8 +12,8 @@ export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
 
-  constructor(private container: StaticContainer) {
-    this.logger = container.getLogger(WsPairHandler.name);
+  constructor(loggerFactory: LoggerFactory) {
+    this.logger = loggerFactory.get(WsPairHandler.name);
   }
 
   public getWsPair(client: WebSocket) {

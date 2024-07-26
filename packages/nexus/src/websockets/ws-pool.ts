@@ -2,7 +2,7 @@ import { EventEmitter } from "eventemitter3";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import type { NodeEndpoint, NodeEndpointPool } from "@src/node-endpoint";
-import type { StaticContainer } from "@src/dependency-injection";
+import type { LoggerFactory } from "@src/logging";
 
 interface WebSocketPoolEvents {
   connect: (socket: WebSocket, endpoint: NodeEndpoint) => void;
@@ -17,11 +17,11 @@ export class WebSocketPool extends EventEmitter<WebSocketPoolEvents> {
 
   constructor(
     private readonly nodeEndpointPool: NodeEndpointPool,
-    container: StaticContainer
+    loggerFactory: LoggerFactory
   ) {
     super();
     this.timeout = 3000; // TODO: make this configurable
-    this.logger = container.getLogger(WebSocketPool.name);
+    this.logger = loggerFactory.get(WebSocketPool.name);
     this.generator = this.nodeEndpointPool.generator();
     this.timer = null;
 
