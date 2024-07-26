@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
 import type { NodeRpcResponseFailure } from "@src/node-endpoint/node-rpc-response";
@@ -15,6 +15,7 @@ import {
 @injectable()
 export class HttpRelayHandler {
   constructor(
+    @inject(NodeEndpointPoolFactory)
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory
   ) {}
 

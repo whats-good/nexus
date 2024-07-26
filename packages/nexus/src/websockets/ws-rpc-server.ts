@@ -3,7 +3,7 @@ import { type Duplex } from "node:stream";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "eventemitter3";
 import type { Logger } from "pino";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NodeEndpointPoolFactory } from "@src/node-endpoint";
@@ -26,10 +26,12 @@ export class WsRpcServer extends EventEmitter<{
   private readonly logger: Logger;
 
   constructor(
-    private readonly config: NexusConfig,
-    private readonly loggingFactory: LoggerFactory,
-    private readonly wsPairHandler: WsPairHandler,
+    @inject(NexusConfig) private readonly config: NexusConfig,
+    @inject(LoggerFactory) private readonly loggingFactory: LoggerFactory,
+    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(NodeEndpointPoolFactory)
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory,
+    @inject(AuthorizationService)
     private readonly authorizationService: AuthorizationService
   ) {
     super();

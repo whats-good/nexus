@@ -1,7 +1,7 @@
 import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import { errSerialize } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
@@ -12,7 +12,7 @@ export class WsPairHandler {
   private readonly logger: Logger;
   private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
 
-  constructor(loggerFactory: LoggerFactory) {
+  constructor(@inject(LoggerFactory) loggerFactory: LoggerFactory) {
     this.logger = loggerFactory.get(WsPairHandler.name);
   }
 

@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { NexusConfig } from "@src/nexus-config";
 
 const AUTH_KEY_QUERY_PARAM_NAME = "key";
@@ -7,7 +7,7 @@ const AUTH_KEY_QUERY_PARAM_NAME = "key";
 export class AuthorizationService {
   private readonly authKey?: string;
 
-  constructor(config: NexusConfig) {
+  constructor(@inject(NexusConfig) config: NexusConfig) {
     this.authKey = config.authKey;
   }
 

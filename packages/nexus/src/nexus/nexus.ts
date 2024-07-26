@@ -5,7 +5,7 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { decorate, injectable } from "inversify";
+import { decorate, inject, injectable } from "inversify";
 import { EventEmitter } from "eventemitter3";
 import {
   NexusConfig,
@@ -33,11 +33,11 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public readonly on: EventBus["on"];
 
   constructor(
-    private readonly controller: HttpController,
-    private readonly wsPairHandler: WsPairHandler,
-    loggerFactory: LoggerFactory,
-    eventBus: EventBus,
-    config: NexusConfig
+    @inject(HttpController) private readonly controller: HttpController,
+    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(EventBus) eventBus: EventBus,
+    @inject(NexusConfig) config: NexusConfig
   ) {
     this.logger = loggerFactory.get(Nexus.name);
     this.on = eventBus.on.bind(eventBus);

@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { errSerialize } from "@src/utils";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NexusConfig } from "@src/nexus-config";
@@ -12,7 +12,10 @@ export class NexusMiddlewareHandler {
   private readonly middleware: NexusMiddleware[];
   private readonly logger: Logger;
 
-  constructor(config: NexusConfig, loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(NexusConfig) config: NexusConfig,
+    @inject(LoggerFactory) loggerFactory: LoggerFactory
+  ) {
     this.middleware = [...config.middleware, authMiddleware];
     this.logger = loggerFactory.get(NexusMiddlewareHandler.name);
   }
