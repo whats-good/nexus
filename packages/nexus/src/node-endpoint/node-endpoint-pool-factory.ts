@@ -1,26 +1,24 @@
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
-import { StaticContainer } from "@src/dependency-injection/static-container";
 import { LoggerFactory } from "@src/logging";
+import { NexusConfig } from "@src/nexus-config";
 import { NodeEndpointPool } from "./node-endpoint-pool";
 import { NodeEndpoint } from "./node-endpoint";
 
 type Protocol = "http" | "ws";
 
-@injectable()
+@singleton()
 export class NodeEndpointPoolFactory {
-  private readonly container: StaticContainer;
   private readonly nodeProviders: NodeProvider[];
   public readonly http: Map<Chain, NodeEndpointPool>;
   public readonly ws: Map<Chain, NodeEndpointPool>;
 
   constructor(
-    container: StaticContainer,
+    private readonly config: NexusConfig,
     private readonly loggerFactory: LoggerFactory // TODO: this should not be a property.
   ) {
-    this.container = container;
-    this.nodeProviders = container.config.nodeProviders;
+    this.nodeProviders = config.nodeProviders;
     this.http = this.createChainToEndpointPoolMap("http");
     this.ws = this.createChainToEndpointPoolMap("ws");
   }
@@ -57,7 +55,7 @@ export class NodeEndpointPoolFactory {
       chainToEndpointPoolMap.set(
         chain,
         new NodeEndpointPool({
-          container: this.container,
+          config: this.config, // TODO: make this ioc friendly
           chain,
           nodeEndpoints: nodeProviders.map(
             (nodeProvider) =>

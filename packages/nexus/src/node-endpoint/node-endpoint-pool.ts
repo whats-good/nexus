@@ -2,8 +2,8 @@ import type { Logger } from "pino";
 import type { Chain } from "@src/chain";
 import type { RpcRequestPayloadType } from "@src/rpc-schema";
 import { generatorOf, take, weightedShuffleGenerator } from "@src/utils";
-import type { StaticContainer } from "@src/dependency-injection";
 import type { LoggerFactory } from "@src/logging";
+import type { NexusConfig } from "@src/nexus-config";
 import type { RelayConfig } from "./relay-config";
 import {
   NodeEndpointPoolAllFailedResponse,
@@ -26,13 +26,13 @@ export class NodeEndpointPool {
 
   constructor(params: {
     chain: Chain;
+    config: NexusConfig;
     nodeEndpoints: NodeEndpoint[];
-    container: StaticContainer;
     loggerFactory: LoggerFactory;
   }) {
     this.chain = params.chain;
     this.nodeEndpoints = params.nodeEndpoints;
-    this.config = params.container.config.relay;
+    this.config = params.config.relay;
     this.logger = params.loggerFactory.get(NodeEndpointPool.name);
 
     if (this.config.failure.kind === "cycle-requests") {

@@ -1,8 +1,7 @@
 import type { Logger } from "pino";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { StaticContainer } from "@src/dependency-injection";
 import type { RpcResponse } from "@src/rpc-response";
 import {
   ChainNotFoundErrorResponse,
@@ -17,23 +16,22 @@ import { chainIdRoute } from "@src/routes";
 import { errSerialize } from "@src/utils";
 import { NexusRpcContext } from "@src/nexus-rpc-context";
 import { LoggerFactory } from "@src/logging";
+import { EventBus } from "@src/events";
 import { HttpRelayHandler } from "./http-relay-handler";
 import { NexusNotFoundResponse, type NexusResponse } from "./nexus-response";
 
-@injectable()
+@singleton()
 export class HttpController {
   private readonly logger: Logger;
 
   constructor(
-    private readonly container: StaticContainer,
     private readonly config: NexusConfig,
     private readonly loggerFactory: LoggerFactory,
     private readonly httpRelayHandler: HttpRelayHandler,
-    private readonly middlewareHandler: NexusMiddlewareHandler
+    private readonly middlewareHandler: NexusMiddlewareHandler,
+    private readonly eventBus: EventBus
   ) {
-    this.container = container;
     this.logger = this.loggerFactory.get(HttpController.name);
-    this.config = container.config;
   }
 
   public async handleRequest(request: Request): Promise<NexusResponse> {
@@ -69,9 +67,9 @@ export class HttpController {
     }
 
     if (response instanceof RpcSuccessResponse) {
-      this.container.eventBus.emit("rpcResponseSuccess", response, ctx);
+      this.eventBus.emit("rpcResponseSuccess", response, ctx);
     } else if (response instanceof RpcErrorResponse) {
-      this.container.eventBus.emit("rpcResponseError", response, ctx);
+      this.eventBus.emit("rpcResponseError", response, ctx);
     } else {
       // this should never happen
       this.logger.error(response, "Invalid response type in context");

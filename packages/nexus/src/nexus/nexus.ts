@@ -15,8 +15,8 @@ import {
 } from "@src/nexus-config";
 import { HttpController } from "@src/http";
 import { WsPairHandler, WsRpcServer } from "@src/websockets";
-import { StaticContainer } from "@src/dependency-injection";
 import { LoggerFactory } from "@src/logging";
+import { EventBus } from "@src/events";
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
@@ -25,16 +25,18 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   private readonly wsPairHandler: WsPairHandler;
   public readonly port?: number;
   public readonly logger: Logger;
-  public readonly on: StaticContainer["eventBus"]["on"];
+  public readonly on: EventBus["on"];
 
-  private constructor(staticContainer: StaticContainer) {
+  private constructor() {
     this.controller = container.resolve(HttpController);
     this.wsPairHandler = container.resolve(WsPairHandler);
     const loggerFactory = container.resolve(LoggerFactory); // TODO: nexus class should be injected with all these, instead of using container.resolve like this
 
     this.logger = loggerFactory.get(Nexus.name);
-    this.on = staticContainer.eventBus.on.bind(staticContainer.eventBus);
-    this.port = staticContainer.config.port;
+    const eventBus = container.resolve(EventBus);
+
+    this.on = eventBus.on.bind(eventBus);
+    this.port = container.resolve(NexusConfig).port;
   }
 
   public handle = async (request: Request): Promise<Response> => {
@@ -58,7 +60,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
 
     container.register(NexusConfig, { useValue: config });
 
-    const server = new Nexus(container.resolve(StaticContainer));
+    const server = new Nexus();
 
     server.logger.info("Nexus server created");
 
