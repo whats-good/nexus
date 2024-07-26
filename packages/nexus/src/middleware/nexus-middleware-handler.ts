@@ -4,6 +4,7 @@ import { StaticContainer } from "@src/dependency-injection";
 import { errSerialize } from "@src/utils";
 import type { NexusRpcContext } from "@src/nexus-rpc-context";
 import { NexusConfig } from "@src/nexus-config";
+import { authMiddleware } from "@src/auth";
 import type { NexusMiddleware } from "./nexus-middleware";
 
 @injectable()
@@ -15,7 +16,7 @@ export class NexusMiddlewareHandler {
     config: NexusConfig,
     private readonly container: StaticContainer
   ) {
-    this.middleware = config.middleware;
+    this.middleware = [...config.middleware, authMiddleware];
     this.logger = container.getLogger(NexusMiddlewareHandler.name);
   }
 
