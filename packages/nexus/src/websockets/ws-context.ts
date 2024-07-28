@@ -7,7 +7,7 @@ import type { LoggerFactory } from "@src/logging";
 /**
  * Represents a pair of websockets, one for the client and one for the node.
  */
-export class WebSocketPair {
+export class WebSocketContext {
   public readonly client: WebSocket;
   public readonly node: WebSocket;
   public readonly endpoint: NodeEndpoint;
@@ -23,7 +23,7 @@ export class WebSocketPair {
     this.client = params.client;
     this.node = params.node;
     this.endpoint = params.endpoint;
-    this.logger = params.loggerFactory.get(WebSocketPair.name, {
+    this.logger = params.loggerFactory.get(WebSocketContext.name, {
       clientId: this.id,
     });
   }

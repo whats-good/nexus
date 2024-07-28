@@ -5,23 +5,23 @@ import { inject, injectable } from "inversify";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import { errSerialize } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
-import type { WebSocketPair } from "./ws-pair";
+import type { WebSocketContext } from "./ws-context";
 
 @injectable()
-export class WsPairHandler {
+export class WsContextHandler {
   private readonly logger: Logger;
-  private readonly wsPairs = new Map<WebSocket, WebSocketPair>();
+  private readonly wsContexts = new Map<WebSocket, WebSocketContext>();
 
   constructor(@inject(LoggerFactory) loggerFactory: LoggerFactory) {
-    this.logger = loggerFactory.get(WsPairHandler.name);
+    this.logger = loggerFactory.get(WsContextHandler.name);
   }
 
-  public getWsPair(client: WebSocket) {
-    return this.wsPairs.get(client);
+  public getContext(client: WebSocket) {
+    return this.wsContexts.get(client);
   }
 
-  public registerWsPair(pair: WebSocketPair) {
-    this.wsPairs.set(pair.client, pair);
+  public registerContext(context: WebSocketContext) {
+    this.wsContexts.set(context.client, context);
   }
 
   private incomingDataToJSON(data: RawData) {
@@ -40,8 +40,8 @@ export class WsPairHandler {
     }
   }
 
-  private handleCleanup(pair: WebSocketPair) {
-    const { client, node } = pair;
+  private handleCleanup(context: WebSocketContext) {
+    const { client, node } = context;
 
     if (client.readyState !== WebSocket.CLOSED) {
       client.terminate(); // TODO: Is this needed? should we do a timeout here?
@@ -54,17 +54,17 @@ export class WsPairHandler {
       this.logger.debug("Node socket terminated.");
     }
 
-    this.wsPairs.delete(client);
+    this.wsContexts.delete(client);
   }
 
-  public handleConnection(pair: WebSocketPair) {
-    const { client, node, endpoint } = pair;
+  public handleConnection(context: WebSocketContext) {
+    const { client, node, endpoint } = context;
     // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 
     node.on("message", (data) => {
       // TODO: emit events for successful and failed messages from the node
       if (client.readyState !== WebSocket.OPEN) {
-        pair.logger.error(
+        context.logger.error(
           {
             nodeProvider: endpoint.nodeProvider.name,
           },
@@ -75,7 +75,7 @@ export class WsPairHandler {
       }
 
       // TODO: handle interception, caching, event handling and so on
-      pair.logger.debug(
+      context.logger.debug(
         {
           nodeProvider: endpoint.nodeProvider.name,
         },
@@ -86,10 +86,10 @@ export class WsPairHandler {
     });
 
     client.on("message", (data) => {
-      pair.logger.debug("Received new websocket message");
+      context.logger.debug("Received new websocket message");
 
       if (client.readyState !== WebSocket.OPEN) {
-        pair.logger.warn("Received a message on a closed socket");
+        context.logger.warn("Received a message on a closed socket");
 
         // TODO: what does this mean? do we need to terminate the socket here?
         return;
@@ -98,8 +98,11 @@ export class WsPairHandler {
       const jsonParsed = this.incomingDataToJSON(data);
 
       if (jsonParsed.kind === "error") {
-        pair.logger.warn(errSerialize(jsonParsed.error), "Error parsing JSON");
-        pair.sendJSONToClient({
+        context.logger.warn(
+          errSerialize(jsonParsed.error),
+          "Error parsing JSON"
+        );
+        context.sendJSONToClient({
           // TODO: standardize these error responses
           id: null,
           jsonrpc: "2.0",
@@ -117,14 +120,14 @@ export class WsPairHandler {
       );
 
       if (!rpcRequestPayloadParsed.success) {
-        pair.logger.warn(
+        context.logger.warn(
           {
             error: rpcRequestPayloadParsed.error,
             request: jsonParsed.result, // TODO: add the request on other logs too
           },
           `Received an invalid RPC payload`
         );
-        pair.sendJSONToClient({
+        context.sendJSONToClient({
           id: null,
           jsonrpc: "2.0",
           error: {
@@ -138,14 +141,17 @@ export class WsPairHandler {
 
       const rpcRequestPayload = rpcRequestPayloadParsed.data;
 
-      pair.logger.debug(rpcRequestPayload, "Received a valid RPC ws request");
+      context.logger.debug(
+        rpcRequestPayload,
+        "Received a valid RPC ws request"
+      );
 
       // TODO: if there are no websocket endpoints available, we should
       // still try to carry the request to http endpoints. this will cover
       // a large portion of ws requests anyway.
 
-      pair.logger.debug("Relaying the RPC request to the ws node");
-      pair.node.send(data);
+      context.logger.debug("Relaying the RPC request to the ws node");
+      context.node.send(data);
 
       // TODO: how do we treat multi json rpc messages?
     });
@@ -153,24 +159,24 @@ export class WsPairHandler {
     // TODO: fix all pino logs to log the object first, and then the message. no stringify needed
 
     client.on("error", (error) => {
-      pair.logger.error(error, "Client socket error");
+      context.logger.error(error, "Client socket error");
       // TODO: should we create a timeout to close the socket?
-      this.handleCleanup(pair);
+      this.handleCleanup(context);
     });
 
     node.on("error", (error) => {
-      pair.logger.error(error, "Node socket error");
-      this.handleCleanup(pair);
+      context.logger.error(error, "Node socket error");
+      this.handleCleanup(context);
     });
 
     client.on("close", () => {
-      pair.logger.debug("Client socket closed, cleaning up...");
-      this.handleCleanup(pair);
+      context.logger.debug("Client socket closed, cleaning up...");
+      this.handleCleanup(context);
     });
 
     node.on("close", () => {
-      pair.logger.debug("Node socket closed, cleaning up...");
-      this.handleCleanup(pair);
+      context.logger.debug("Node socket closed, cleaning up...");
+      this.handleCleanup(context);
     });
   }
 }

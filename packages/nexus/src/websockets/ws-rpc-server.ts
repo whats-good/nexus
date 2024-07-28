@@ -11,8 +11,8 @@ import { AuthorizationService } from "@src/auth";
 import { NexusConfig } from "@src/nexus-config";
 import { LoggerFactory } from "@src/logging";
 import { WebSocketPool } from "./ws-pool";
-import { WebSocketPair } from "./ws-pair";
-import { WsPairHandler } from "./ws-pair-handler";
+import { WebSocketContext } from "./ws-context";
+import { WsContextHandler } from "./ws-context-handler";
 
 // TODO: add a way to route requests to special destinations, for example "alchemy_minedTransactions" should to go to alchemy
 
@@ -20,7 +20,7 @@ import { WsPairHandler } from "./ws-pair-handler";
 
 @injectable()
 export class WsRpcServer extends EventEmitter<{
-  connection: (pair: WebSocketPair) => void;
+  connection: (context: WebSocketContext) => void;
 }> {
   private readonly wss: WebSocketServer;
   private readonly logger: Logger;
@@ -28,7 +28,8 @@ export class WsRpcServer extends EventEmitter<{
   constructor(
     @inject(NexusConfig) private readonly config: NexusConfig,
     @inject(LoggerFactory) private readonly loggingFactory: LoggerFactory,
-    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(WsContextHandler)
+    private readonly wsContextHandler: WsContextHandler,
     @inject(NodeEndpointPoolFactory)
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory,
     @inject(AuthorizationService)
@@ -43,13 +44,13 @@ export class WsRpcServer extends EventEmitter<{
     });
 
     this.wss.on("connection", (ws, request) => {
-      const pair = this.wsPairHandler.getWsPair(ws);
+      const context = this.wsContextHandler.getContext(ws);
 
       this.logger.debug("New websocket connection established");
 
-      if (!pair) {
+      if (!context) {
         this.logger.error(
-          "Received a connection, but no socket pair was found for it"
+          "Received a connection, but no socket context was found for it"
         );
         ws.terminate();
         request.destroy();
@@ -57,7 +58,7 @@ export class WsRpcServer extends EventEmitter<{
         return;
       }
 
-      this.emit("connection", pair);
+      this.emit("connection", context);
     });
   }
 
@@ -133,15 +134,15 @@ export class WsRpcServer extends EventEmitter<{
     wsPool.once("connect", (nodeSocket, endpoint) => {
       this.wss.handleUpgrade(req, socket, head, (clientSocket) => {
         this.logger.debug("Upgrading to websocket connection");
-        // TODO: use dependency injection to create a request scoped wsPair
-        const pair = new WebSocketPair({
+        // TODO: use dependency injection to create a request scoped wsContext
+        const context = new WebSocketContext({
           client: clientSocket,
           node: nodeSocket,
           endpoint,
           loggerFactory: this.loggingFactory,
         });
 
-        this.wsPairHandler.registerWsPair(pair);
+        this.wsContextHandler.registerContext(context);
 
         this.wss.emit("connection", clientSocket, req);
       });

@@ -13,7 +13,7 @@ import {
   type NexusConfigOptions,
 } from "@src/nexus-config";
 import { HttpController } from "@src/http";
-import { WsPairHandler, WsRpcServer } from "@src/websockets";
+import { WsContextHandler, WsRpcServer } from "@src/websockets";
 import { LoggerFactory } from "@src/logging";
 import { EventBus } from "@src/events";
 import { container } from "@src/dependency-injection";
@@ -34,7 +34,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
 
   constructor(
     @inject(HttpController) private readonly controller: HttpController,
-    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
+    @inject(WsContextHandler)
+    private readonly wsContextHandler: WsContextHandler,
     @inject(LoggerFactory) loggerFactory: LoggerFactory,
     @inject(EventBus) eventBus: EventBus,
     @inject(NexusConfig) config: NexusConfig
@@ -52,8 +53,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public ws(httpServer: NodeHttpServer) {
     const wsServer = container.resolve(WsRpcServer);
 
-    wsServer.on("connection", (pair) => {
-      this.wsPairHandler.handleConnection(pair);
+    wsServer.on("connection", (context) => {
+      this.wsContextHandler.handleConnection(context);
     });
 
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
@@ -67,7 +68,7 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     container.bind(HttpController).toSelf().inSingletonScope();
     container.bind(Nexus).toSelf().inSingletonScope();
     container.bind(LoggerFactory).toSelf().inSingletonScope();
-    container.bind(WsPairHandler).toSelf().inSingletonScope();
+    container.bind(WsContextHandler).toSelf().inSingletonScope();
     container.bind(WsRpcServer).toSelf().inSingletonScope();
     container.bind(EventBus).toSelf().inSingletonScope();
     container.bind(HttpRelayHandler).toSelf().inSingletonScope();
