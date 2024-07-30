@@ -33,12 +33,14 @@ export interface NexusConfigOptions {
 export class NexusConfigFactory {
   private readonly options: NexusConfigOptions;
   private readonly envConfig: EnvConfig;
+  private readonly baseLogger: Logger;
   private readonly logger: Logger;
 
   constructor(options?: NexusConfigOptions) {
     this.options = options || {};
     this.envConfig = getEnvConfig(this.getEnv());
-    this.logger = this.getLogger();
+    this.baseLogger = this.getLogger();
+    this.logger = this.baseLogger.child({ name: NexusConfigFactory.name });
   }
 
   private getEnv() {
@@ -63,7 +65,7 @@ export class NexusConfigFactory {
       chains: new Map(uniqueChains.map((chain) => [chain.chainId, chain])),
       relay: this.getRelayConfig(),
       port: this.getPort(),
-      logger: this.logger,
+      logger: this.baseLogger,
       middleware: this.getMiddleware(),
       authKey: this.getAuthKey(),
     });
