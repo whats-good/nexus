@@ -5,8 +5,7 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { decorate, injectable } from "inversify";
-import { EventEmitter } from "eventemitter3";
+import { injectable } from "inversify";
 import {
   NexusConfig,
   NexusConfigFactory,
@@ -17,8 +16,6 @@ import { WsContextHandler, WsRpcServer } from "@src/websockets";
 import { LoggerFactory } from "@src/logging";
 import { EventBus } from "@src/events";
 import { container } from "@src/dependency-injection";
-
-decorate(injectable(), EventEmitter); // TODO: put this somewhere else
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
