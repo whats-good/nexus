@@ -1,5 +1,5 @@
 import type { Logger } from "pino";
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import { NexusConfig } from "@src/nexus-config";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
 import type { RpcResponse } from "@src/rpc-response";
@@ -25,13 +25,11 @@ export class HttpController {
   private readonly logger: Logger;
 
   constructor(
-    @inject(NexusConfig) private readonly config: NexusConfig,
-    @inject(LoggerFactory) private readonly loggerFactory: LoggerFactory,
-    @inject(HttpRelayHandler)
+    private readonly config: NexusConfig,
+    private readonly loggerFactory: LoggerFactory,
     private readonly httpRelayHandler: HttpRelayHandler,
-    @inject(NexusMiddlewareHandler)
     private readonly middlewareHandler: NexusMiddlewareHandler,
-    @inject(EventBus) private readonly eventBus: EventBus
+    private readonly eventBus: EventBus
   ) {
     this.logger = this.loggerFactory.get(HttpController.name);
   }
