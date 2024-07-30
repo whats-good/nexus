@@ -17,10 +17,6 @@ import { WsContextHandler, WsRpcServer } from "@src/websockets";
 import { LoggerFactory } from "@src/logging";
 import { EventBus } from "@src/events";
 import { container } from "@src/dependency-injection";
-import { HttpRelayHandler } from "@src/http/http-relay-handler";
-import { NodeEndpointPoolFactory } from "@src/node-endpoint";
-import { NexusMiddlewareHandler } from "@src/middleware";
-import { AuthorizationService } from "@src/auth";
 
 decorate(injectable(), EventEmitter); // TODO: put this somewhere else
 
@@ -64,17 +60,6 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const config = nexusConfigFactory.getNexusConfig();
 
     container.bind(NexusConfig).toConstantValue(config);
-    container.bind(HttpController).toSelf().inSingletonScope();
-    container.bind(Nexus).toSelf().inSingletonScope();
-    container.bind(LoggerFactory).toSelf().inSingletonScope();
-    container.bind(WsContextHandler).toSelf().inSingletonScope();
-    container.bind(WsRpcServer).toSelf().inSingletonScope();
-    container.bind(EventBus).toSelf().inSingletonScope();
-    container.bind(HttpRelayHandler).toSelf().inSingletonScope();
-    container.bind(NodeEndpointPoolFactory).toSelf().inSingletonScope();
-    container.bind(NexusMiddlewareHandler).toSelf().inSingletonScope();
-    container.bind(EventEmitter).toSelf().inSingletonScope();
-    container.bind(AuthorizationService).toSelf().inSingletonScope();
 
     const nexus = container.resolve(Nexus);
 
