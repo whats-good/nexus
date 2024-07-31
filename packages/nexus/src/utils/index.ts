@@ -1,3 +1,4 @@
+import type { RawData } from "ws";
 import { z } from "zod";
 
 export const requiredUnknown = () => z.custom((x) => x !== undefined);
@@ -89,3 +90,19 @@ export const JSONStringSchema = z.string().transform((str, ctx): unknown => {
 
 export const isNonEmptyArray = <T>(arr: T[]): arr is [T, ...T[]] =>
   arr.length > 0;
+
+export function wsDataToJson(data: RawData) {
+  try {
+    const result: unknown = JSON.parse(data as unknown as string); // TODO: add tests and more validation here. still not sure if RawData can be treated as a string under all circumstances
+
+    return {
+      kind: "success" as const,
+      result,
+    };
+  } catch (e) {
+    return {
+      kind: "error" as const,
+      error: e,
+    };
+  }
+}
