@@ -27,6 +27,7 @@ export const eth_subscribe = z.union([
 ]);
 
 export type EthSubscribeRpcPayloadType = z.infer<typeof eth_subscribe>;
+export type EthSubscribeRpcParamsType = EthSubscribeRpcPayloadType["params"];
 
 export const eth_subscribeSuccessResponsePayloadSchema =
   RpcResponseSuccessPayloadSchema.extend({
