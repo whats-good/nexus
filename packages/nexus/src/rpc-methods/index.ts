@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { RpcRequestPayloadSchema } from "@src/rpc-schema";
+import {
+  RpcRequestPayloadSchema,
+  RpcResponseSuccessPayloadSchema,
+} from "@src/rpc-schema";
 
 export const eth_subscribe_newHeads = RpcRequestPayloadSchema.extend({
   method: z.literal("eth_subscribe"),
@@ -24,3 +27,25 @@ export const eth_subscribe = z.union([
 ]);
 
 export type EthSubscribeRpcPayloadType = z.infer<typeof eth_subscribe>;
+
+export const eth_subscribeSuccessResponsePayloadSchema =
+  RpcResponseSuccessPayloadSchema.extend({
+    result: z.string(),
+  });
+
+export type EthSubscribeSuccessResponsePayloadType = z.infer<
+  typeof eth_subscribeSuccessResponsePayloadSchema
+>;
+
+export const eth_subscriptionPayloadSchema = z.object({
+  jsonrpc: z.literal("2.0"),
+  method: z.literal("eth_subscription"),
+  params: z.object({
+    subscription: z.string(),
+    result: z.unknown(), // TODO: do better narrowing here
+  }),
+});
+
+export type EthSubscriptionPayloadType = z.infer<
+  typeof eth_subscriptionPayloadSchema
+>;
