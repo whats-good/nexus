@@ -83,6 +83,7 @@ export class OutboundSubscriptionFactory {
       // TODO: we should differentiate between fatal errors and regular termination.
       // on a fatal termination, we should close the client socket too.
       this.outboundSubscriptions.delete(serializedParams); // TODO: is this good enough? can this handle race conditions?
+      // TODO: do i need to do any event listener removal here to prevent memory leaks?
     });
 
     return outboundSubscription;
