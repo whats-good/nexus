@@ -1,18 +1,22 @@
-import type { RawData } from "ws";
 import { WebSocket } from "ws";
 import type { Logger } from "pino";
 import { injectable } from "inversify";
 import { RpcRequestPayloadSchema } from "@src/rpc-schema";
-import { errSerialize } from "@src/utils";
+import { errSerialize, wsDataToJson } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
+import { eth_subscribe_newHeads, eth_unsubscribe } from "@src/rpc-methods";
+import { InboundSubscriptionFactory } from "@src/subscriptions";
 import type { WebSocketContext } from "./ws-context";
 
 @injectable()
 export class WsContextHandler {
   private readonly logger: Logger;
-  private readonly wsContexts = new Map<WebSocket, WebSocketContext>();
+  private readonly wsContexts = new WeakMap<WebSocket, WebSocketContext>();
 
-  constructor(loggerFactory: LoggerFactory) {
+  constructor(
+    private readonly inboundSubscriptionFactory: InboundSubscriptionFactory,
+    loggerFactory: LoggerFactory
+  ) {
     this.logger = loggerFactory.get(WsContextHandler.name);
   }
 
@@ -22,39 +26,6 @@ export class WsContextHandler {
 
   public registerContext(context: WebSocketContext) {
     this.wsContexts.set(context.client, context);
-  }
-
-  private incomingDataToJSON(data: RawData) {
-    try {
-      const result: unknown = JSON.parse(data as unknown as string); // TODO: add tests and more validation here. still not sure if RawData can be treated as a string under all circumstances
-
-      return {
-        kind: "success" as const,
-        result,
-      };
-    } catch (e) {
-      return {
-        kind: "error" as const,
-        error: e,
-      };
-    }
-  }
-
-  private handleCleanup(context: WebSocketContext) {
-    const { client, node } = context;
-
-    if (client.readyState !== WebSocket.CLOSED) {
-      client.terminate(); // TODO: Is this needed? should we do a timeout here?
-      this.logger.debug("Client socket terminated.");
-      // TODO: handle subscription accounting and close shared subscriptions if needed
-    }
-
-    if (node.readyState !== WebSocket.CLOSED) {
-      node.terminate(); // TODO: Is this needed? should we do a timeout here?
-      this.logger.debug("Node socket terminated.");
-    }
-
-    this.wsContexts.delete(client);
   }
 
   public handleConnection(context: WebSocketContext) {
@@ -93,13 +64,16 @@ export class WsContextHandler {
       context.logger.debug("Received new websocket message");
 
       if (client.readyState !== WebSocket.OPEN) {
-        context.logger.warn("Received a message on a closed socket");
+        context.logger.warn(
+          "Received a client message on a closed provider socket"
+        );
 
-        // TODO: what does this mean? do we need to terminate the socket here?
         return;
       }
 
-      const jsonParsed = this.incomingDataToJSON(data);
+      // TODO: make this a reusable workflow. create a reusable interception flow
+      // both for client messages and node messages.
+      const jsonParsed = wsDataToJson(data);
 
       if (jsonParsed.kind === "error") {
         context.logger.warn(
@@ -153,6 +127,54 @@ export class WsContextHandler {
       // TODO: if there are no websocket endpoints available, we should
       // still try to carry the request to http endpoints. this will cover
       // a large portion of ws requests anyway.
+
+      const eth_subscribe_newHeadsParsed =
+        eth_subscribe_newHeads.safeParse(rpcRequestPayload);
+
+      if (eth_subscribe_newHeadsParsed.success) {
+        context.logger.debug("Received newHeads subscription request");
+
+        this.inboundSubscriptionFactory.subscribe(
+          context,
+          eth_subscribe_newHeadsParsed.data
+        );
+
+        return;
+      }
+
+      const eth_unsubscribeParsed =
+        eth_unsubscribe.safeParse(rpcRequestPayload);
+
+      if (eth_unsubscribeParsed.success) {
+        context.logger.debug("Received unsubscribe request");
+
+        const removedInbound = context.unsubscribeByInboundId(
+          eth_unsubscribeParsed.data.params[0]
+        );
+
+        if (removedInbound) {
+          context.logger.debug(
+            {
+              id: removedInbound.id,
+            },
+            "Unsubscribed from shared subscription"
+          );
+          context.sendJSONToClient({
+            id: rpcRequestPayload.id,
+            jsonrpc: "2.0",
+            result: true,
+          });
+        } else {
+          context.logger.debug(
+            {
+              id: rpcRequestPayload.id,
+            },
+            "Received an unsubscribe request that wasn't in the context. Forwarding to dedicated node."
+          );
+        }
+
+        return;
+      }
 
       context.logger.debug("Relaying the RPC request to the ws node");
       context.node.send(data);
