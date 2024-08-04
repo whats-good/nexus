@@ -16,8 +16,7 @@ export class OutboundSubscriptionFactory {
   private readonly logger: Logger;
 
   constructor(
-    @inject(LoggerFactory) private readonly loggerFactory: LoggerFactory,
-    @inject(NodeEndpointPoolFactory)
+    private readonly loggerFactory: LoggerFactory,
     private readonly nodeEndpointPoolFactory: NodeEndpointPoolFactory
   ) {
     this.logger = loggerFactory.get(OutboundSubscriptionFactory.name);
