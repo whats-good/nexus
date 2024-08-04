@@ -32,4 +32,30 @@ export class WebSocketContext {
     // TODO: look into fast-json-stringify for performant serialization
     this.client.send(JSON.stringify(data));
   }
+  public abort(error: Error) {
+    this.logger.warn(
+      {
+        err: error,
+        activeEventNames: this.eventNames(),
+        numSubscriptions: this.subscriptions.size,
+      },
+      "Aborting websocket context"
+    );
+
+    disposeSocket(this.client); // TODO: maybe we should .close() instead of .terminate() on the client. this is more important than the node.
+    disposeSocket(this.node); // TODO: maybe we should .close() instead of .terminate() on the node.
+
+    this.unsubscribeAll();
+
+    this.emit("abort", error);
+    this.removeAllListeners("abort");
+
+    this.logger.debug(
+      {
+        activeEventNames: this.eventNames(),
+        numSubscriptions: this.subscriptions.size,
+      },
+      "Aborted websocket context"
+    );
+  }
 }

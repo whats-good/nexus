@@ -61,6 +61,10 @@ export class WsContextHandler {
     const { client, node, endpoint } = context;
     // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 
+    context.once("abort", () => {
+      this.wsContexts.delete(client);
+    });
+
     node.on("message", (data) => {
       // TODO: emit events for successful and failed messages from the node
       if (client.readyState !== WebSocket.OPEN) {
@@ -161,22 +165,22 @@ export class WsContextHandler {
     client.on("error", (error) => {
       context.logger.error(error, "Client socket error");
       // TODO: should we create a timeout to close the socket?
-      this.handleCleanup(context);
+      context.abort(error);
     });
 
     node.on("error", (error) => {
       context.logger.error(error, "Node socket error");
-      this.handleCleanup(context);
+      context.abort(error);
     });
 
     client.on("close", () => {
       context.logger.debug("Client socket closed, cleaning up...");
-      this.handleCleanup(context);
+      context.abort(new Error("Client socket closed"));
     });
 
     node.on("close", () => {
       context.logger.debug("Node socket closed, cleaning up...");
-      this.handleCleanup(context);
+      context.abort(new Error("Node socket closed"));
     });
   }
 }
