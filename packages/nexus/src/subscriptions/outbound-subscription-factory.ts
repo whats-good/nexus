@@ -70,9 +70,7 @@ export class OutboundSubscriptionFactory {
     const nodeEndpointPool = this.nodeEndpointPoolFactory.ws.get(chain);
 
     if (!nodeEndpointPool) {
-      // TODO: we know the endpoint pool itself is stateless, so we could just inject it
-      // direclty into the container. but then we need to start thinking about request scoped
-      // dependencies.
+      // TODO: we should return some other result here, that lets the caller understand that the outbound could not be created
       throw new Error("No node endpoint pool found");
     }
 
