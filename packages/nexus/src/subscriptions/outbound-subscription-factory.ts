@@ -1,4 +1,4 @@
-import { injectable, inject } from "inversify";
+import { injectable } from "inversify";
 import type { Logger } from "pino";
 import type { Chain } from "@src/chain";
 import { LoggerFactory } from "@src/logging";
@@ -26,13 +26,19 @@ export class OutboundSubscriptionFactory {
     chain: Chain,
     params: EthSubscribeRpcParamsType
   ): string {
-    if (params.length === 1) {
-      if (params[0] === "newHeads") {
+    switch (params[0]) {
+      case "newHeads": {
         return `${chain.chainId}-newHeads`;
       }
-    }
 
-    throw new Error("Invalid subscription params");
+      case "newPendingTransactions": {
+        return `${chain.chainId}-newPendingTransactions`;
+      }
+
+      default: {
+        throw new Error("Invalid subscription params");
+      }
+    }
   }
 
   public findOrCreate(chain: Chain, params: EthSubscribeRpcParamsType) {
