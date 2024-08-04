@@ -1,4 +1,6 @@
+import crypto from "node:crypto"; // TODO: will this work in cloudflare workers?
 import type { RawData } from "ws";
+import { WebSocket } from "ws";
 import { z } from "zod";
 
 export const requiredUnknown = () => z.custom((x) => x !== undefined);
@@ -91,7 +93,9 @@ export const JSONStringSchema = z.string().transform((str, ctx): unknown => {
 export const isNonEmptyArray = <T>(arr: T[]): arr is [T, ...T[]] =>
   arr.length > 0;
 
-export function wsDataToJson(data: RawData) {
+export function wsDataToJson(
+  data: RawData
+): { kind: "success"; result: unknown } | { kind: "error"; error: unknown } {
   try {
     const result: unknown = JSON.parse(data as unknown as string); // TODO: add tests and more validation here. still not sure if RawData can be treated as a string under all circumstances
 
@@ -105,4 +109,30 @@ export function wsDataToJson(data: RawData) {
       error: e,
     };
   }
+}
+
+export function disposeSocket(socket: WebSocket) {
+  socket.removeAllListeners("open");
+  socket.removeAllListeners("error");
+  socket.removeAllListeners("close");
+  socket.removeAllListeners("message");
+  socket.removeAllListeners("ping");
+  socket.removeAllListeners("pong");
+
+  if (socket.readyState !== WebSocket.CLOSED) {
+    socket.terminate();
+  }
+}
+
+export function generateHexId() {
+  // Generate 16 random bytes
+  const buffer = crypto.randomBytes(16);
+
+  // Convert the buffer to a hexadecimal string
+  const hexString = buffer.toString("hex");
+
+  // Prefix with "0x"
+  const hexId = `0x${hexString}`;
+
+  return hexId;
 }
