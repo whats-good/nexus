@@ -37,6 +37,23 @@ export class OutboundSubscriptionFactory {
   }
 
   public findOrCreate(chain: Chain, params: EthSubscribeRpcParamsType) {
+    const serializedParams =
+      OutboundSubscriptionFactory.serializeRpcSubscriptionParams(chain, params);
+
+    const existing = this.outboundSubscriptions.get(serializedParams);
+
+    if (existing) {
+      this.logger.debug(
+        {
+          chain,
+          params,
+        },
+        "Outbound subscription already exists"
+      );
+
+      return existing;
+    }
+
     this.logger.info(
       {
         chain,
@@ -44,16 +61,6 @@ export class OutboundSubscriptionFactory {
       },
       "Creating outbound subscription"
     );
-    const serializedParams =
-      OutboundSubscriptionFactory.serializeRpcSubscriptionParams(chain, params);
-
-    const existing = this.outboundSubscriptions.get(serializedParams);
-
-    if (existing) {
-      this.logger.debug("Outbound subscription already exists");
-
-      return existing;
-    }
 
     const nodeEndpointPool = this.nodeEndpointPoolFactory.ws.get(chain);
 
@@ -64,13 +71,11 @@ export class OutboundSubscriptionFactory {
       throw new Error("No node endpoint pool found");
     }
 
-    // TODO: turn this into a factory init
     const webSocketPool = new WebSocketPool(
       nodeEndpointPool,
       this.loggerFactory
     );
 
-    // TODO: turn this into a factory init
     const outboundSubscription = new OutboundSubscription(
       params,
       webSocketPool,
@@ -79,12 +84,18 @@ export class OutboundSubscriptionFactory {
 
     this.outboundSubscriptions.set(serializedParams, outboundSubscription);
 
-    outboundSubscription.on("terminate", () => {
-      // TODO: we should differentiate between fatal errors and regular termination.
-      // on a fatal termination, we should close the client socket too.
-      this.outboundSubscriptions.delete(serializedParams); // TODO: is this good enough? can this handle race conditions?
-      // TODO: do i need to do any event listener removal here to prevent memory leaks?
+    outboundSubscription.on("terminate", (state) => {
+      this.logger.debug(
+        {
+          state,
+          remainingActiveEventNames: outboundSubscription.eventNames(),
+        },
+        "Outbound subscription has terminated. Cleaning up references from factory."
+      );
+      this.outboundSubscriptions.delete(serializedParams);
     });
+
+    // TODO: don't return the outbound subscription if it's in a terminal state.
 
     return outboundSubscription;
   }
