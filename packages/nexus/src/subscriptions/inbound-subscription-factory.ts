@@ -25,6 +25,8 @@ export class InboundSubscriptionFactory {
   ) {
     const subscriptionId = generateHexId();
 
+    // TODO: create a timeout for the inbound to attach to the outbound
+
     this.logger.info(
       {
         chain: context.chain,

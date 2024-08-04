@@ -30,14 +30,12 @@ export class WsContextHandler {
 
   public handleConnection(context: WebSocketContext) {
     const { client, node, endpoint } = context;
-    // TODO: node-level errors and close events should trigger client cleanup, and vice versa
 
     context.once("abort", () => {
       this.wsContexts.delete(client);
     });
 
     node.on("message", (data) => {
-      // TODO: emit events for successful and failed messages from the node
       if (client.readyState !== WebSocket.OPEN) {
         context.logger.error(
           {
@@ -182,11 +180,8 @@ export class WsContextHandler {
       // TODO: how do we treat multi json rpc messages?
     });
 
-    // TODO: fix all pino logs to log the object first, and then the message. no stringify needed
-
     client.on("error", (error) => {
       context.logger.error(error, "Client socket error");
-      // TODO: should we create a timeout to close the socket?
       context.abort(error);
     });
 
