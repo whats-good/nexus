@@ -16,7 +16,7 @@ export class NodeEndpointPoolFactory {
 
   constructor(
     private readonly config: NexusConfig,
-    private readonly loggerFactory: LoggerFactory // TODO: this should not be a property.
+    private readonly loggerFactory: LoggerFactory
   ) {
     this.nodeProviders = config.nodeProviders;
     this.http = this.createChainToEndpointPoolMap("http");
@@ -63,7 +63,9 @@ export class NodeEndpointPoolFactory {
                 nodeProvider,
               })
           ),
-          loggerFactory: this.loggerFactory,
+          logger: this.loggerFactory.get(NodeEndpointPool.name, {
+            chain,
+          }),
         })
       );
     }
