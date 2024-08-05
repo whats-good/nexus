@@ -66,6 +66,7 @@ export const EnvSchema = z.object({
   NEXUS_RELAY_ORDER: ENV_RELAY_ORDER_SCHEMA.optional(),
   NEXUS_RELAY_FAILURE: ENV_RELAY_FAILURE.optional(),
   NEXUS_RPC_AUTH_KEY: z.string().optional(),
+  NEXUS_SUBSCRIPTION_SHARING_ENABLED: boolFromString.optional(),
 });
 
 export type EnvConfig = ReturnType<typeof getEnvConfig>;
@@ -80,6 +81,7 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
     NEXUS_RELAY_FAILURE,
     NEXUS_RELAY_ORDER,
     NEXUS_RPC_AUTH_KEY,
+    NEXUS_SUBSCRIPTION_SHARING_ENABLED,
   } = EnvSchema.parse(env);
   const defaultChains = Object.values(CHAIN);
   const chainsMap = new Map(
@@ -129,6 +131,13 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
     }
   }
 
+  const subscriptionSharing =
+    typeof NEXUS_SUBSCRIPTION_SHARING_ENABLED === "boolean"
+      ? {
+          enabled: NEXUS_SUBSCRIPTION_SHARING_ENABLED,
+        }
+      : undefined;
+
   return {
     nodeProviders: nodeProviders ?? [],
     port: NEXUS_PORT,
@@ -137,5 +146,6 @@ export function getEnvConfig(env: Record<string, string | undefined>) {
     relay,
     rpcAuthKey: NEXUS_RPC_AUTH_KEY,
     overwrittenChains: Array.from(overwrittenChainsMap.values()),
+    subscriptionSharing,
   };
 }
