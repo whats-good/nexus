@@ -1,5 +1,12 @@
 # @whatsgood/nexus
 
+## 0.26.0
+
+### Minor Changes
+
+- a9a2496: Introducing subscription sharing
+- ae511a1: Subscription sharing can be turned off via config or environment variables
+
 ## 0.25.0
 
 ### Minor Changes
