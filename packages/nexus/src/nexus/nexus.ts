@@ -5,24 +5,17 @@ import type {
 } from "@whatwg-node/server";
 import { createServerAdapter } from "@whatwg-node/server";
 import type { Logger } from "pino";
-import { decorate, inject, injectable } from "inversify";
-import { EventEmitter } from "eventemitter3";
+import { injectable } from "inversify";
 import {
   NexusConfig,
   NexusConfigFactory,
   type NexusConfigOptions,
 } from "@src/nexus-config";
 import { HttpController } from "@src/http";
-import { WsPairHandler, WsRpcServer } from "@src/websockets";
+import { WsContextHandler, WsRpcServer } from "@src/websockets";
 import { LoggerFactory } from "@src/logging";
 import { EventBus } from "@src/events";
 import { container } from "@src/dependency-injection";
-import { HttpRelayHandler } from "@src/http/http-relay-handler";
-import { NodeEndpointPoolFactory } from "@src/node-endpoint";
-import { NexusMiddlewareHandler } from "@src/middleware";
-import { AuthorizationService } from "@src/auth";
-
-decorate(injectable(), EventEmitter); // TODO: put this somewhere else
 
 export type NexusServerInstance = ServerAdapter<unknown, Nexus>;
 
@@ -33,11 +26,11 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public readonly on: EventBus["on"];
 
   constructor(
-    @inject(HttpController) private readonly controller: HttpController,
-    @inject(WsPairHandler) private readonly wsPairHandler: WsPairHandler,
-    @inject(LoggerFactory) loggerFactory: LoggerFactory,
-    @inject(EventBus) eventBus: EventBus,
-    @inject(NexusConfig) config: NexusConfig
+    private readonly controller: HttpController,
+    private readonly wsContextHandler: WsContextHandler,
+    loggerFactory: LoggerFactory,
+    eventBus: EventBus,
+    config: NexusConfig
   ) {
     this.logger = loggerFactory.get(Nexus.name);
     this.on = eventBus.on.bind(eventBus);
@@ -52,8 +45,8 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
   public ws(httpServer: NodeHttpServer) {
     const wsServer = container.resolve(WsRpcServer);
 
-    wsServer.on("connection", (pair) => {
-      this.wsPairHandler.handleConnection(pair);
+    wsServer.on("connection", (context) => {
+      this.wsContextHandler.handleConnection(context);
     });
 
     httpServer.on("upgrade", wsServer.handleUpgrade.bind(wsServer));
@@ -64,17 +57,6 @@ export class Nexus implements ServerAdapterBaseObject<unknown> {
     const config = nexusConfigFactory.getNexusConfig();
 
     container.bind(NexusConfig).toConstantValue(config);
-    container.bind(HttpController).toSelf().inSingletonScope();
-    container.bind(Nexus).toSelf().inSingletonScope();
-    container.bind(LoggerFactory).toSelf().inSingletonScope();
-    container.bind(WsPairHandler).toSelf().inSingletonScope();
-    container.bind(WsRpcServer).toSelf().inSingletonScope();
-    container.bind(EventBus).toSelf().inSingletonScope();
-    container.bind(HttpRelayHandler).toSelf().inSingletonScope();
-    container.bind(NodeEndpointPoolFactory).toSelf().inSingletonScope();
-    container.bind(NexusMiddlewareHandler).toSelf().inSingletonScope();
-    container.bind(EventEmitter).toSelf().inSingletonScope();
-    container.bind(AuthorizationService).toSelf().inSingletonScope();
 
     const nexus = container.resolve(Nexus);
 

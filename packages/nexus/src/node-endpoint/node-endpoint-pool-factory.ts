@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import type { Chain } from "@src/chain";
 import type { NodeProvider } from "@src/node-provider";
 import { LoggerFactory } from "@src/logging";
@@ -15,8 +15,8 @@ export class NodeEndpointPoolFactory {
   public readonly ws: Map<Chain, NodeEndpointPool>;
 
   constructor(
-    @inject(NexusConfig) private readonly config: NexusConfig,
-    @inject(LoggerFactory) private readonly loggerFactory: LoggerFactory // TODO: this should not be a property.
+    private readonly config: NexusConfig,
+    private readonly loggerFactory: LoggerFactory
   ) {
     this.nodeProviders = config.nodeProviders;
     this.http = this.createChainToEndpointPoolMap("http");
@@ -63,7 +63,9 @@ export class NodeEndpointPoolFactory {
                 nodeProvider,
               })
           ),
-          loggerFactory: this.loggerFactory,
+          logger: this.loggerFactory.get(NodeEndpointPool.name, {
+            chain,
+          }),
         })
       );
     }

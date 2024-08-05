@@ -1,8 +1,5 @@
 import * as http from "node:http";
-import { Nexus } from "@src/nexus";
-import { NodeProvider } from "@src/node-provider";
-import { CHAIN } from "@src/default-chains";
-import { Chain } from "@src/chain";
+import { Nexus, NodeProvider, CHAIN, Chain } from "@src/index";
 
 // const llamaRpcNodeProvider = new NodeProvider({
 //   name: "llama-rpc",
