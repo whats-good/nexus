@@ -65,7 +65,8 @@
             "features/rate-limiting",
             "features/authorization",
             "features/caching",
-            "features/websockets"
+            "features/websockets",
+            "features/subscription-sharing"
           ]
         },
         {

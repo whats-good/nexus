@@ -4,6 +4,7 @@ import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
 import { isNonEmptyArray } from "@src/utils";
+import type { SubscriptionSharingConfig } from "@src/subscriptions/subscription-sharing-config";
 import type { EnvConfig } from "./env-config";
 import { getEnvConfig } from "./env-config";
 import { NexusConfig } from "./nexus-config";
@@ -18,6 +19,10 @@ interface LogConfig {
   colorize: boolean;
 }
 
+interface SubscriptionSharingConfigOptions {
+  enabled?: boolean;
+}
+
 const DEFAULT_PORT = 4000;
 
 export interface NexusConfigOptions {
@@ -28,6 +33,7 @@ export interface NexusConfigOptions {
   middleware?: NexusMiddleware[];
   rpcAuthKey?: string;
   env?: Record<string, string | undefined>;
+  subscriptionSharing?: SubscriptionSharingConfigOptions;
 }
 
 export class NexusConfigFactory {
@@ -68,7 +74,22 @@ export class NexusConfigFactory {
       logger: this.baseLogger,
       middleware: this.getMiddleware(),
       authKey: this.getAuthKey(),
+      subscriptionSharing: this.getSubscriptionSharingConfig(),
     });
+  }
+
+  private getSubscriptionSharingConfig(): SubscriptionSharingConfig {
+    const subscriptionSharingConfig: SubscriptionSharingConfig = {
+      enabled: true,
+    };
+
+    if (this.options.subscriptionSharing?.enabled === false) {
+      subscriptionSharingConfig.enabled = false;
+    } else if (this.envConfig.subscriptionSharing?.enabled === false) {
+      subscriptionSharingConfig.enabled = false;
+    }
+
+    return subscriptionSharingConfig;
   }
 
   private getAuthKey(): string | undefined {

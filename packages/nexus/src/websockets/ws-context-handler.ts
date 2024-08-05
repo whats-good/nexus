@@ -6,18 +6,22 @@ import { errSerialize, wsDataToJson } from "@src/utils";
 import { LoggerFactory } from "@src/logging";
 import { eth_subscribe_newHeads, eth_unsubscribe } from "@src/rpc-methods";
 import { InboundSubscriptionFactory } from "@src/subscriptions";
+import { NexusConfig } from "@src/nexus-config";
 import type { WebSocketContext } from "./ws-context";
 
 @injectable()
 export class WsContextHandler {
   private readonly logger: Logger;
   private readonly wsContexts = new WeakMap<WebSocket, WebSocketContext>();
+  private readonly subscriptionSharingEnabled: boolean;
 
   constructor(
     private readonly inboundSubscriptionFactory: InboundSubscriptionFactory,
+    config: NexusConfig,
     loggerFactory: LoggerFactory
   ) {
     this.logger = loggerFactory.get(WsContextHandler.name);
+    this.subscriptionSharingEnabled = config.subscriptionSharing.enabled;
   }
 
   public getContext(client: WebSocket) {
@@ -122,56 +126,62 @@ export class WsContextHandler {
         "Received a valid RPC ws request"
       );
 
-      // TODO: if there are no websocket endpoints available, we should
-      // still try to carry the request to http endpoints. this will cover
-      // a large portion of ws requests anyway.
+      if (this.subscriptionSharingEnabled) {
+        // TODO: if there are no websocket endpoints available, we should
+        // still try to carry the request to http endpoints. this will cover
+        // a large portion of ws requests anyway.
 
-      const eth_subscribe_newHeadsParsed =
-        eth_subscribe_newHeads.safeParse(rpcRequestPayload);
+        const eth_subscribe_newHeadsParsed =
+          eth_subscribe_newHeads.safeParse(rpcRequestPayload);
 
-      if (eth_subscribe_newHeadsParsed.success) {
-        context.logger.debug("Received newHeads subscription request");
+        if (eth_subscribe_newHeadsParsed.success) {
+          context.logger.debug("Received newHeads subscription request");
 
-        this.inboundSubscriptionFactory.subscribe(
-          context,
-          eth_subscribe_newHeadsParsed.data
-        );
-
-        return;
-      }
-
-      const eth_unsubscribeParsed =
-        eth_unsubscribe.safeParse(rpcRequestPayload);
-
-      if (eth_unsubscribeParsed.success) {
-        context.logger.debug("Received unsubscribe request");
-
-        const removedInbound = context.unsubscribeByInboundId(
-          eth_unsubscribeParsed.data.params[0]
-        );
-
-        if (removedInbound) {
-          context.logger.debug(
-            {
-              id: removedInbound.id,
-            },
-            "Unsubscribed from shared subscription"
+          this.inboundSubscriptionFactory.subscribe(
+            context,
+            eth_subscribe_newHeadsParsed.data
           );
-          context.sendJSONToClient({
-            id: rpcRequestPayload.id,
-            jsonrpc: "2.0",
-            result: true,
-          });
-        } else {
-          context.logger.debug(
-            {
-              id: rpcRequestPayload.id,
-            },
-            "Received an unsubscribe request that wasn't in the context. Forwarding to dedicated node."
-          );
+
+          return;
         }
 
-        return;
+        const eth_unsubscribeParsed =
+          eth_unsubscribe.safeParse(rpcRequestPayload);
+
+        if (eth_unsubscribeParsed.success) {
+          context.logger.debug("Received unsubscribe request");
+
+          const removedInbound = context.unsubscribeByInboundId(
+            eth_unsubscribeParsed.data.params[0]
+          );
+
+          if (removedInbound) {
+            context.logger.debug(
+              {
+                id: removedInbound.id,
+              },
+              "Unsubscribed from shared subscription"
+            );
+            context.sendJSONToClient({
+              id: rpcRequestPayload.id,
+              jsonrpc: "2.0",
+              result: true,
+            });
+          } else {
+            context.logger.debug(
+              {
+                id: rpcRequestPayload.id,
+              },
+              "Received an unsubscribe request that wasn't in the context. Forwarding to dedicated node."
+            );
+          }
+
+          return;
+        }
+      } else {
+        context.logger.debug(
+          "Subscription sharing is disabled. Not attempting to share subscriptions."
+        );
       }
 
       context.logger.debug("Relaying the RPC request to the ws node");

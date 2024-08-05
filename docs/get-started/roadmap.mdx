@@ -19,7 +19,7 @@ The long term vision for Nexus is to provide a robust, scalable, and secure rpc 
     Once middleware and event handler layers are stabilized, we will begin polishing our caching layer. This is something we originally had, and then elected to remove as it was not up to par with where we wanted it to be. Once done, you will be able to cache responses from your rpc server, and configure the cache to expire after a certain time, or based on certain conditions such as a given chain's block time, the caller, the method name, the parameters and so on. You will be able to bring in your own caching layer, or use the built-in memory cache.
   </Step>
   <Step title="Web Socket Support">
-    Nexus currently has experimental WebSocket support for NodeJS. Cloudflare Workers currently only support http requests. For more information, see the [Websockets](/features/websockets) page.
+    Nexus currently has experimental WebSocket support for NodeJS. Cloudflare Workers currently only support http requests. For more information, see the [Websockets](/features/websockets) page. Nexus also has experimental support for [Subscription Sharing](/features/subscription-sharing).
   </Step>
   <Step title="SSE Support">
     We're working on adding support for Server Sent Events. This will allow you to stream data from your rpc server to your clients in real-time. There is no current standard for this in the blockchain space, so we're excited to be one of the first to offer this feature. Our goal is to overcome the inherent limitations of websocket support in the ecosystem, which have proven to be unreliable and brittle in many cases.

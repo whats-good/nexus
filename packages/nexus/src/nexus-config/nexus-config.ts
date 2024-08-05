@@ -4,6 +4,7 @@ import type { Chain } from "@src/chain";
 import type { NexusMiddleware } from "@src/middleware";
 import type { RelayConfig } from "@src/node-endpoint";
 import type { NodeProvider } from "@src/node-provider";
+import type { SubscriptionSharingConfig } from "@src/subscriptions/subscription-sharing-config";
 
 @injectable()
 export class NexusConfig {
@@ -14,6 +15,7 @@ export class NexusConfig {
   public readonly middleware: NexusMiddleware[];
   public readonly logger: Logger;
   public readonly authKey?: string;
+  public readonly subscriptionSharing: SubscriptionSharingConfig;
 
   constructor(params: {
     nodeProviders: [NodeProvider, ...NodeProvider[]];
@@ -23,6 +25,7 @@ export class NexusConfig {
     middleware: NexusMiddleware[];
     logger: Logger;
     authKey?: string;
+    subscriptionSharing: SubscriptionSharingConfig;
   }) {
     this.nodeProviders = params.nodeProviders;
     this.chains = params.chains;
@@ -31,6 +34,7 @@ export class NexusConfig {
     this.middleware = params.middleware;
     this.logger = params.logger;
     this.authKey = params.authKey;
+    this.subscriptionSharing = params.subscriptionSharing;
   }
 
   // a summary object that removes potentially sensitive information
@@ -45,6 +49,7 @@ export class NexusConfig {
       logLevel: this.logger.level,
       middleware: this.middleware.map((m) => m.name),
       auth: this.authKey ? "Enabled" : "Disabled",
+      subscriptionSharing: this.subscriptionSharing,
     };
   }
 }

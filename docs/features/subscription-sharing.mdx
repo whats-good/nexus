@@ -1,0 +1,38 @@
+---
+title: "Subscription Sharing"
+description: "Learn how Nexus shares subscription calls across multiple WebSocket clients"
+---
+
+## Background
+
+Ethereum JSON RPC subscriptions are a powerful feature that allows clients to receive real-time updates from the blockchain. Unlike http requests, subscriptions are not request-response based, and thus cannot be cached. Another reason they cannot be cached is that the data is constantly changing, and the client is only interested in the latest data in real-time. 
+
+## Introduction
+
+Ethereum subscriptions present a unique challenge when multiple clients are interested in the same data, as each client would have to subscribe to the same data separately. This can lead to a high number of subscriptions, which can be expensive in terms of resources. Nexus solves this problem by sharing subscriptions across multiple clients, reducing the number of outbound subscriptions onto the node provider. Subscription sharing is enabled by default in `Nexus`, which automatically applies to `newHeads` and `newPendingTransactions` subscriptions.
+
+<Note>
+  In the upcoming release, `Nexus` will support conditinal and partial sharing of `logs` subscriptions accross multiple topics.
+</Note>
+
+## Configuration
+
+Subscription sharing is enabled by default in `Nexus`, and can be disabled by setting the `sharedSubscriptions.enabled` option to `false` in the `Nexus` configuration. For more information on WebSocket configuration, see [WebSockets](/features/websockets).
+
+```typescript
+
+const nexus = Nexus.create({
+  sharedSubscriptions: {
+    enabled: false
+  }
+  //...
+});
+
+const server = createServer(nexus);
+nexus.ws(server);
+
+server.listen(nexus.port, () => {
+  nexus.logger.info(`🚀 Server ready at http://localhost:${nexus.port}`);
+});
+
+```
